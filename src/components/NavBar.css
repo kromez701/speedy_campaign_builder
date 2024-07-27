@@ -1,0 +1,34 @@
+/* src/components/Navbar.css */
+.navbar {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #000; /* Black line to show where navbar ends */
+    box-sizing: border-box; /* Ensure padding is included in the element's total width and height */
+    overflow: hidden; /* Prevent horizontal scrolling */
+  }
+  
+  .navbar-right {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navbar-icon {
+    margin-right: 30px;
+    cursor: pointer;
+    width: 18px;
+    height: 20px;
+    
+  }
+  
+  .navbar-profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-right: 30px;
+  }
+  

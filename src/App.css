@@ -36,3 +36,27 @@
     transform: rotate(360deg);
   }
 }
+
+/* src/App.css */
+.app {
+  display: flex;
+  flex-direction: column;
+}
+
+.layout {
+  display: flex;
+  flex: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 20px;
+  margin-left: 250px; /* Match this with the width of the sidebar */
+  overflow: auto;
+}
+
+@media (max-width: 960px) {
+  .content {
+    margin-left: 0;
+  }
+}
