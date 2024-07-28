@@ -1,3 +1,6 @@
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
 .container {
   text-align: center;
   font-family: 'Poppins', sans-serif;
@@ -6,6 +9,12 @@
   margin: 20px auto; /* Center the container and add top/bottom margin */
   padding: 20px; /* Add some padding for better spacing */
   box-sizing: border-box; /* Include padding and border in the element's total width and height */
+  background-color: #fff;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 h1 {
@@ -64,3 +73,7 @@ h1 {
       padding: 8px 12px; /* Adjust padding for smaller screens */
   }
 }
+
+`;
+
+export default GlobalStyle;

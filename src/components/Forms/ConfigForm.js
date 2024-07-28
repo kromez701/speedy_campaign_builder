@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import './ConfigForm.css';
+import ScopedGlobalStyle from './ConfigFormStyles';
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -150,6 +150,7 @@ const ConfigForm = ({ onSaveConfig, onCancel, initialConfig, isNewCampaign }) =>
 
   return (
     <div className="form-container2">
+      <ScopedGlobalStyle />
       {/* <h2>Edit Config</h2> */}
       <form id="configForm" onSubmit={handleSubmit}>
         {/* <h3>Facebook Connection</h3>

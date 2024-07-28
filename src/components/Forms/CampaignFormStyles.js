@@ -1,9 +1,7 @@
-body {
-  font-family: Arial, sans-serif;
-  background-color: #f7f7f7;
-  margin: 0;
-  padding: 0;
-}
+import { createGlobalStyle } from 'styled-components';
+
+const GlobalStyle = createGlobalStyle`
+
 
 .container {
   width: 100%;
@@ -199,3 +197,7 @@ h2{
   margin-right: 10px;
 }
 }
+
+`;
+
+export default GlobalStyle;

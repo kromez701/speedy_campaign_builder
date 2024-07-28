@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import io from 'socket.io-client';
-import CampaignForm from './CampaignForm';
-import ConfigForm from './ConfigForm';
-import ProgressBar from './ProgressBar';
-import SuccessScreen from './SuccessScreen';
-import './Main.css';
+import CampaignForm from '../Forms/CampaignForm';
+import ConfigForm from '../Forms/ConfigForm';
+import ProgressBar from '../ProgressBar/ProgressBar';
+import SuccessScreen from '../SuccessScreen';
+import ScopedGlobalStyle from './MainStyles';
 
 const socket = io('http://localhost:5000/');
 
@@ -208,6 +208,7 @@ const Main = () => {
 
   return (
     <div className="container">
+      <ScopedGlobalStyle />
       {showHeader && <h1>Facebook Ads Manager</h1>}
       {formId === 'mainForm' && (
         <div className="form-container">

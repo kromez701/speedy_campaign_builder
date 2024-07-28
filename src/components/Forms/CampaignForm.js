@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
-import './CampaignForm.css';
+import ScopedGlobalStyle from './CampaignFormStyles';
 
 const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onSaveConfig, onGoBack }) => {
   const [campaignName, setCampaignName] = useState('');
@@ -23,6 +23,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onS
 
   return (
     <div className="form-container2">
+      <ScopedGlobalStyle />
       <div className="header">
         <img
           src="/assets/Vector4.png"
