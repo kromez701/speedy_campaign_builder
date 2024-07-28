@@ -34,6 +34,7 @@ h1 {
   padding: 12px 16px;
   border-radius: 5px;
   font-family: 'Poppins', sans-serif;
+  font-weight: 600;
   font-size: 13px;
   cursor: pointer;
   transition: background-color 0.3s ease;
