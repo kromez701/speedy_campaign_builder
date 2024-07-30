@@ -32,19 +32,16 @@ const App = () => {
     checkCurrentUser();
   }, []);
 
-  const handleAuthSuccess = () => {
-    const checkCurrentUser = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
-        if (response.status === 200) {
-          setUser(response.data.user);
-          setAuthMode(null);
-        }
-      } catch (error) {
-        console.error('Error checking current user', error);
+  const handleAuthSuccess = async () => {
+    try {
+      const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
+      if (response.status === 200) {
+        setUser(response.data.user);
+        setAuthMode(null);
       }
-    };
-    checkCurrentUser();
+    } catch (error) {
+      console.error('Error checking current user', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -52,7 +49,6 @@ const App = () => {
       const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
-        Navigate('/');
       } else {
         console.error('Failed to log out');
       }
@@ -79,6 +75,7 @@ const App = () => {
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
+                {user && window.location.pathname !== '/' && <Navigate to="/" />}
               </div>
             </div>
           </div>
