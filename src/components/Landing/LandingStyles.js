@@ -103,6 +103,10 @@ nav ul li a {
     gap: 40px;
 }
 
+.nav-btn-container button:hover {
+  background-color: #e9e9e9;
+  cursor: pointer; /* Ensures the cursor changes to a pointer on hover */
+}
 .nav-btn-container button {
     padding: 10px 24px;
     font-size: 20px;

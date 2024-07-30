@@ -2,6 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
+    <meta name="google-signin-client_id" content="362986823691-u76e3r421e7ts51cphcpcitihpu6ks51.apps.googleusercontent.com">
     <link rel="icon" href="%PUBLIC_URL%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
@@ -30,6 +31,10 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <!-- Add this inside the <head> or <body> tag of your public/index.html -->
+    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+
     <!--
       This HTML file is a template.
       If you open it directly in the browser, you will see an empty page.
@@ -39,6 +44,36 @@
 
       To begin the development, run `npm start` or `yarn start`.
       To create a production bundle, use `npm run build` or `yarn build`.
+
     -->
+    <script>
+      function onSignIn(googleUser) {
+        var profile = googleUser.getBasicProfile();
+        console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+        console.log('Name: ' + profile.getName());
+        console.log('Image URL: ' + profile.getImageUrl());
+        console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+        
+        var id_token = googleUser.getAuthResponse().id_token;
+        console.log('ID Token: ' + id_token);
+    
+        // Send the ID token to your backend
+        fetch('http://localhost:5000/auth/google', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ token: id_token })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+          // Handle the response from the backend
+        })
+        .catch((error) => {
+          console.error('Error:', error);
+        });
+      }
+    </script>    
   </body>
 </html>

@@ -6,7 +6,7 @@ import ScopedGlobalStyle from './CampaignFormStyles';
 const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onSaveConfig, onGoBack }) => {
   const [campaignName, setCampaignName] = useState('');
   const [campaignId, setCampaignId] = useState('');
-  console.log("isNewCampaign: \n", isNewCampaign);
+  
 
   const handleSubmit = (event) => {
     event.preventDefault();

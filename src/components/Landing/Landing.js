@@ -1,7 +1,7 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import ScopedGlobalStyle from './LandingStyles';
 
-const Landing = () => {
+const Landing = ({ setAuthMode }) => {
   const handleHamburgMenuClick = () => {
     document.querySelector('.nav-menu-btn-container').style.right = '0';
   };
@@ -48,8 +48,8 @@ const Landing = () => {
             <li><a href="#contact-section">Contact</a></li>
           </ul>
           <div className="nav-btn-container">
-            <button>Login</button>
-            <button>
+            <button onClick={() => setAuthMode('login')}>Login</button>
+            <button className="get-started" onClick={() => setAuthMode('register')}>
               Get Started
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -58,7 +58,6 @@ const Landing = () => {
           </div>
         </div>
       </nav>
-
       <div className="hero">
         <img className="back-shadow hero-mid-shadow" src="./assets/hero-center-shadow.svg" alt="" />
         <img className="back-shadow hero-bottom-shadow" src="./assets/hero-bottom-shadow.svg" alt="" />
@@ -414,7 +413,7 @@ const Landing = () => {
             to wasted time and hello to increased productivity and performance.
           </p>
           <button className="get-start-btn">
-            But Now
+            Buy Now
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
