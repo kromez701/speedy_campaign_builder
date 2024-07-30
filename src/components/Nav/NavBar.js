@@ -1,17 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import './NavBar.css';
-import ProfileManagement from '../ProfileManagement/ProfileManagement';
 import axios from 'axios';
 
 const Navbar = () => {
-  const [showProfile, setShowProfile] = useState(false);
+  const navigate = useNavigate();
 
   const handleProfileClick = () => {
-    setShowProfile(true);
-  };
-
-  const handleCloseProfile = () => {
-    setShowProfile(false);
+    navigate('/profile-management');
   };
 
   const handleLogout = async () => {
@@ -29,7 +25,7 @@ const Navbar = () => {
     } catch (error) {
       console.error('Error logging out:', error);
     }
-  };  
+  };
 
   return (
     <>
@@ -44,7 +40,6 @@ const Navbar = () => {
           />
         </div>
       </nav>
-      {showProfile && <ProfileManagement onClose={handleCloseProfile} onLogout={handleLogout} />}
     </>
   );
 };

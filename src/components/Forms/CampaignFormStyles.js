@@ -5,7 +5,7 @@ const GlobalStyle = createGlobalStyle`
 
 .container {
   width: 100%;
-  max-width: 600px;
+  max-width: 500px;
   margin: 20px auto; /* Adjust margin to be responsive */
   padding: 20px;
   background-color: #fff;

@@ -10,7 +10,7 @@ const GlobalStyle = createGlobalStyle`
   .form-container textarea,
   .form-container select {
     width: 100%;
-    max-width: 420px; /* Set a consistent max width */
+    max-width: 500px; /* Set a consistent max width */
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
