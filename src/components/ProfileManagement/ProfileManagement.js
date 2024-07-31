@@ -1,12 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import styles from './ProfileManagement.module.css';
 
-const ProfileManagement = ({ onLogout }) => {
+const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const navigate = useNavigate();
   const [profilePic, setProfilePic] = useState(null);
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
+  const [adAccountDetails, setAdAccountDetails] = useState({});
+  const [isBound, setIsBound] = useState(false);
+
+  // Fetch profile information on component mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
+        if (response.status === 200) {
+          const { username, email, profile_picture } = response.data.user;
+          setFullName(username);
+          setEmail(email);
+          setProfilePic(profile_picture ? profile_picture : null);
+        }
+      } catch (error) {
+        console.error('Error fetching profile', error);
+      }
+    };
+    fetchProfile();
+  }, []);  // Empty dependency array to ensure this only runs once on mount
+
+  // Update ad account details when activeAccount changes
+  useEffect(() => {
+    if (activeAccount) {
+      console.log('ProfileManagement: activeAccount changed:', activeAccount);
+      setIsBound(activeAccount.is_bound);
+      fetchAdAccountDetails(activeAccount.id);
+    }
+  }, [activeAccount]);
+
+  const fetchAdAccountDetails = async (adAccountId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
+      setAdAccountDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching ad account details', error);
+    }
+  };
 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
@@ -17,8 +56,40 @@ const ProfileManagement = ({ onLogout }) => {
     }
   };
 
-  const handleSaveChanges = () => {
-    // Add logic to save changes
+  const handleSaveChanges = async () => {
+    const formData = new FormData();
+    formData.append('username', fullName);
+    formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
+
+    try {
+      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
+      if (response.status === 200) {
+        alert('Profile updated successfully');
+      }
+    } catch (error) {
+      console.error('Error saving profile', error);
+    }
+  };
+
+  const handleAdAccountChange = (e) => {
+    const { name, value } = e.target;
+    setAdAccountDetails({ ...adAccountDetails, [name]: value });
+  };
+
+  const handleAdAccountSave = async () => {
+    if (isBound) {
+      alert('Ad account settings can only be changed once.');
+      return;
+    }
+    try {
+      const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
+      if (response.status === 200) {
+        alert('Ad account updated successfully');
+        setIsBound(true);
+      }
+    } catch (error) {
+      console.error('Error saving ad account', error);
+    }
   };
 
   return (
@@ -34,6 +105,7 @@ const ProfileManagement = ({ onLogout }) => {
       </div>
       <div className={styles.profileContent}>
         <div className={styles.section}>
+          {profilePic && <img src={profilePic} alt="Profile" className={styles.profilePic} />}
           <h3>Profile Information</h3>
           <input
             type="file"
@@ -41,7 +113,6 @@ const ProfileManagement = ({ onLogout }) => {
             onChange={handleProfilePicChange}
             className={styles.profileInput}
           />
-          {profilePic && <img src={profilePic} alt="Profile" className={styles.profilePic} />}
           <input
             type="text"
             placeholder="Full Name"
@@ -59,12 +130,63 @@ const ProfileManagement = ({ onLogout }) => {
         </div>
         <div className={styles.section}>
           <h3>Ad Account Settings</h3>
-          <input type="text" placeholder="Ad Account ID" className={styles.profileInput} />
-          <input type="text" placeholder="Pixel ID" className={styles.profileInput} />
-          <input type="text" placeholder="Facebook Page ID" className={styles.profileInput} />
-          <input type="text" placeholder="App ID" className={styles.profileInput} />
-          <input type="text" placeholder="App Secret" className={styles.profileInput} />
-          <input type="text" placeholder="Access Token" className={styles.profileInput} />
+          <p className={styles.infoText}>
+            Ad account settings cannot be changed after being saved.
+          </p>
+          <input
+            type="text"
+            name="ad_account_id"
+            placeholder="Ad Account ID"
+            value={adAccountDetails.ad_account_id || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
+          <input
+            type="text"
+            name="pixel_id"
+            placeholder="Pixel ID"
+            value={adAccountDetails.pixel_id || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
+          <input
+            type="text"
+            name="facebook_page_id"
+            placeholder="Facebook Page ID"
+            value={adAccountDetails.facebook_page_id || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
+          <input
+            type="text"
+            name="app_id"
+            placeholder="App ID"
+            value={adAccountDetails.app_id || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
+          <input
+            type="text"
+            name="app_secret"
+            placeholder="App Secret"
+            value={adAccountDetails.app_secret || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
+          <input
+            type="text"
+            name="access_token"
+            placeholder="Access Token"
+            value={adAccountDetails.access_token || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            disabled={isBound}
+          />
         </div>
       </div>
       <div className={styles.footer}>
@@ -72,7 +194,14 @@ const ProfileManagement = ({ onLogout }) => {
           onClick={handleSaveChanges}
           className={`${styles.button} ${styles.primaryButton}`}
         >
-          Save Changes
+          Save Profile
+        </button>
+        <button
+          onClick={handleAdAccountSave}
+          className={`${styles.button} ${styles.primaryButton}`}
+          disabled={isBound}
+        >
+          Save Ad Account
         </button>
         <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
           Go Back

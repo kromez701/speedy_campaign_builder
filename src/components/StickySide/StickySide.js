@@ -1,21 +1,51 @@
 import React, { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
 import styles from './StickySide.module.css';
 
-const StickySide = () => {
-  const [activeAccount, setActiveAccount] = useState(null);
+const StickySide = ({ setActiveAccount, activeAccount }) => {
   const [adAccounts, setAdAccounts] = useState([]);
+  const [adAccountDetails, setAdAccountDetails] = useState({});
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const sidebarRef = useRef(null);
 
+  const fetchAdAccountDetails = async (id) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/auth/ad_account/${id}`, { withCredentials: true });
+      setAdAccountDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching ad account details', error);
+    }
+  };
+
   useEffect(() => {
-    // Fetch accounts from backend (example data for now)
-    const fetchedAccounts = ["Ad Account 1", "Ad Account 2"];
-    setAdAccounts(fetchedAccounts);
-  }, []);
+    const fetchAdAccounts = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        setAdAccounts(response.data.ad_accounts);
+        setIsLoading(false);
+        // Set the first account as active by default and fetch its details
+        if (response.data.ad_accounts.length > 0) {
+          setActiveAccount(response.data.ad_accounts[0]);
+          fetchAdAccountDetails(response.data.ad_accounts[0].id);
+        }
+      } catch (error) {
+        setError(error);
+        setIsLoading(false);
+        console.error('Error fetching ad accounts', error);
+      }
+    };
+
+    fetchAdAccounts();
+  }, [setActiveAccount]);
 
   const handleAccountClick = (index) => {
-    setActiveAccount(index);
+    const selectedAccount = adAccounts[index];
+    console.log('Ad account selected in StickySide:', selectedAccount);
+    setActiveAccount(selectedAccount); // Update activeAccount in ProfileManagement
+    fetchAdAccountDetails(selectedAccount.id);
   };
 
   const handleDropdownToggle = () => {
@@ -30,6 +60,14 @@ const StickySide = () => {
     setSidebarOpen(false);
   };
 
+  if (isLoading) {
+    return <div>Loading...</div>; // Simple loading state
+  }
+
+  if (error) {
+    return <div>Error loading ad accounts</div>; // Simple error state
+  }
+
   return (
     <div>
       <div className={styles.hamburgerIcon} onClick={toggleSidebar}>
@@ -43,15 +81,20 @@ const StickySide = () => {
           </div>
           <hr className={styles.horizontalRule} />
           <div className={styles.accountsContainer}>
-            {adAccounts.map((account, index) => (
-              <button
-                key={index}
-                className={`${styles.accountButton} ${activeAccount === index ? styles.active : ''}`}
-                onClick={() => handleAccountClick(index)}
-              >
-                <img src="./assets/user-round.png" alt="User Icon" className={styles.icon} /> {account}
-              </button>
-            ))}
+            {adAccounts.length > 0 ? (
+              adAccounts.map((account, index) => (
+                <button
+                  key={index}
+                  className={`${styles.accountButton} ${activeAccount === account ? styles.active : ''}`}
+                  onClick={() => handleAccountClick(index)}
+                  aria-label={`Switch to Ad Account ${index + 1}`}
+                >
+                  <img src="./assets/user-round.png" alt="User Icon" className={styles.icon} /> {`Ad Account ${index + 1}`}
+                </button>
+              ))
+            ) : (
+              <p>No ad accounts available</p>
+            )}
           </div>
           <hr className={styles.horizontalRule} />
           <div className={styles.dropdownSection}>
@@ -63,30 +106,30 @@ const StickySide = () => {
                 className={`${styles.dropdownIcon} ${isDropdownVisible ? styles.rotated : ''}`}
               />
             </div>
-            {isDropdownVisible && (
+            {isDropdownVisible && activeAccount && (
               <div className={styles.dropdownContent}>
                 <div className={styles.dropdownRow}>
-                  <input className={`${styles.input} ${styles.input1}`} placeholder="Ad Account ID" />
+                  <input className={`${styles.input} ${styles.input1}`} placeholder="Ad Account ID" value={adAccountDetails.ad_account_id || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
                 <div className={styles.dropdownRow}>
-                  <input className={styles.input} placeholder="Pixel ID" />
+                  <input className={styles.input} placeholder="Pixel ID" value={adAccountDetails.pixel_id || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
                 <div className={styles.dropdownRow}>
-                  <input className={styles.input} placeholder="Facebook Page ID" />
+                  <input className={styles.input} placeholder="Facebook Page ID" value={adAccountDetails.facebook_page_id || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
                 <div className={styles.dropdownRow}>
-                  <input className={styles.input} placeholder="App ID" />
+                  <input className={styles.input} placeholder="App ID" value={adAccountDetails.app_id || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
                 <div className={styles.dropdownRow}>
-                  <input className={styles.input} placeholder="App Secret" />
+                  <input className={styles.input} placeholder="App Secret" value={adAccountDetails.app_secret || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
                 <div className={styles.dropdownRow}>
-                  <input className={styles.input} placeholder="Access Token" />
+                  <input className={styles.input} placeholder="Access Token" value={adAccountDetails.access_token || ''} readOnly />
                   <hr className={styles.horizontalRule1} />
                 </div>
               </div>
