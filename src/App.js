@@ -93,11 +93,11 @@ const App = () => {
             <div className="layout">
               <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} />
               <div className="content">
-                <Routes>
-                  <Route path="/" element={<Main />} />
-                  <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
-                  <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
+              <Routes>
+                <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
+                <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
               </div>
             </div>
           </>

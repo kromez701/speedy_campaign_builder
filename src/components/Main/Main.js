@@ -12,32 +12,26 @@ const getDefaultStartTime = () => {
   const startTime = new Date();
   startTime.setUTCDate(startTime.getUTCDate() + 1);
   startTime.setUTCHours(4, 0, 0, 0);
-  return startTime.toISOString().slice(0, 16); // Ensure it is in correct format for datetime-local input
+  return startTime.toISOString().slice(0, 16);
 };
 
 const getDefaultEndTime = () => {
   const endTime = new Date();
-  endTime.setUTCDate(endTime.getUTCDate() + 2); // Default end time 1 day after start time
+  endTime.setUTCDate(endTime.getUTCDate() + 2);
   endTime.setUTCHours(4, 0, 0, 0);
-  return endTime.toISOString().slice(0, 16); // Ensure it is in correct format for datetime-local input
+  return endTime.toISOString().slice(0, 16);
 };
 
-const Main = () => {
+const Main = ({ activeAccount }) => {
   const [formId, setFormId] = useState('mainForm');
   const [previousForm, setPreviousForm] = useState('mainForm');
   const [progress, setProgress] = useState(0);
   const [stepVisible, setStepVisible] = useState(false);
   const [step, setStep] = useState('');
   const [config, setConfig] = useState({
-    ad_account_id: 'act_2945173505586523',
-    pixel_id: '466400552489809',
-    facebook_page_id: '102076431877514',
-    app_id: '314691374966102',
-    app_secret: '88d92443cfcfc3922cdea79b384a116e',
-    access_token: 'EAAEeNcueZAVYBO0NvEUMo378SikOh70zuWuWgimHhnE5Vk7ye8sZCaRtu9qQGWNDvlBZBBnZAT6HCuDlNc4OeOSsdSw5qmhhmtKvrWmDQ8ZCg7a1BZAM1NS69YmtBJWGlTwAmzUB6HuTmb3Vz2r6ig9Xz9ZADDDXauxFCry47Fgh51yS1JCeo295w2V',
     objective: 'OUTCOME_SALES',
     campaign_budget_optimization: 'AD_SET_BUDGET_OPTIMIZATION',
-    budget_value: '50.73', // Default value in dollars
+    budget_value: '50.73',
     campaign_bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
     buying_type: 'AUCTION',
     object_store_url: '',
@@ -52,16 +46,16 @@ const Main = () => {
     call_to_action: 'SHOP_NOW',
     destination_url: '',
     url_parameters: '',
-    ad_set_budget_value: '50.73', // Default ad set budget value in dollars
-    ad_format: 'Single image or video', // Default ad format
-    bid_amount: '5.0', // Default bid amount value
+    ad_set_budget_value: '50.73',
+    ad_format: 'Single image or video',
+    bid_amount: '5.0',
     end_time: getDefaultEndTime(),
     ad_set_bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
-    prediction_id: '', // New field for prediction_id
+    prediction_id: '',
   });
   const [taskId, setTaskId] = useState(null);
   const [uploadController, setUploadController] = useState(null);
-  const [showHeader, setShowHeader] = useState(true); // State to manage header visibility
+  const [showHeader, setShowHeader] = useState(true);
 
   useEffect(() => {
     let progressData = null;
@@ -119,8 +113,8 @@ const Main = () => {
   const handleShowForm = (formId) => {
     setPreviousForm(formId === 'configForm' ? previousForm : formId);
     setFormId(formId);
-    if (formId !== 'mainForm') setShowHeader(false); // Hide the header when any form except mainForm is shown
-    else setShowHeader(true); // Show the header when mainForm is shown
+    if (formId !== 'mainForm') setShowHeader(false);
+    else setShowHeader(true);
   };
 
   const handleEditConfig = () => {
@@ -166,14 +160,33 @@ const Main = () => {
     setTaskId(taskId);
     formData.append('task_id', taskId);
 
+    console.log('activeAccount:', activeAccount);
+
+    if (!activeAccount || !activeAccount.ad_account_id) {
+      alert('Ad account details are missing.');
+      return;
+    }
+
+    // Use activeAccount's Facebook settings
+    const adAccountConfig = {
+      ad_account_id: activeAccount.ad_account_id,
+      pixel_id: activeAccount.pixel_id,
+      facebook_page_id: activeAccount.facebook_page_id,
+      app_id: activeAccount.app_id,
+      app_secret: activeAccount.app_secret,
+      access_token: activeAccount.access_token,
+    };
+
+    // Merge activeAccount's config with the current config
+    const finalConfig = { ...config, ...adAccountConfig };
+
     // Append all config values to formData
-    Object.keys(config).forEach((key) => {
-      formData.append(key, config[key]);
+    Object.keys(finalConfig).forEach((key) => {
+      formData.append(key, finalConfig[key]);
     });
 
-    // If buying_type is RESERVED, add prediction_id to formData
-    if (config.buying_type === 'RESERVED' && config.prediction_id) {
-      formData.append('prediction_id', config.prediction_id);
+    if (finalConfig.buying_type === 'RESERVED' && finalConfig.prediction_id) {
+      formData.append('prediction_id', finalConfig.prediction_id);
     }
 
     const controller = new AbortController();
@@ -222,7 +235,7 @@ const Main = () => {
           onSubmit={handleSubmit}
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
-          isNewCampaign={true} // Pass isNewCampaign as true
+          isNewCampaign={true}
         />
       )}
       {formId === 'existingCampaignForm' && (
@@ -231,7 +244,7 @@ const Main = () => {
           onSubmit={handleSubmit}
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
-          isNewCampaign={false} // Pass isNewCampaign as false
+          isNewCampaign={false}
         />
       )}
       {formId === 'configForm' && (

@@ -3,10 +3,14 @@ import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
 import ScopedGlobalStyle from './CampaignFormStyles';
 
-const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onSaveConfig, onGoBack }) => {
+const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack }) => {
   const [campaignName, setCampaignName] = useState('');
   const [campaignId, setCampaignId] = useState('');
-  
+  const [savedConfig, setSavedConfig] = useState(initialConfig);
+
+  const handleSaveConfig = (config) => {
+    setSavedConfig(config);
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -16,6 +20,11 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onS
       formData.append('campaign_name', campaignName);
     } else {
       formData.append('campaign_id', campaignId);
+    }
+
+    // Append saved config to formData or use it as needed
+    for (const [key, value] of Object.entries(savedConfig)) {
+      formData.append(key, value);
     }
 
     onSubmit(formData, formId === 'newCampaign');
@@ -65,7 +74,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onS
         <label htmlFor="uploadFolders">Upload Folders:</label>
         <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory="true" directory="true" multiple required />
 
-        <ConfigForm initialConfig={initialConfig} isNewCampaign={isNewCampaign} onSaveConfig={onSaveConfig} />
+        <ConfigForm initialConfig={initialConfig} isNewCampaign={isNewCampaign} onSaveConfig={handleSaveConfig} />
 
         <div className='button-container2'>
           <button type="submit" className="create-ad-button">Create Ad</button>
@@ -81,7 +90,6 @@ CampaignForm.propTypes = {
   onSubmit: PropTypes.func.isRequired,
   initialConfig: PropTypes.object,
   isNewCampaign: PropTypes.bool.isRequired,
-  onSaveConfig: PropTypes.func.isRequired,
   onGoBack: PropTypes.func.isRequired,
 };
 
