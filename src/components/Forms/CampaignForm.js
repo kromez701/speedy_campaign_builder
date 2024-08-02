@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
 import ScopedGlobalStyle from './CampaignFormStyles';
+import axios from 'axios'; // Import axios for making API requests
 
 const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack }) => {
   const [campaignName, setCampaignName] = useState('');
   const [campaignId, setCampaignId] = useState('');
   const [savedConfig, setSavedConfig] = useState(initialConfig);
+  const [isActiveSubscription, setIsActiveSubscription] = useState(false); // New state for subscription status
+
+  useEffect(() => {
+    // Fetch subscription status from the backend
+    const fetchSubscriptionStatus = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
+        setIsActiveSubscription(response.data.is_active); // Set subscription status
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+        setIsActiveSubscription(false); // Default to false if there's an error
+      }
+    };
+
+    fetchSubscriptionStatus();
+  }, []);
 
   const handleSaveConfig = (config) => {
     setSavedConfig(config);
@@ -14,6 +31,12 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
 
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (!isActiveSubscription) {
+      alert('Kindly subscribe to a plan to enjoy this feature');
+      return; // Prevent form submission if no active subscription
+    }
+
     const formData = new FormData(event.target);
 
     if (formId === 'newCampaign') {

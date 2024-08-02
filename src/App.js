@@ -6,6 +6,7 @@ import Main from './components/Main/Main';
 import Navbar from './components/Nav/NavBar';
 import StickySide from './components/StickySide/StickySide';
 import ProfileManagement from './components/ProfileManagement/ProfileManagement';
+import PricingSection from './components/PricingSection/PricingSection'; // Import the PricingSection component
 import axios from 'axios';
 import './App.css';
 
@@ -36,14 +37,11 @@ const App = () => {
 
   const handleAuthSuccess = async () => {
     try {
-      console.log('handleAuthSuccess called');
       const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
       if (response.status === 200) {
-        console.log('User after authentication:', response.data.user);
         setUser(response.data.user);
         setAuthMode(null);
         setRedirectToMain(true); // Redirect to main page on successful authentication
-        console.log('redirectToMain after login:', true);
       }
     } catch (error) {
       console.error('Error checking current user', error);
@@ -52,13 +50,10 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      console.log('handleLogout called');
       const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
-        console.log('Logout successful');
         setUser(null);
         setRedirectToMain(false); // Reset redirect state on logout
-        console.log('redirectToMain after logout:', false);
       } else {
         console.error('Failed to log out');
       }
@@ -69,9 +64,7 @@ const App = () => {
 
   useEffect(() => {
     if (redirectToMain) {
-      console.log('Redirecting to main page...');
       setRedirectToMain(false); // Reset redirect state after redirection
-      console.log('redirectToMain reset to:', false);
     }
   }, [redirectToMain]);
 
@@ -93,11 +86,12 @@ const App = () => {
             <div className="layout">
               <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} />
               <div className="content">
-              <Routes>
-                <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
-                <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
-                <Route path="*" element={<Navigate to="/" />} />
-              </Routes>
+                <Routes>
+                  <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
+                  <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
+                  <Route path="/pricing-section" element={<PricingSection onPlanSelect={() => setRedirectToMain(true)} />} /> {/* Route to PricingSection */}
+                  <Route path="*" element={<Navigate to="/" />} />
+                </Routes>
               </div>
             </div>
           </>

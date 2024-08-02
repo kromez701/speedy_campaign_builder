@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './StickySide.module.css';
 
@@ -10,6 +11,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const sidebarRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchAdAccountDetails = async (id) => {
     try {
@@ -26,7 +28,6 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
         const response = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
         setAdAccounts(response.data.ad_accounts);
         setIsLoading(false);
-        // Set the first account as active by default and fetch its details
         if (response.data.ad_accounts.length > 0) {
           setActiveAccount(response.data.ad_accounts[0]);
           fetchAdAccountDetails(response.data.ad_accounts[0].id);
@@ -43,8 +44,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
 
   const handleAccountClick = (index) => {
     const selectedAccount = adAccounts[index];
-    console.log('Ad account selected in StickySide:', selectedAccount);
-    setActiveAccount(selectedAccount); // Update activeAccount in ProfileManagement
+    setActiveAccount(selectedAccount);
     fetchAdAccountDetails(selectedAccount.id);
   };
 
@@ -60,12 +60,16 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
     setSidebarOpen(false);
   };
 
+  const handleUpgradeClick = () => {
+    navigate('/pricing-section'); // Navigate to PricingSection on click
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>; // Simple loading state
+    return <div>Loading...</div>;
   }
 
   if (error) {
-    return <div>Error loading ad accounts</div>; // Simple error state
+    return <div>Error loading ad accounts</div>;
   }
 
   return (
@@ -137,7 +141,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
           </div>
         </div>
         <div>
-          <button className={styles.upgradeButton}>Upgrade Plan</button>
+          <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
           <div className={styles.footer}>
             0 Ad account left on professional plan
           </div>

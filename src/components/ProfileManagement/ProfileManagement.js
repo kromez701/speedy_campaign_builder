@@ -11,7 +11,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [isBound, setIsBound] = useState(false);
 
-  // Fetch profile information on component mount
+  const [subscriptionPlan, setSubscriptionPlan] = useState('');
+  const [subscriptionStartDate, setSubscriptionStartDate] = useState('');
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState('');
+  const [isActive, setIsActive] = useState(false);  
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -27,12 +31,29 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       }
     };
     fetchProfile();
-  }, []);  // Empty dependency array to ensure this only runs once on mount
+  }, []);
 
-  // Update ad account details when activeAccount changes
+  useEffect(() => {
+    const fetchSubscriptionDetails = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
+        if (response.status === 200) {
+          const { plan, start_date, end_date, is_active } = response.data;
+          setSubscriptionPlan(plan);
+          setSubscriptionStartDate(start_date);
+          setSubscriptionEndDate(end_date);
+          setIsActive(is_active);
+        }
+      } catch (error) {
+        console.error('Error fetching subscription details', error);
+      }
+    };
+
+    fetchSubscriptionDetails();
+  }, []);
+
   useEffect(() => {
     if (activeAccount) {
-      console.log('ProfileManagement: activeAccount changed:', activeAccount);
       setIsBound(activeAccount.is_bound);
       fetchAdAccountDetails(activeAccount.id);
     }
@@ -49,7 +70,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.size <= 5242880) { // 5MB limit
+    if (file && file.size <= 5242880) {
       setProfilePic(URL.createObjectURL(file));
     } else {
       alert('File size should be less than 5MB');
@@ -92,6 +113,21 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    try {
+      const response = await axios.post('http://localhost:5001/cancel-subscription', {}, { withCredentials: true });
+      if (response.status === 200) {
+        alert('Subscription canceled successfully');
+        setSubscriptionPlan('None');  // Set to 'None' after cancellation
+        setIsActive(false);
+        setSubscriptionStartDate('');
+        setSubscriptionEndDate('');
+      }
+    } catch (error) {
+      console.error('Error canceling subscription', error);
+    }
+  };
+  
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -187,6 +223,30 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             className={styles.profileInput}
             disabled={isBound}
           />
+        </div>
+        <div className={styles.section}>
+          <h3>Subscription Details</h3>
+          <p><strong>Plan:</strong> {subscriptionPlan}</p>
+          <p><strong>Start Date:</strong> {new Date(subscriptionStartDate).toLocaleDateString()}</p>
+          {isActive ? (
+            <p><strong>Status:</strong> Active</p>
+          ) : (
+            <p><strong>Status:</strong> Inactive</p>
+          )}
+          {subscriptionEndDate && (
+            <p><strong>End Date:</strong> {new Date(subscriptionEndDate).toLocaleDateString()}</p>
+          )}
+        </div>
+        <div className={styles.section}>
+          <h3>Manage Subscription</h3>
+          <button onClick={() => navigate('/subscription/plans')} className={`${styles.button} ${styles.primaryButton}`}>
+            Change Plan
+          </button>
+          {subscriptionPlan !== 'No active plan' && (
+            <button onClick={handleCancelSubscription} className={`${styles.button} ${styles.secondaryButton}`}>
+              Cancel Subscription
+            </button>
+          )}
         </div>
       </div>
       <div className={styles.footer}>
