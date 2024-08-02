@@ -107,6 +107,10 @@ nav ul li a {
   background-color: #e9e9e9;
   cursor: pointer; /* Ensures the cursor changes to a pointer on hover */
 }
+
+.price-start-btn:hover, .get-start-btn:hover{
+    cursor: pointer;
+}
 .nav-btn-container button {
     padding: 10px 24px;
     font-size: 20px;
