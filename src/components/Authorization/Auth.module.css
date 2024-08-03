@@ -139,6 +139,19 @@ h1 {
   cursor: pointer;
 }
 
+.linkText {
+  color: #5356FF;
+  text-decoration: underline;
+  font-size: 15px;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+}
+
+.linkText:hover {
+  color: #4044C9;
+}
+
+
 .closeIcon {
   position: absolute;
   top: 10px;
@@ -197,7 +210,7 @@ h1 {
 
 @media (max-width: 960px){
   .logo-header {
-    width: 198px;
+    width: 210px;
 }
 }
 @media (max-width: 960px) {

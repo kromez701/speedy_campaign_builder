@@ -134,7 +134,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
             setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
         }
     }
-};
+  };
 
   const responseGoogle = async ({ accessToken, remember }) => {
     try {
@@ -216,7 +216,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
                     />
                   </>
                 )}
-                {isLogin && (
+                {isLogin && !isForgotPassword && (
                   <div className={styles['remember-me']}>
                     <Field type="checkbox" name="remember" checked={remember} onChange={() => setRemember(!remember)} />
                     <label className={styles['remember-me-text']} htmlFor="remember">Remember me</label>
@@ -233,12 +233,14 @@ const Auth = ({ mode, onAuthSuccess }) => {
               <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
             </div>
           )}
-          <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
-            {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <span className={styles.linkText}>
-              {isLogin ? 'Register' : 'Sign in'}
-            </span>
-          </div>
+          {!isForgotPassword && (
+            <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
+              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              <span className={styles.linkText}>
+                {isLogin ? 'Register' : 'Sign in'}
+              </span>
+            </div>
+          )}
           {isLogin && !isForgotPassword && (
             <div className={styles.switchLink} onClick={() => setIsForgotPassword(true)}>
               <span className={styles.linkText}>Forgot your password?</span>
