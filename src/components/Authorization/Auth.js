@@ -3,6 +3,7 @@ import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import styles from './Auth.module.css';
 
 const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => (
@@ -27,12 +28,10 @@ const CustomGoogleLogin = ({ isLogin, onSuccess, onError, remember }) => {
   const login = useGoogleLogin({
     onSuccess: async tokenResponse => {
       try {
-        console.log('Google token response:', tokenResponse);
         const accessToken = tokenResponse.access_token;
         if (!accessToken) {
           throw new Error('No access token found in the response.');
         }
-        console.log('Access Token:', accessToken);
         onSuccess({ accessToken, remember });
       } catch (error) {
         onError(error);
@@ -50,12 +49,15 @@ const CustomGoogleLogin = ({ isLogin, onSuccess, onError, remember }) => {
   );
 };
 
-const Auth = ({ mode, onClose, onAuthSuccess }) => {
+const Auth = ({ mode, onAuthSuccess }) => {
   const [isLogin, setIsLogin] = useState(mode === 'login');
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [remember, setRemember] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     setIsLogin(mode === 'login');
@@ -71,69 +73,100 @@ const Auth = ({ mode, onClose, onAuthSuccess }) => {
   };
 
   const validationSchema = Yup.object({
-    name: isLogin ? Yup.string() : Yup.string().required('Required'),
+    name: !isLogin && !isForgotPassword ? Yup.string().required('Required') : Yup.string(),
     email: Yup.string().email('Invalid email format').required('Required'),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Required'),
-    confirmPassword: isLogin
-      ? Yup.string()
-      : Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Required'),
+    password: !isForgotPassword ? Yup.string().min(6, 'Password must be at least 6 characters').required('Required') : Yup.string().min(6, 'Password must be at least 6 characters').required('Required'),
+    confirmPassword: (!isLogin && !isForgotPassword) || isForgotPassword
+      ? Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Required')
+      : Yup.string(),
   });
 
   const onSubmit = async (values, { resetForm }) => {
-    const url = isLogin ? 'http://localhost:5000/auth/login' : 'http://localhost:5000/auth/register';
-    try {
-      const response = await axios.post(url, values, { withCredentials: true });
-      if (response.status === 200 || response.status === 201) {
-        onAuthSuccess();
-        resetForm();
-        setErrorMessage('');
-      }
-    } catch (error) {
-      if (error.response && error.response.data && error.response.data.message) {
-        setErrorMessage(error.response.data.message);
-      } else {
-        setErrorMessage('An error occurred. Please try again.');
-      }
+    let url = '';
+    if (isForgotPassword) {
+        url = `http://localhost:5000/auth/forgot_password`;
+        try {
+            const response = await axios.post(url, {
+                email: values.email,
+                newPassword: values.password,  // Send the new password along with the email
+                confirmPassword: values.confirmPassword  // Optionally send confirmation password too
+            });
+            if (response.status === 200) {
+                setErrorMessage('Password reset link sent! Check your email.');
+            }
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        }
+    } else if (location.pathname.startsWith('/reset_password')) {
+        const token = location.pathname.split('/').pop(); // Extract token from URL
+        url = `http://localhost:5000/auth/reset_password/${token}`;
+        try {
+            const response = await axios.post(url, { password: values.password });
+            if (response.status === 200) {
+                setErrorMessage('Password reset successfully! You can now log in.');
+                navigate('/login'); // Use navigate instead of history.push
+            }
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        }
+    } else if (isLogin) {
+        url = 'http://localhost:5000/auth/login';
+        try {
+            const response = await axios.post(url, values, { withCredentials: true });
+            if (response.status === 200 || response.status === 201) {
+                onAuthSuccess();
+                resetForm();
+                setErrorMessage('');
+            }
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        }
+    } else {
+        url = 'http://localhost:5000/auth/register';
+        try {
+            const response = await axios.post(url, values, { withCredentials: true });
+            if (response.status === 200 || response.status === 201) {
+                onAuthSuccess();
+                resetForm();
+                setErrorMessage('');
+            }
+        } catch (error) {
+            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        }
     }
-  };
+};
 
   const responseGoogle = async ({ accessToken, remember }) => {
     try {
-      const res = await axios.post('http://localhost:5000/auth/google', { token: accessToken, remember }, { withCredentials: true });
-      console.log('User info:', res.data);
+      await axios.post('http://localhost:5000/auth/google', { token: accessToken, remember }, { withCredentials: true });
       onAuthSuccess();
     } catch (error) {
-      console.error('Error verifying token:', error);
       setErrorMessage('Failed to authenticate with Google.');
     }
   };
 
   const responseGoogleError = (error) => {
-    console.error('Google login error:', error);
     setErrorMessage('Failed to authenticate with Google.');
   };
 
   return (
     <GoogleOAuthProvider clientId='362986823691-u76e3r421e7ts51cphcpcitihpu6ks51.apps.googleusercontent.com'>
-      <div className={styles['modal-background']}>
+      <div className={styles['page-container']}>
+        <Link to="/">
+          <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
+        </Link>
         <div className={styles.container}>
-          <img
-            src="/assets/xdark.svg"
-            alt="Close"
-            className={styles.closeIcon}
-            onClick={onClose}
-          />
-          <h1>{isLogin ? 'Login' : 'Register'}</h1>
+          <h1>{isForgotPassword ? 'Reset Password' : isLogin ? 'Login' : 'Register'}</h1>
           <Formik
             initialValues={initialValues}
             validationSchema={validationSchema}
             onSubmit={onSubmit}
             enableReinitialize={true}
           >
-            {({ resetForm }) => (
+            {() => (
               <Form className={styles['form-container']}>
                 {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-                {!isLogin && (
+                {!isLogin && !isForgotPassword && (
                   <>
                     <Field
                       type="text"
@@ -151,19 +184,37 @@ const Auth = ({ mode, onClose, onAuthSuccess }) => {
                   className={styles['form-input']}
                 />
                 <ErrorMessage name="email" component="div" className={styles.error} />
-                <PasswordField
-                  name="password"
-                  placeholder="Password"
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                />
-                {!isLogin && (
+                {(!isForgotPassword || !isLogin) && (
+                  <PasswordField
+                    name="password"
+                    placeholder="Password"
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
+                  />
+                )}
+                {!isLogin && !isForgotPassword && (
                   <PasswordField
                     name="confirmPassword"
                     placeholder="Confirm Password"
                     showPassword={showConfirmPassword}
                     setShowPassword={setShowConfirmPassword}
                   />
+                )}
+                {isForgotPassword && (
+                  <>
+                    <PasswordField
+                      name="password"
+                      placeholder="New Password"
+                      showPassword={showPassword}
+                      setShowPassword={setShowPassword}
+                    />
+                    <PasswordField
+                      name="confirmPassword"
+                      placeholder="Confirm New Password"
+                      showPassword={showConfirmPassword}
+                      setShowPassword={setShowConfirmPassword}
+                    />
+                  </>
                 )}
                 {isLogin && (
                   <div className={styles['remember-me']}>
@@ -172,23 +223,32 @@ const Auth = ({ mode, onClose, onAuthSuccess }) => {
                   </div>
                 )}
                 <button type="submit" className={styles['option-button']}>
-                  {isLogin ? 'Sign In' : 'Create account'}
+                  {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create account'}
                 </button>
               </Form>
             )}
           </Formik>
-          <div className={styles.socialLogin}>
-            <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
-          </div>
-          <div className={styles.switchLink} onClick={() => {
-            setIsLogin(!isLogin);
-            setErrorMessage('');
-          }}>
+          {!isForgotPassword && (
+            <div className={styles.socialLogin}>
+              <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
+            </div>
+          )}
+          <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <span className={styles.linkText}>
               {isLogin ? 'Register' : 'Sign in'}
             </span>
           </div>
+          {isLogin && !isForgotPassword && (
+            <div className={styles.switchLink} onClick={() => setIsForgotPassword(true)}>
+              <span className={styles.linkText}>Forgot your password?</span>
+            </div>
+          )}
+          {isForgotPassword && (
+            <div className={styles.switchLink} onClick={() => setIsForgotPassword(false)}>
+              <span className={styles.linkText}>Back to Login</span>
+            </div>
+          )}
         </div>
       </div>
     </GoogleOAuthProvider>

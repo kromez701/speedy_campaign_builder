@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import ScopedGlobalStyle from './LandingStyles';
 
-const Landing = ({ setAuthMode }) => {
+const Landing = () => {
+  const navigate = useNavigate(); // Initialize useNavigate
+
   const handleHamburgMenuClick = () => {
     document.querySelector('.nav-menu-btn-container').style.right = '0';
   };
@@ -48,8 +51,8 @@ const Landing = ({ setAuthMode }) => {
             <li><a href="#contact-section">Contact</a></li>
           </ul>
           <div className="nav-btn-container">
-            <button onClick={() => setAuthMode('login')}>Login</button>
-            <button className="get-started" onClick={() => setAuthMode('register')}>
+            <button onClick={() => navigate('/login')}>Login</button>
+            <button className="get-started" onClick={() => navigate('/register')}>
               Get Started
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -269,7 +272,7 @@ const Landing = ({ setAuthMode }) => {
                 Get a feel for the tool before subscribing.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => setAuthMode('register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
           </div>
           <div className="price-card popular-plan">
             <div className="popular-plan-wrapper">
@@ -314,7 +317,7 @@ const Landing = ({ setAuthMode }) => {
                 Receive dedicated support for your ad management needs.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => setAuthMode('register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
           </div>
           <div className="price-card popular-plan enterprise-plan">
             <div className="popular-plan-wrapper enterprise-plan-wrapper">
@@ -359,7 +362,7 @@ const Landing = ({ setAuthMode }) => {
                 Get priority support tailored for multi-account management.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => setAuthMode('register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
           </div>
         </div>
       </div>
@@ -412,7 +415,7 @@ const Landing = ({ setAuthMode }) => {
             experience the power of lightning-fast campaign creation. Say goodbye
             to wasted time and hello to increased productivity and performance.
           </p>
-          <button className="get-start-btn" onClick={() => setAuthMode('register')}>
+          <button className="get-start-btn" onClick={() => navigate('/register')}>
             Buy Now
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />

@@ -1,3 +1,5 @@
+// Updated App Component
+
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './components/Landing/Landing';
@@ -6,18 +8,16 @@ import Main from './components/Main/Main';
 import Navbar from './components/Nav/NavBar';
 import StickySide from './components/StickySide/StickySide';
 import ProfileManagement from './components/ProfileManagement/ProfileManagement';
-import PricingSection from './components/PricingSection/PricingSection'; // Import the PricingSection component
+import PricingSection from './components/PricingSection/PricingSection';
 import axios from 'axios';
 import './App.css';
 
 const App = () => {
-  const [authMode, setAuthMode] = useState(null); // null, 'login', 'register'
+  const [authMode, setAuthMode] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [redirectToMain, setRedirectToMain] = useState(false); // State to manage redirection
-  const [activeAccount, setActiveAccount] = useState(null); // State to manage active account
-
-  const handleCloseAuth = () => setAuthMode(null);
+  const [redirectToMain, setRedirectToMain] = useState(false);
+  const [activeAccount, setActiveAccount] = useState(null);
 
   useEffect(() => {
     const checkCurrentUser = async () => {
@@ -41,7 +41,7 @@ const App = () => {
       if (response.status === 200) {
         setUser(response.data.user);
         setAuthMode(null);
-        setRedirectToMain(true); // Redirect to main page on successful authentication
+        setRedirectToMain(true);
       }
     } catch (error) {
       console.error('Error checking current user', error);
@@ -53,7 +53,7 @@ const App = () => {
       const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
-        setRedirectToMain(false); // Reset redirect state on logout
+        setRedirectToMain(false);
       } else {
         console.error('Failed to log out');
       }
@@ -64,12 +64,12 @@ const App = () => {
 
   useEffect(() => {
     if (redirectToMain) {
-      setRedirectToMain(false); // Reset redirect state after redirection
+      setRedirectToMain(false);
     }
   }, [redirectToMain]);
 
   useEffect(() => {
-    console.log('App.js: activeAccount changed:', activeAccount); // Debugging log for activeAccount change
+    console.log('App.js: activeAccount changed:', activeAccount);
   }, [activeAccount]);
 
   if (loading) {
@@ -81,7 +81,7 @@ const App = () => {
       <div className="app">
         {user ? (
           <>
-            {redirectToMain && <Navigate to="/" replace />} {/* Redirect to main page when user is set */}
+            {redirectToMain && <Navigate to="/" replace />}
             <Navbar />
             <div className="layout">
               <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} />
@@ -89,7 +89,7 @@ const App = () => {
                 <Routes>
                   <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
-                  <Route path="/pricing-section" element={<PricingSection onPlanSelect={() => setRedirectToMain(true)} />} /> {/* Route to PricingSection */}
+                  <Route path="/pricing-section" element={<PricingSection onPlanSelect={() => setRedirectToMain(true)} />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>
@@ -97,8 +97,12 @@ const App = () => {
           </>
         ) : (
           <>
-            <Landing setAuthMode={setAuthMode} />
-            {authMode && <Auth mode={authMode} onClose={handleCloseAuth} onAuthSuccess={handleAuthSuccess} />}
+            <Routes>
+              <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
+              <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
+              <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
           </>
         )}
       </div>

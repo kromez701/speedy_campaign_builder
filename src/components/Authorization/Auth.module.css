@@ -1,20 +1,43 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
+/* Centering the container on the page */
+.page-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 20px;
+  background-color: #f7f7f7;
+  overflow-y: auto;
+}
+
+
+/* Main container styling */
 .container {
   text-align: center;
   font-family: 'Poppins', sans-serif;
   width: 100%;
   max-width: 500px;
-  margin: 20px auto;
+  margin: 90px auto;
   padding: 20px;
   box-sizing: border-box;
   background-color: #fff;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
   border-radius: 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  position: relative;
+}
+
+
+/* Position the logo at the top right */
+.logo-header {
+  position: absolute;
+  top: 20px;
+  left: 70px;
+  width: 285px;
+  cursor: pointer;
 }
 
 .remember-me {
@@ -30,7 +53,7 @@
 .password-toggle {
   position: absolute;
   right: 10px;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   cursor: pointer;
 }
@@ -50,6 +73,7 @@ h1 {
   background-color: #5356FF;
   color: white;
   border: none;
+  height: 44px;
   padding: 10px 16px;
   border-radius: 5px;
   font-family: 'Poppins', sans-serif;
@@ -133,7 +157,6 @@ h1 {
   flex-direction: column;
   gap: 10px;
   width: 100%;
-  margin-top: 20px;
 }
 
 .social-button {
@@ -153,7 +176,7 @@ h1 {
 }
 
 .googleLogin {
-  background-color: #e0e0e0;
+  background-color: #f1efef;
   color: black !important;
   font-family: 'Poppins', sans-serif !important;
   width: 100%;
@@ -170,6 +193,13 @@ h1 {
   width: 20px;
 }
 
+
+
+@media (max-width: 960px){
+  .logo-header {
+    width: 198px;
+}
+}
 @media (max-width: 960px) {
   .container {
     width: 90%;
