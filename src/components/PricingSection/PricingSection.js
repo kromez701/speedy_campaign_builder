@@ -12,7 +12,7 @@ const SubscriptionPlan = () => {
     // Fetch the current subscription plan and free trial status when the component mounts
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5001/subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
         setCurrentPlan(response.data.plan);
         setHasUsedFreeTrial(response.data.has_used_free_trial); // Set the hasUsedFreeTrial state
         console.log("Start")
@@ -39,7 +39,7 @@ const SubscriptionPlan = () => {
 
     try {
       // Send selected plan to the backend to create a checkout session
-      const response = await axios.post('http://localhost:5001/create-checkout-session', 
+      const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
         { plan }, 
         { withCredentials: true }
       );

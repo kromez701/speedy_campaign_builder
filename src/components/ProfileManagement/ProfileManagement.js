@@ -115,7 +115,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleCancelSubscription = async () => {
     try {
-      const response = await axios.post('http://localhost:5001/cancel-subscription', {}, { withCredentials: true });
+      const response = await axios.post('http://localhost:5000/payment/cancel-subscription', {}, { withCredentials: true });
       if (response.status === 200) {
         alert('Subscription canceled successfully');
         setSubscriptionPlan('None');  // Set to 'None' after cancellation

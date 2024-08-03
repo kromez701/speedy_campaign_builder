@@ -6,7 +6,7 @@ import ProgressBar from '../ProgressBar/ProgressBar';
 import SuccessScreen from '../SuccessScreen';
 import ScopedGlobalStyle from './MainStyles';
 
-const socket = io('http://localhost:5000/');
+const socket = io('http://localhost:5001/');
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -138,7 +138,7 @@ const Main = ({ activeAccount }) => {
     }
 
     if (taskId) {
-      fetch('http://localhost:5000/cancel_task', {
+      fetch('http://localhost:5001/cancel_task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task_id: taskId }),
@@ -195,7 +195,7 @@ const Main = ({ activeAccount }) => {
     setProgress(0);
     setStepVisible(false);
 
-    fetch('http://localhost:5000/create_campaign', {
+    fetch('http://localhost:5001/create_campaign', {
       method: 'POST',
       body: formData,
       signal: controller.signal,
