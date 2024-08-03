@@ -56,6 +56,8 @@ const Auth = ({ mode, onAuthSuccess }) => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [remember, setRemember] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false); // For email verification
+  const [isPasswordResetSent, setIsPasswordResetSent] = useState(false); // For password reset confirmation
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -83,56 +85,54 @@ const Auth = ({ mode, onAuthSuccess }) => {
 
   const onSubmit = async (values, { resetForm }) => {
     let url = '';
-    if (isForgotPassword) {
-        url = `http://localhost:5000/auth/forgot_password`;
-        try {
-            const response = await axios.post(url, {
-                email: values.email,
-                newPassword: values.password,  // Send the new password along with the email
-                confirmPassword: values.confirmPassword  // Optionally send confirmation password too
-            });
-            if (response.status === 200) {
-                setErrorMessage('Password reset link sent! Check your email.');
-            }
-        } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+    if (isForgotPassword) {  // Forgot Password case
+      url = `http://localhost:5000/auth/forgot_password`;
+      try {
+        const response = await axios.post(url, {
+          email: values.email,
+          newPassword: values.password,
+          confirmPassword: values.confirmPassword
+        });
+        if (response.status === 200) {
+          setIsPasswordResetSent(true); // Trigger password reset confirmation screen
         }
+      } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      }
     } else if (location.pathname.startsWith('/reset_password')) {
-        const token = location.pathname.split('/').pop(); // Extract token from URL
-        url = `http://localhost:5000/auth/reset_password/${token}`;
-        try {
-            const response = await axios.post(url, { password: values.password });
-            if (response.status === 200) {
-                setErrorMessage('Password reset successfully! You can now log in.');
-                navigate('/login'); // Use navigate instead of history.push
-            }
-        } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      const token = location.pathname.split('/').pop(); // Extract token from URL
+      url = `http://localhost:5000/auth/reset_password/${token}`;
+      try {
+        const response = await axios.post(url, { password: values.password });
+        if (response.status === 200) {
+          setErrorMessage('Password reset successfully! You can now log in.');
+          navigate('/login');
         }
-    } else if (isLogin) {
-        url = 'http://localhost:5000/auth/login';
-        try {
-            const response = await axios.post(url, values, { withCredentials: true });
-            if (response.status === 200 || response.status === 201) {
-                onAuthSuccess();
-                resetForm();
-                setErrorMessage('');
-            }
-        } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      }
+    } else if (isLogin) {  // Login case
+      url = 'http://localhost:5000/auth/login';
+      try {
+        const response = await axios.post(url, values, { withCredentials: true });
+        if (response.status === 200 || response.status === 201) {
+          onAuthSuccess();
+          resetForm();
+          setErrorMessage('');
         }
-    } else {
-        url = 'http://localhost:5000/auth/register';
-        try {
-            const response = await axios.post(url, values, { withCredentials: true });
-            if (response.status === 200 || response.status === 201) {
-                onAuthSuccess();
-                resetForm();
-                setErrorMessage('');
-            }
-        } catch (error) {
-            setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      }
+    } else {  // Registration case
+      url = 'http://localhost:5000/auth/register';
+      try {
+        const response = await axios.post(url, values, { withCredentials: true });
+        if (response.status === 200 || response.status === 201) {
+          setIsEmailSent(true); // Trigger email verification screen
         }
+      } catch (error) {
+        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+      }
     }
   };
 
@@ -156,100 +156,132 @@ const Auth = ({ mode, onAuthSuccess }) => {
           <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
         </Link>
         <div className={styles.container}>
-          <h1>{isForgotPassword ? 'Reset Password' : isLogin ? 'Login' : 'Register'}</h1>
-          <Formik
-            initialValues={initialValues}
-            validationSchema={validationSchema}
-            onSubmit={onSubmit}
-            enableReinitialize={true}
-          >
-            {() => (
-              <Form className={styles['form-container']}>
-                {errorMessage && <div className={styles.error}>{errorMessage}</div>}
-                {!isLogin && !isForgotPassword && (
-                  <>
+          {isEmailSent ? ( // Email verification screen
+            <>
+              <h1>Email Sent</h1>
+              <p>An email has been sent to verify your account. Please check your inbox and click the verification link. Once verified, come back to login.</p>
+              <span 
+                className={styles.linkText}
+                onClick={() => {
+                  setIsEmailSent(false);
+                  navigate('/login');
+                }}
+              >
+                Back to Login
+              </span>
+            </>
+          ) : isPasswordResetSent ? ( // Password reset confirmation screen
+            <>
+              <h1>Password Reset</h1>
+              <p>Password reset link sent to your email address.</p>
+              <span 
+                className={styles.linkText}
+                onClick={() => {
+                  setIsPasswordResetSent(false);
+                  navigate('/login');
+                }}
+              >
+                Back to Login
+              </span>
+            </>
+          ) : ( // Original Forms: Login, Register, Reset Password
+            <>
+              <h1>{isForgotPassword ? 'Reset Password' : isLogin ? 'Login' : 'Register'}</h1>
+              <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={onSubmit}
+                enableReinitialize={true}
+              >
+                {() => (
+                  <Form className={styles['form-container']}>
+                    {errorMessage && <div className={styles.error}>{errorMessage}</div>}
+                    {!isLogin && !isForgotPassword && (
+                      <>
+                        <Field
+                          type="text"
+                          name="name"
+                          placeholder="Name"
+                          className={styles['form-input']}
+                        />
+                        <ErrorMessage name="name" component="div" className={styles.error} />
+                      </>
+                    )}
                     <Field
-                      type="text"
-                      name="name"
-                      placeholder="Name"
+                      type="email"
+                      name="email"
+                      placeholder="Email"
                       className={styles['form-input']}
                     />
-                    <ErrorMessage name="name" component="div" className={styles.error} />
-                  </>
+                    <ErrorMessage name="email" component="div" className={styles.error} />
+                    {(!isForgotPassword || !isLogin) && (
+                      <PasswordField
+                        name="password"
+                        placeholder="Password"
+                        showPassword={showPassword}
+                        setShowPassword={setShowPassword}
+                      />
+                    )}
+                    {!isLogin && !isForgotPassword && (
+                      <PasswordField
+                        name="confirmPassword"
+                        placeholder="Confirm Password"
+                        showPassword={showConfirmPassword}
+                        setShowPassword={setShowConfirmPassword}
+                      />
+                    )}
+                    {isForgotPassword && (
+                      <>
+                        <PasswordField
+                          name="password"
+                          placeholder="New Password"
+                          showPassword={showPassword}
+                          setShowPassword={setShowPassword}
+                        />
+                        <PasswordField
+                          name="confirmPassword"
+                          placeholder="Confirm New Password"
+                          showPassword={showConfirmPassword}
+                          setShowPassword={setShowConfirmPassword}
+                        />
+                      </>
+                    )}
+                    {isLogin && !isForgotPassword && (
+                      <div className={styles['remember-me']}>
+                        <Field type="checkbox" name="remember" checked={remember} onChange={() => setRemember(!remember)} />
+                        <label className={styles['remember-me-text']} htmlFor="remember">Remember me</label>
+                      </div>
+                    )}
+                    <button type="submit" className={styles['option-button']}>
+                      {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create account'}
+                    </button>
+                  </Form>
                 )}
-                <Field
-                  type="email"
-                  name="email"
-                  placeholder="Email"
-                  className={styles['form-input']}
-                />
-                <ErrorMessage name="email" component="div" className={styles.error} />
-                {(!isForgotPassword || !isLogin) && (
-                  <PasswordField
-                    name="password"
-                    placeholder="Password"
-                    showPassword={showPassword}
-                    setShowPassword={setShowPassword}
-                  />
-                )}
-                {!isLogin && !isForgotPassword && (
-                  <PasswordField
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    showPassword={showConfirmPassword}
-                    setShowPassword={setShowConfirmPassword}
-                  />
-                )}
-                {isForgotPassword && (
-                  <>
-                    <PasswordField
-                      name="password"
-                      placeholder="New Password"
-                      showPassword={showPassword}
-                      setShowPassword={setShowPassword}
-                    />
-                    <PasswordField
-                      name="confirmPassword"
-                      placeholder="Confirm New Password"
-                      showPassword={showConfirmPassword}
-                      setShowPassword={setShowConfirmPassword}
-                    />
-                  </>
-                )}
-                {isLogin && !isForgotPassword && (
-                  <div className={styles['remember-me']}>
-                    <Field type="checkbox" name="remember" checked={remember} onChange={() => setRemember(!remember)} />
-                    <label className={styles['remember-me-text']} htmlFor="remember">Remember me</label>
-                  </div>
-                )}
-                <button type="submit" className={styles['option-button']}>
-                  {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create account'}
-                </button>
-              </Form>
-            )}
-          </Formik>
-          {!isForgotPassword && (
-            <div className={styles.socialLogin}>
-              <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
-            </div>
-          )}
-          {!isForgotPassword && (
-            <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
-              <span className={styles.linkText}>
-                {isLogin ? 'Register' : 'Sign in'}
-              </span>
-            </div>
-          )}
-          {isLogin && !isForgotPassword && (
-            <div className={styles.switchLink} onClick={() => setIsForgotPassword(true)}>
-              <span className={styles.linkText}>Forgot your password?</span>
-            </div>
-          )}
-          {isForgotPassword && (
-            <div className={styles.switchLink} onClick={() => setIsForgotPassword(false)}>
-              <span className={styles.linkText}>Back to Login</span>
-            </div>
+              </Formik>
+              {!isForgotPassword && (
+                <div className={styles.socialLogin}>
+                  <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
+                </div>
+              )}
+              {!isForgotPassword && (
+                <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
+                  {isLogin ? "Don't have an account? " : 'Already have an account? '}
+                  <span className={styles.linkText}>
+                    {isLogin ? 'Register' : 'Sign in'}
+                  </span>
+                </div>
+              )}
+              {isLogin && !isForgotPassword && (
+                <div className={styles.switchLink} onClick={() => setIsForgotPassword(true)}>
+                  <span className={styles.linkText}>Forgot your password?</span>
+                </div>
+              )}
+              {isForgotPassword && (
+                <div className={styles.switchLink} onClick={() => setIsForgotPassword(false)}>
+                  <span className={styles.linkText}>Back to Login</span>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
