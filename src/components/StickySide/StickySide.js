@@ -3,14 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './StickySide.module.css';
 
-const StickySide = ({ setActiveAccount, activeAccount }) => {
+const StickySide = ({ setActiveAccount, activeAccount }) => { 
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
+  const [subscriptionPlan, setSubscriptionPlan] = useState(''); // State for current plan
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const sidebarRef = useRef(null);
+  const activeAccountRef = useRef(null); // Ref for active account button
   const navigate = useNavigate();
 
   const fetchAdAccountDetails = async (id) => {
@@ -23,24 +25,36 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
   };
 
   useEffect(() => {
-    const fetchAdAccounts = async () => {
+    const fetchAdAccountsAndPlan = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
-        setAdAccounts(response.data.ad_accounts);
+        const [adAccountsResponse, subscriptionResponse] = await Promise.all([
+          axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true }),
+          axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true }) // Fetch current plan
+        ]);
+        
+        setAdAccounts(adAccountsResponse.data.ad_accounts);
+        setSubscriptionPlan(subscriptionResponse.data.plan); // Set the current plan
         setIsLoading(false);
-        if (response.data.ad_accounts.length > 0) {
-          setActiveAccount(response.data.ad_accounts[0]);
-          fetchAdAccountDetails(response.data.ad_accounts[0].id);
+
+        if (adAccountsResponse.data.ad_accounts.length > 0) {
+          setActiveAccount(adAccountsResponse.data.ad_accounts[0]);
+          fetchAdAccountDetails(adAccountsResponse.data.ad_accounts[0].id);
         }
       } catch (error) {
         setError(error);
         setIsLoading(false);
-        console.error('Error fetching ad accounts', error);
+        console.error('Error fetching ad accounts or subscription plan', error);
       }
     };
 
-    fetchAdAccounts();
+    fetchAdAccountsAndPlan();
   }, [setActiveAccount]);
+
+  useEffect(() => {
+    if (activeAccountRef.current) {
+      activeAccountRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [activeAccount]); // Scroll to active account when it changes
 
   const handleAccountClick = (index) => {
     const selectedAccount = adAccounts[index];
@@ -63,6 +77,25 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
   const handleUpgradeClick = () => {
     navigate('/pricing-section'); // Navigate to PricingSection on click
   };
+
+  const handleAddAdAccountClick = async () => {
+    try {
+      // Call your backend endpoint to add a new ad account
+      const response = await axios.post('http://localhost:5000/auth/add_ad_account', {}, { withCredentials: true });
+      if (response.status === 200) {
+        // Refresh the ad accounts list
+        const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        setAdAccounts(newAdAccounts.data.ad_accounts);
+  
+        // Set the newly created ad account as the active account
+        const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
+        setActiveAccount(latestAdAccount);
+        fetchAdAccountDetails(latestAdAccount.id);
+      }
+    } catch (error) {
+      console.error('Error adding ad account', error);
+    }
+  };  
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -89,6 +122,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
               adAccounts.map((account, index) => (
                 <button
                   key={index}
+                  ref={activeAccount === account ? activeAccountRef : null} // Set ref to active account
                   className={`${styles.accountButton} ${activeAccount === account ? styles.active : ''}`}
                   onClick={() => handleAccountClick(index)}
                   aria-label={`Switch to Ad Account ${index + 1}`}
@@ -101,6 +135,15 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
             )}
           </div>
           <hr className={styles.horizontalRule} />
+          {subscriptionPlan === 'Enterprise Plan' && (
+            <button
+              className={styles.accountButton2}
+              onClick={handleAddAdAccountClick}
+              aria-label="Create New Ad Account"
+            >
+             Create New Ad Account
+            </button>
+          )}
           <div className={styles.dropdownSection}>
             <div className={styles.sectionHeader} onClick={handleDropdownToggle}>
               <div className={styles.sectionTitle}>Facebook Setting</div>
