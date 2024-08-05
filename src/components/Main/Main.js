@@ -236,6 +236,7 @@ const Main = ({ activeAccount }) => {
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
           isNewCampaign={true}
+          activeAccount={activeAccount}  // Pass activeAccount here
         />
       )}
       {formId === 'existingCampaignForm' && (
@@ -245,8 +246,10 @@ const Main = ({ activeAccount }) => {
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
           isNewCampaign={false}
+          activeAccount={activeAccount}  // Pass activeAccount here
         />
       )}
+
       {formId === 'configForm' && (
         <ConfigForm
           initialConfig={config}

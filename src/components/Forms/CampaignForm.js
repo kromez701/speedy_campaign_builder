@@ -38,7 +38,9 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       alert('Please choose a subscription plan for the selected ad account before creating an ad.');
       return;
     }
-
+    else{
+      console.log(isActiveSubscription)
+    }
     const formData = new FormData(event.target);
 
     if (formId === 'newCampaign') {

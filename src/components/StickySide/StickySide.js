@@ -6,7 +6,7 @@ import styles from './StickySide.module.css';
 const StickySide = ({ setActiveAccount, activeAccount }) => { 
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
-  const [subscriptionPlan, setSubscriptionPlan] = useState(''); // State for current plan
+  const [userSubscriptionPlan, setUserSubscriptionPlan] = useState(''); // User's overall subscription plan
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -27,34 +27,32 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
         try {
+            // Fetch user subscription plan
+            const userPlanResponse = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+            setUserSubscriptionPlan(userPlanResponse.data.plan); // Set the user's subscription plan
+
+            // Fetch ad accounts
             const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
-            console.log(adAccountsResponse.data)
 
             if (adAccountsResponse.data.ad_accounts.length > 0) {
                 const activeAccount = adAccountsResponse.data.ad_accounts[0];
                 setActiveAccount(activeAccount);
 
                 // Fetch subscription status for the active account
-                const subscriptionResponse = await axios.get(`http://localhost:5000/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
-
-                setSubscriptionPlan(subscriptionResponse.data.plan); // Set the current plan
                 fetchAdAccountDetails(activeAccount.id); // Fetch details for the active ad account
-            } else {
-                setSubscriptionPlan('No active plan');
-            }
+            } 
 
             setAdAccounts(adAccountsResponse.data.ad_accounts);
             setIsLoading(false);
         } catch (error) {
             setError(error);
             setIsLoading(false);
-            console.error('Error fetching ad accounts or subscription plan', error);
+            console.error('Error fetching ad accounts or user plan', error);
         }
     };
 
     fetchAdAccountsAndPlan();
-}, [setActiveAccount]);
-
+  }, [setActiveAccount]);
 
   useEffect(() => {
     if (activeAccountRef.current) {
@@ -112,7 +110,6 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
     }
 };
 
-
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -151,7 +148,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
             )}
           </div>
           <hr className={styles.horizontalRule} />
-          {subscriptionPlan === 'Enterprise Plan' && (
+          {userSubscriptionPlan === 'Enterprise' && (
             <button
               className={styles.accountButton2}
               onClick={handleAddAdAccountClick}
@@ -199,11 +196,10 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
             )}
           </div>
         </div>
-        <div>
-          <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
-          <div className={styles.footer}>
-            0 Ad account left on professional plan
-          </div>
+        <div className={styles.footer}>
+          {adAccounts.length === 1 
+            ? `1 Ad account on ${userSubscriptionPlan.toLowerCase()} plan`
+            : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase()} plan`}
         </div>
       </div>
     </div>

@@ -12,8 +12,8 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [isBound, setIsBound] = useState(false);
 
   const [subscriptionPlan, setSubscriptionPlan] = useState('');  // User's overall plan
-  const [subscriptionStartDate, setSubscriptionStartDate] = useState('');
-  const [subscriptionEndDate, setSubscriptionEndDate] = useState('');
+  const [subscriptionStartDate, setSubscriptionStartDate] = useState('-- -- --');
+  const [subscriptionEndDate, setSubscriptionEndDate] = useState('-- -- --');
   const [isActive, setIsActive] = useState(false);  
   const [runningPlan, setRunningPlan] = useState('No active plan'); // Running plan for active ad account
 
@@ -79,15 +79,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     }
   }, [activeAccount]);    
 
-  const fetchAdAccountDetails = async (adAccountId) => {
-    try {
-      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
-      setAdAccountDetails(response.data);
-    } catch (error) {
-      console.error('Error fetching ad account details', error);
-    }
-  };
-
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
     if (file && file.size <= 5242880) {
@@ -134,18 +125,25 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   };
 
   const handleCancelSubscription = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/payment/cancel-subscription', {}, { withCredentials: true });
-      if (response.status === 200) {
-        alert('Subscription canceled successfully');
-        setSubscriptionPlan('None');  // Set to 'None' after cancellation
-        setIsActive(false);
-        setSubscriptionStartDate('');
-        setSubscriptionEndDate('');
-        setRunningPlan('No active plan');  // Update running plan
+    const confirmCancel = window.confirm(
+      runningPlan === 'Enterprise' && isActive && activeAccount.ad_accounts.length < 3 
+        ? `There are fewer than 3 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
+        : `Are you sure you want to cancel the subscription for ad account: ${activeAccount.id}?`
+    );
+
+    if (confirmCancel) {
+      try {
+        const response = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        if (response.status === 200) {
+          alert(response.data.message);
+          setIsActive(false);
+          setSubscriptionStartDate('-- -- --');
+          setSubscriptionEndDate('-- -- --');
+          setRunningPlan('No active plan');  // Update running plan
+        }
+      } catch (error) {
+        console.error('Error canceling subscription', error);
       }
-    } catch (error) {
-      console.error('Error canceling subscription', error);
     }
   };
   
@@ -249,14 +247,14 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           <h3>Subscription Details</h3>
           <p><strong>Plan:</strong> {subscriptionPlan}</p>
           <p><strong>Running Plan:</strong> {runningPlan}</p> {/* Display running plan */}
-          <p><strong>Start Date:</strong> {new Date(subscriptionStartDate).toLocaleDateString()}</p>
+          <p><strong>Start Date:</strong> {subscriptionStartDate}</p>
           {isActive ? (
             <p><strong>Status:</strong> Active</p>
           ) : (
             <p><strong>Status:</strong> Inactive</p>
           )}
           {subscriptionEndDate && (
-            <p><strong>End Date:</strong> {new Date(subscriptionEndDate).toLocaleDateString()}</p>
+            <p><strong>End Date:</strong> {subscriptionEndDate}</p>
           )}
         </div>
         <div className={styles.section}>
@@ -264,9 +262,9 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           <button onClick={() => navigate('/subscription/plans')} className={`${styles.button} ${styles.primaryButton}`}>
             Change Plan
           </button>
-          {subscriptionPlan !== 'No active plan' && (
+          {runningPlan !== 'No active plan' && (
             <button onClick={handleCancelSubscription} className={`${styles.button} ${styles.secondaryButton}`}>
-              Cancel Subscription
+              Cancel Subscription.
             </button>
           )}
         </div>

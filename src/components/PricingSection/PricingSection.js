@@ -48,7 +48,7 @@ const SubscriptionPlan = () => {
 
     // Check if the user is trying to subscribe to the same plan
     if (plan === currentPlan) {
-      alert('You are already subscribed to this plan.');
+      alert('You are already subscribed to this plan. Visit profile management to renew subscription.');
       return;
     }
 
@@ -58,7 +58,7 @@ const SubscriptionPlan = () => {
       (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
       (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
     ) {
-      alert('You cannot downgrade your plan without canceling your current subscription first. Please contact support for assistance.');
+      alert('Kindly contact support for assistance with downgrading plan.');
       return;
     }
 
