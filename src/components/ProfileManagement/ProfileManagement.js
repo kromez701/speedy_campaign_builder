@@ -113,40 +113,79 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       alert('Ad account settings can only be changed once.');
       return;
     }
-    try {
-      const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
-      if (response.status === 200) {
-        alert('Ad account updated successfully');
-        setIsBound(true);
-      }
-    } catch (error) {
-      console.error('Error saving ad account', error);
-    }
-  };
 
-  const handleCancelSubscription = async () => {
-    const confirmCancel = window.confirm(
-      runningPlan === 'Enterprise' && isActive && activeAccount.ad_accounts.length < 3 
-        ? `There are fewer than 3 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
-        : `Are you sure you want to cancel the subscription for ad account: ${activeAccount.id}?`
+    const confirmSave = window.confirm(
+      'Ad account settings can not be changed later. Are you sure you want to proceed?'
     );
 
-    if (confirmCancel) {
+    if (confirmSave) {
       try {
-        const response = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
         if (response.status === 200) {
-          alert(response.data.message);
+          alert('Ad account updated successfully');
+          setIsBound(true);
+        }
+      } catch (error) {
+        console.error('Error saving ad account', error);
+      }
+    }
+  };  
+
+  const handleCancelSubscription = async () => {
+    try {
+      // Fetch the total number of active ad accounts from the backend
+      const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
+      const activeAdAccountsCount = response.data.count;
+
+      const confirmCancel = window.confirm(
+        runningPlan === 'Enterprise Plan' && isActive && activeAdAccountsCount < 3
+          ? `There are fewer than 3 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
+          : `Are you sure you want to cancel the subscription for ad account: ${activeAccount.id}?`
+      );
+
+      if (confirmCancel) {
+        const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+
+        if (cancelResponse.status === 200) {
+          alert(cancelResponse.data.message);
           setIsActive(false);
           setSubscriptionStartDate('-- -- --');
           setSubscriptionEndDate('-- -- --');
           setRunningPlan('No active plan');  // Update running plan
         }
-      } catch (error) {
-        console.error('Error canceling subscription', error);
       }
+    } catch (error) {
+      console.error('Error fetching active ad accounts or canceling subscription:', error);
     }
   };
-  
+
+  const handleRenewSubscription = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/payment/renew-subscription', 
+        { ad_account_id: activeAccount.id, plan: subscriptionPlan },
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        alert('Subscription renewed successfully.');
+        setIsActive(true);
+        setRunningPlan(subscriptionPlan);
+        // Refresh the subscription details after renewal
+        const updatedSubscription = await axios.get(
+          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
+          { withCredentials: true }
+        );
+        if (updatedSubscription.status === 200) {
+          const { start_date, end_date } = updatedSubscription.data;
+          setSubscriptionStartDate(start_date);
+          setSubscriptionEndDate(end_date);
+        }
+      }
+    } catch (error) {
+      console.error('Error renewing subscription:', error);
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>
@@ -264,7 +303,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           </button>
           {runningPlan !== 'No active plan' && (
             <button onClick={handleCancelSubscription} className={`${styles.button} ${styles.secondaryButton}`}>
-              Cancel Subscription.
+              Cancel Subscription
+            </button>
+          )}
+          {subscriptionPlan === 'Professional' && runningPlan === 'No active plan' && (
+            <button onClick={handleRenewSubscription} className={`${styles.button} ${styles.renewButton}`}>
+              Renew Subscription
             </button>
           )}
         </div>

@@ -196,10 +196,13 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
             )}
           </div>
         </div>
+        <div>
+        <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
         <div className={styles.footer}>
           {adAccounts.length === 1 
-            ? `1 Ad account on ${userSubscriptionPlan.toLowerCase()} plan`
-            : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase()} plan`}
+            ? `1 Ad account on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`
+            : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`}
+        </div>
         </div>
       </div>
     </div>

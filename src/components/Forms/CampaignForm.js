@@ -9,6 +9,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const [campaignId, setCampaignId] = useState('');
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [isActiveSubscription, setIsActiveSubscription] = useState(false);
+  const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
 
   useEffect(() => {
     // Fetch subscription status for the active ad account
@@ -22,10 +23,26 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
           setIsActiveSubscription(false);
         }
       }
-    };    
+    };
 
     fetchSubscriptionStatus();
   }, [activeAccount]);
+
+  useEffect(() => {
+    if (isActiveSubscription) {
+      // Fetch the count of active ad accounts for the current user
+      const fetchActiveAdAccountsCount = async () => {
+        try {
+          const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
+          setActiveAdAccountsCount(response.data.count);
+        } catch (error) {
+          console.error('Error fetching active ad accounts count:', error);
+        }
+      };
+
+      fetchActiveAdAccountsCount();
+    }
+  }, [isActiveSubscription]);
 
   const handleSaveConfig = (config) => {
     setSavedConfig(config);
@@ -38,9 +55,12 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       alert('Please choose a subscription plan for the selected ad account before creating an ad.');
       return;
     }
-    else{
-      console.log(isActiveSubscription)
+
+    if (activeAdAccountsCount < 2) {
+      alert('Please purchase a second ad account to activate and enjoy the Enterprise plan.');
+      return;
     }
+
     const formData = new FormData(event.target);
 
     if (formId === 'newCampaign') {
