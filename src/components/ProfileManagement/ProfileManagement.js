@@ -76,8 +76,19 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   
     if (activeAccount) {
       fetchSubscriptionDetails();
+      setIsBound(activeAccount.is_bound);
+      fetchAdAccountDetails(activeAccount.id);
     }
-  }, [activeAccount]);    
+  }, [activeAccount]);
+
+  const fetchAdAccountDetails = async (adAccountId) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
+      setAdAccountDetails(response.data);
+    } catch (error) {
+      console.error('Error fetching ad account details', error);
+    }
+  };
 
   const handleProfilePicChange = (e) => {
     const file = e.target.files[0];
