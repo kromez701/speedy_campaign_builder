@@ -2,28 +2,30 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
 import ScopedGlobalStyle from './CampaignFormStyles';
-import axios from 'axios'; // Import axios for making API requests
+import axios from 'axios';
 
-const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack }) => {
+const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount }) => {
   const [campaignName, setCampaignName] = useState('');
   const [campaignId, setCampaignId] = useState('');
   const [savedConfig, setSavedConfig] = useState(initialConfig);
-  const [isActiveSubscription, setIsActiveSubscription] = useState(false); // New state for subscription status
+  const [isActiveSubscription, setIsActiveSubscription] = useState(false);
 
   useEffect(() => {
-    // Fetch subscription status from the backend
+    // Fetch subscription status for the active ad account
     const fetchSubscriptionStatus = async () => {
-      try {
-        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
-        setIsActiveSubscription(response.data.is_active); // Set subscription status
-      } catch (error) {
-        console.error('Error fetching subscription status:', error);
-        setIsActiveSubscription(false); // Default to false if there's an error
+      if (activeAccount) {
+        try {
+          const response = await axios.get(`http://localhost:5000/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+          setIsActiveSubscription(response.data.is_active);
+        } catch (error) {
+          console.error('Error fetching subscription status:', error);
+          setIsActiveSubscription(false);
+        }
       }
-    };
+    };    
 
     fetchSubscriptionStatus();
-  }, []);
+  }, [activeAccount]);
 
   const handleSaveConfig = (config) => {
     setSavedConfig(config);
@@ -33,8 +35,8 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     event.preventDefault();
 
     if (!isActiveSubscription) {
-      alert('Kindly subscribe to a plan to enjoy this feature');
-      return; // Prevent form submission if no active subscription
+      alert('Please choose a subscription plan for the selected ad account before creating an ad.');
+      return;
     }
 
     const formData = new FormData(event.target);
@@ -45,7 +47,6 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       formData.append('campaign_id', campaignId);
     }
 
-    // Append saved config to formData or use it as needed
     for (const [key, value] of Object.entries(savedConfig)) {
       formData.append(key, value);
     }
@@ -114,6 +115,7 @@ CampaignForm.propTypes = {
   initialConfig: PropTypes.object,
   isNewCampaign: PropTypes.bool.isRequired,
   onGoBack: PropTypes.func.isRequired,
+  activeAccount: PropTypes.object.isRequired, // Prop for activeAccount
 };
 
 export default CampaignForm;

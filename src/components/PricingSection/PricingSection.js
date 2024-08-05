@@ -6,45 +6,68 @@ import styles from './PricingSection.module.css';
 const SubscriptionPlan = () => {
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState(null);
-  const [hasUsedFreeTrial, setHasUsedFreeTrial] = useState(false); // State to track if the user has used the free trial
+  const [hasUsedFreeTrial, setHasUsedFreeTrial] = useState(false);
+  const [adAccounts, setAdAccounts] = useState([]);
+  const [selectedAdAccountId, setSelectedAdAccountId] = useState(null); // State for selected ad account
 
   useEffect(() => {
-    // Fetch the current subscription plan and free trial status when the component mounts
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         setCurrentPlan(response.data.plan);
-        setHasUsedFreeTrial(response.data.has_used_free_trial); // Set the hasUsedFreeTrial state
-        console.log("Start")
-        console.log(setHasUsedFreeTrial)
-        console.log("Hello")
+        setHasUsedFreeTrial(response.data.has_used_free_trial);
+
+        // Fetch ad accounts and set the first one as selected
+        const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        setAdAccounts(adAccountsResponse.data.ad_accounts);
+
+        if (adAccountsResponse.data.ad_accounts.length > 0) {
+          setSelectedAdAccountId(adAccountsResponse.data.ad_accounts[0].id); // Set the first ad account as selected
+        }
       } catch (error) {
         console.error('Error fetching subscription details', error);
       }
     };
-
     fetchSubscriptionDetails();
   }, []);
 
+
   const handleSubscribe = async (plan) => {
-    if (plan === 'Free Trial' && hasUsedFreeTrial) { // Check based on hasUsedFreeTrial
+
+    console.log(plan)
+    console.log(currentPlan)
+    if (!selectedAdAccountId) {
+      alert('Please select an ad account before subscribing.');
+      return;
+    }
+
+    if (plan === 'Free Trial' && hasUsedFreeTrial) {
       alert('You have already used the Free Trial. Please choose a different plan.');
       return;
     }
 
-    if (plan === 'Professional' && currentPlan === 'Enterprise Plan') {
-      alert('You cannot downgrade from the Enterprise plan to the Professional plan without canceling your current subscription first.');
+    // Check if the user is trying to subscribe to the same plan
+    if (plan === currentPlan) {
+      alert('You are already subscribed to this plan.');
+      return;
+    }
+
+    // Check for downgrades and prevent them
+    if (
+      (plan === 'Professional' && currentPlan === 'Enterprise Plan') || // Downgrade from Enterprise to Professional
+      (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
+      (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
+    ) {
+      alert('You cannot downgrade your plan without canceling your current subscription first. Please contact support for assistance.');
       return;
     }
 
     try {
-      // Send selected plan to the backend to create a checkout session
       const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
-        { plan }, 
+        { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
         { withCredentials: true }
       );
       if (response.data.sessionId) {
-        // Initialize Stripe.js with your publishable key and redirect to checkout
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {
@@ -80,7 +103,6 @@ const SubscriptionPlan = () => {
             Try Speedy Campaign Builder Risk-Free For 5 days at no cost.
           </p>
           <div className={styles.priceCardFeatureContainer}>
-            {/* Feature 1 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -88,7 +110,6 @@ const SubscriptionPlan = () => {
               </svg>
               Upload ads to your ad account once for free.
             </div>
-            {/* Feature 2 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -96,7 +117,6 @@ const SubscriptionPlan = () => {
               </svg>
               Experience all the features and benefits.
             </div>
-            {/* Feature 3 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -125,7 +145,6 @@ const SubscriptionPlan = () => {
             Perfect for Individual Advertisers and Small Teams
           </p>
           <div className={styles.priceCardFeatureContainer}>
-            {/* Feature 1 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -133,7 +152,6 @@ const SubscriptionPlan = () => {
               </svg>
               Upload Unlimited Ads.
             </div>
-            {/* Feature 2 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -141,7 +159,6 @@ const SubscriptionPlan = () => {
               </svg>
               Ideal for solo marketers or small teams.
             </div>
-            {/* Feature 3 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -149,7 +166,6 @@ const SubscriptionPlan = () => {
               </svg>
               Enjoy all customization options and real-time adjustments.
             </div>
-            {/* Feature 4 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -178,7 +194,6 @@ const SubscriptionPlan = () => {
           <p className={styles.priceCardPlan}>Enterprise plan</p>
           <p className={styles.priceCardPlanDesc}>Ideal for Agencies and Businesses</p>
           <div className={styles.priceCardFeatureContainer}>
-            {/* Feature 1 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -186,7 +201,6 @@ const SubscriptionPlan = () => {
               </svg>
               Upload Unlimited Ads.
             </div>
-            {/* Feature 2 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -194,7 +208,6 @@ const SubscriptionPlan = () => {
               </svg>
               Manage multiple accounts with ease.
             </div>
-            {/* Feature 3 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -202,7 +215,6 @@ const SubscriptionPlan = () => {
               </svg>
               Streamline ad uploads and management across all accounts.
             </div>
-            {/* Feature 4 */}
             <div className={styles.priceCardFeature}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
@@ -216,7 +228,6 @@ const SubscriptionPlan = () => {
           </button>
         </div>
       </div>
-      {/* Go Back Button */}
       <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
         Go Back
       </button>

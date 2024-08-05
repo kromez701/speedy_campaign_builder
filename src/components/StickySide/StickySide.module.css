@@ -97,7 +97,9 @@
   background-color: #5356FF;
 }
 
-
+.accountButton2:hover{
+  background-color: #4044C9;
+}
 
 .icon {
   margin-right: 15px;

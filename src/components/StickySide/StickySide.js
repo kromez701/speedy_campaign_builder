@@ -26,29 +26,35 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
 
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
-      try {
-        const [adAccountsResponse, subscriptionResponse] = await Promise.all([
-          axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true }),
-          axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true }) // Fetch current plan
-        ]);
-        
-        setAdAccounts(adAccountsResponse.data.ad_accounts);
-        setSubscriptionPlan(subscriptionResponse.data.plan); // Set the current plan
-        setIsLoading(false);
+        try {
+            const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+            console.log(adAccountsResponse.data)
 
-        if (adAccountsResponse.data.ad_accounts.length > 0) {
-          setActiveAccount(adAccountsResponse.data.ad_accounts[0]);
-          fetchAdAccountDetails(adAccountsResponse.data.ad_accounts[0].id);
+            if (adAccountsResponse.data.ad_accounts.length > 0) {
+                const activeAccount = adAccountsResponse.data.ad_accounts[0];
+                setActiveAccount(activeAccount);
+
+                // Fetch subscription status for the active account
+                const subscriptionResponse = await axios.get(`http://localhost:5000/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+
+                setSubscriptionPlan(subscriptionResponse.data.plan); // Set the current plan
+                fetchAdAccountDetails(activeAccount.id); // Fetch details for the active ad account
+            } else {
+                setSubscriptionPlan('No active plan');
+            }
+
+            setAdAccounts(adAccountsResponse.data.ad_accounts);
+            setIsLoading(false);
+        } catch (error) {
+            setError(error);
+            setIsLoading(false);
+            console.error('Error fetching ad accounts or subscription plan', error);
         }
-      } catch (error) {
-        setError(error);
-        setIsLoading(false);
-        console.error('Error fetching ad accounts or subscription plan', error);
-      }
     };
 
     fetchAdAccountsAndPlan();
-  }, [setActiveAccount]);
+}, [setActiveAccount]);
+
 
   useEffect(() => {
     if (activeAccountRef.current) {
@@ -80,22 +86,32 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
 
   const handleAddAdAccountClick = async () => {
     try {
-      // Call your backend endpoint to add a new ad account
-      const response = await axios.post('http://localhost:5000/auth/add_ad_account', {}, { withCredentials: true });
-      if (response.status === 200) {
-        // Refresh the ad accounts list
-        const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
-        setAdAccounts(newAdAccounts.data.ad_accounts);
-  
-        // Set the newly created ad account as the active account
-        const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
-        setActiveAccount(latestAdAccount);
-        fetchAdAccountDetails(latestAdAccount.id);
-      }
+        // Call your backend endpoint to add a new ad account
+        const response = await axios.post('http://localhost:5000/payment/add_ad_account', {}, { withCredentials: true });
+        if (response.status === 200) {
+            // Refresh the ad accounts list
+            const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+            setAdAccounts(newAdAccounts.data.ad_accounts);
+
+            // Set the newly created ad account as the active account
+            const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
+            setActiveAccount(latestAdAccount);
+            fetchAdAccountDetails(latestAdAccount.id);
+
+            // Redirect to Stripe checkout using the session ID and publishable key
+            const sessionId = response.data.sessionId;
+            if (sessionId) {
+                const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+                stripe.redirectToCheckout({ sessionId });
+            } else {
+                console.error('No session ID returned from backend');
+            }
+        }
     } catch (error) {
-      console.error('Error adding ad account', error);
+        console.error('Error adding ad account', error);
     }
-  };  
+};
+
 
   if (isLoading) {
     return <div>Loading...</div>;

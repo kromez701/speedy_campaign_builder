@@ -11,10 +11,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [isBound, setIsBound] = useState(false);
 
-  const [subscriptionPlan, setSubscriptionPlan] = useState('');
+  const [subscriptionPlan, setSubscriptionPlan] = useState('');  // User's overall plan
   const [subscriptionStartDate, setSubscriptionStartDate] = useState('');
   const [subscriptionEndDate, setSubscriptionEndDate] = useState('');
   const [isActive, setIsActive] = useState(false);  
+  const [runningPlan, setRunningPlan] = useState('No active plan'); // Running plan for active ad account
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -34,12 +35,36 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   }, []);
 
   useEffect(() => {
-    const fetchSubscriptionDetails = async () => {
+    const fetchUserSubscriptionStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
-          setSubscriptionPlan(plan);
+          setSubscriptionPlan(plan);  // Set the user's overall plan
+          setSubscriptionStartDate(start_date);
+          setSubscriptionEndDate(end_date);
+          setIsActive(is_active);
+        }
+      } catch (error) {
+        console.error('Error fetching user subscription status', error);
+      }
+    };
+    
+    fetchUserSubscriptionStatus();
+  }, []);
+
+  useEffect(() => {
+    const fetchSubscriptionDetails = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
+          { withCredentials: true }
+        );
+  
+        if (response.status === 200) {
+          const { plan, start_date, end_date, is_active } = response.data;
+  
+          setRunningPlan(plan);  // Set the running plan for the active ad account
           setSubscriptionStartDate(start_date);
           setSubscriptionEndDate(end_date);
           setIsActive(is_active);
@@ -48,16 +73,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         console.error('Error fetching subscription details', error);
       }
     };
-
-    fetchSubscriptionDetails();
-  }, []);
-
-  useEffect(() => {
+  
     if (activeAccount) {
-      setIsBound(activeAccount.is_bound);
-      fetchAdAccountDetails(activeAccount.id);
+      fetchSubscriptionDetails();
     }
-  }, [activeAccount]);
+  }, [activeAccount]);    
 
   const fetchAdAccountDetails = async (adAccountId) => {
     try {
@@ -122,6 +142,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         setIsActive(false);
         setSubscriptionStartDate('');
         setSubscriptionEndDate('');
+        setRunningPlan('No active plan');  // Update running plan
       }
     } catch (error) {
       console.error('Error canceling subscription', error);
@@ -227,6 +248,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         <div className={styles.section}>
           <h3>Subscription Details</h3>
           <p><strong>Plan:</strong> {subscriptionPlan}</p>
+          <p><strong>Running Plan:</strong> {runningPlan}</p> {/* Display running plan */}
           <p><strong>Start Date:</strong> {new Date(subscriptionStartDate).toLocaleDateString()}</p>
           {isActive ? (
             <p><strong>Status:</strong> Active</p>
