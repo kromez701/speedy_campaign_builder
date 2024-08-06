@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import styles from './StickySide.module.css';
 
 const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
-  const [userSubscriptionPlan, setUserSubscriptionPlan] = useState(''); // User's overall subscription plan
+  const [userSubscriptionPlan, setUserSubscriptionPlan] = useState('');
   const [isDropdownVisible, setDropdownVisible] = useState(false);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const sidebarRef = useRef(null);
-  const activeAccountRef = useRef(null); // Ref for active account button
+  const activeAccountRef = useRef(null);
   const navigate = useNavigate();
 
   const fetchAdAccountDetails = async (id) => {
@@ -26,35 +26,35 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
-        try {
-            const userPlanResponse = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
-            setUserSubscriptionPlan(userPlanResponse.data.plan); // Set the user's subscription plan
+      try {
+        const userPlanResponse = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        setUserSubscriptionPlan(userPlanResponse.data.plan);
 
-            const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
 
-            if (adAccountsResponse.data.ad_accounts.length > 0) {
-                const activeAccount = adAccountsResponse.data.ad_accounts[0];
-                setActiveAccount(activeAccount);
-                fetchAdAccountDetails(activeAccount.id);
-            } 
-
-            setAdAccounts(adAccountsResponse.data.ad_accounts);
-            setIsLoading(false);
-        } catch (error) {
-            setError(error);
-            setIsLoading(false);
-            console.error('Error fetching ad accounts or user plan', error);
+        if (adAccountsResponse.data.ad_accounts.length > 0) {
+          const activeAccount = adAccountsResponse.data.ad_accounts[0];
+          setActiveAccount(activeAccount);
+          fetchAdAccountDetails(activeAccount.id);
         }
+
+        setAdAccounts(adAccountsResponse.data.ad_accounts);
+        setIsLoading(false);
+      } catch (error) {
+        setError(error);
+        setIsLoading(false);
+        console.error('Error fetching ad accounts or user plan', error);
+      }
     };
 
     fetchAdAccountsAndPlan();
-  }, [setActiveAccount, refreshTrigger]); // Listen for refreshTrigger changes
+  }, [setActiveAccount, refreshTrigger]);
 
   useEffect(() => {
     if (activeAccountRef.current) {
       activeAccountRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
-  }, [activeAccount]); // Scroll to active account when it changes
+  }, [activeAccount]);
 
   const handleAccountClick = (index) => {
     const selectedAccount = adAccounts[index];
@@ -75,32 +75,32 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   };
 
   const handleUpgradeClick = () => {
-    navigate('/pricing-section'); // Navigate to PricingSection on click
+    navigate('/pricing-section');
   };
 
   const handleAddAdAccountClick = async () => {
     try {
-        const response = await axios.post('http://localhost:5000/payment/add_ad_account', {}, { withCredentials: true });
-        if (response.status === 200) {
-            const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
-            setAdAccounts(newAdAccounts.data.ad_accounts);
+      const response = await axios.post('http://localhost:5000/payment/add_ad_account', {}, { withCredentials: true });
+      if (response.status === 200) {
+        const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        setAdAccounts(newAdAccounts.data.ad_accounts);
 
-            const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
-            setActiveAccount(latestAdAccount);
-            fetchAdAccountDetails(latestAdAccount.id);
+        const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
+        setActiveAccount(latestAdAccount);
+        fetchAdAccountDetails(latestAdAccount.id);
 
-            const sessionId = response.data.sessionId;
-            if (sessionId) {
-                const stripe = window.Stripe('your-stripe-public-key');
-                stripe.redirectToCheckout({ sessionId });
-            } else {
-                console.error('No session ID returned from backend');
-            }
+        const sessionId = response.data.sessionId;
+        if (sessionId) {
+          const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+          stripe.redirectToCheckout({ sessionId });
+        } else {
+          console.error('No session ID returned from backend');
         }
+      }
     } catch (error) {
-        console.error('Error adding ad account', error);
+      console.error('Error adding ad account', error);
     }
-};
+  };
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -119,7 +119,9 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
       <div ref={sidebarRef} className={`${styles.sidebarContainer} ${isSidebarOpen ? styles.open : ''}`}>
         <div>
           <div className={styles.logo}>
-            <img src="./assets/logo-footer.png" alt="Logo" className={styles.logoImage} />
+            <Link to="/">
+              <img src="./assets/logo-footer.png" alt="Logo" className={styles.logoImage} />
+            </Link>
           </div>
           <hr className={styles.horizontalRule} />
           <div className={styles.accountsContainer}>
@@ -189,12 +191,12 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
           </div>
         </div>
         <div>
-        <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
-        <div className={styles.footer}>
-          {adAccounts.length === 1 
-            ? `1 Ad account on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`
-            : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`}
-        </div>
+          <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
+          <div className={styles.footer}>
+            {adAccounts.length === 1 
+              ? `1 Ad account on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`
+              : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`}
+          </div>
         </div>
       </div>
     </div>
