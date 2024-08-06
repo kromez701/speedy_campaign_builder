@@ -1,5 +1,3 @@
-// Updated App Component
-
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './components/Landing/Landing';
@@ -18,6 +16,7 @@ const App = () => {
   const [loading, setLoading] = useState(true);
   const [redirectToMain, setRedirectToMain] = useState(false);
   const [activeAccount, setActiveAccount] = useState(null);
+  const [refreshTrigger, setRefreshTrigger] = useState(false);
 
   useEffect(() => {
     const checkCurrentUser = async () => {
@@ -62,15 +61,15 @@ const App = () => {
     }
   };
 
+  const handlePlanUpgrade = () => {
+    setRefreshTrigger(prev => !prev); // Toggle refresh trigger
+  };
+
   useEffect(() => {
     if (redirectToMain) {
       setRedirectToMain(false);
     }
   }, [redirectToMain]);
-
-  useEffect(() => {
-    console.log('App.js: activeAccount changed:', activeAccount);
-  }, [activeAccount]);
 
   if (loading) {
     return null;
@@ -84,12 +83,12 @@ const App = () => {
             {redirectToMain && <Navigate to="/" replace />}
             <Navbar />
             <div className="layout">
-              <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} />
+              <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} refreshTrigger={refreshTrigger} />
               <div className="content">
                 <Routes>
                   <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
-                  <Route path="/pricing-section" element={<PricingSection onPlanSelect={() => setRedirectToMain(true)} />} />
+                  <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>

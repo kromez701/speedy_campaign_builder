@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './StickySide.module.css';
 
-const StickySide = ({ setActiveAccount, activeAccount }) => { 
+const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [userSubscriptionPlan, setUserSubscriptionPlan] = useState(''); // User's overall subscription plan
@@ -27,19 +27,15 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
         try {
-            // Fetch user subscription plan
             const userPlanResponse = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
             setUserSubscriptionPlan(userPlanResponse.data.plan); // Set the user's subscription plan
 
-            // Fetch ad accounts
             const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
 
             if (adAccountsResponse.data.ad_accounts.length > 0) {
                 const activeAccount = adAccountsResponse.data.ad_accounts[0];
                 setActiveAccount(activeAccount);
-
-                // Fetch subscription status for the active account
-                fetchAdAccountDetails(activeAccount.id); // Fetch details for the active ad account
+                fetchAdAccountDetails(activeAccount.id);
             } 
 
             setAdAccounts(adAccountsResponse.data.ad_accounts);
@@ -52,7 +48,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
     };
 
     fetchAdAccountsAndPlan();
-  }, [setActiveAccount]);
+  }, [setActiveAccount, refreshTrigger]); // Listen for refreshTrigger changes
 
   useEffect(() => {
     if (activeAccountRef.current) {
@@ -84,22 +80,18 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
 
   const handleAddAdAccountClick = async () => {
     try {
-        // Call your backend endpoint to add a new ad account
         const response = await axios.post('http://localhost:5000/payment/add_ad_account', {}, { withCredentials: true });
         if (response.status === 200) {
-            // Refresh the ad accounts list
             const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
             setAdAccounts(newAdAccounts.data.ad_accounts);
 
-            // Set the newly created ad account as the active account
             const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
             setActiveAccount(latestAdAccount);
             fetchAdAccountDetails(latestAdAccount.id);
 
-            // Redirect to Stripe checkout using the session ID and publishable key
             const sessionId = response.data.sessionId;
             if (sessionId) {
-                const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+                const stripe = window.Stripe('your-stripe-public-key');
                 stripe.redirectToCheckout({ sessionId });
             } else {
                 console.error('No session ID returned from backend');
@@ -135,7 +127,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
               adAccounts.map((account, index) => (
                 <button
                   key={index}
-                  ref={activeAccount === account ? activeAccountRef : null} // Set ref to active account
+                  ref={activeAccount === account ? activeAccountRef : null}
                   className={`${styles.accountButton} ${activeAccount === account ? styles.active : ''}`}
                   onClick={() => handleAccountClick(index)}
                   aria-label={`Switch to Ad Account ${index + 1}`}

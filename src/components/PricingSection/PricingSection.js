@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './PricingSection.module.css';
 
-const SubscriptionPlan = () => {
+const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState(null);
   const [hasUsedFreeTrial, setHasUsedFreeTrial] = useState(false);
   const [adAccounts, setAdAccounts] = useState([]);
-  const [selectedAdAccountId, setSelectedAdAccountId] = useState(null); // State for selected ad account
+  const [selectedAdAccountId, setSelectedAdAccountId] = useState(null);
 
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
@@ -84,6 +84,7 @@ const SubscriptionPlan = () => {
       } else if (response.data.message) {
         alert(response.data.message);
         setCurrentPlan('Enterprise');
+        onPlanUpgrade(); 
         // Optionally, update any UI elements to reflect the plan change
       } else {
         alert('Failed to create checkout session');
