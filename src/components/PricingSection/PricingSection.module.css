@@ -14,8 +14,11 @@
 }
 
 .pricingSection {
-    padding: 0px 120px;
-    background-color: #fff;
+  padding: 0px 120px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .priceHeading {
@@ -54,9 +57,10 @@
 }
 
 .priceCardContainer {
-    display: flex;
-    justify-content: center;
-    gap: 32px;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-grow: 1;
 }
 
 .priceCard {
@@ -228,3 +232,27 @@
     }
   }
   
+  .goBackButton {
+    background-color: #5356FF;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 20px;
+    align-self: center; /* Center horizontally */
+    font-weight: 600px;
+}
+
+.goBackButton:hover {
+    background-color: #4044C9;
+}
+@media (max-width: 768px) {
+  .goBackButton {
+      bottom: 8px; /* Adjust position for smaller screens */
+      right: 8px; /* Adjust position for smaller screens */
+      padding: 10px 20px; /* Adjust padding for smaller screens */
+      font-size: 0.875rem; /* Adjust font size for smaller screens */
+  }
+}

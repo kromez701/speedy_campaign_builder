@@ -225,6 +225,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             disabled
             className={styles.profileInput}
           />
+          <button
+          onClick={handleSaveChanges}
+          className={`${styles.button} ${styles.primaryButton}`}
+        >
+          Save Profile
+        </button>
         </div>
         <div className={styles.section}>
           <h3>Ad Account Settings</h3>
@@ -285,24 +291,34 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             className={styles.profileInput}
             disabled={isBound}
           />
+          <button
+          onClick={handleAdAccountSave}
+          className={`${styles.button} ${styles.primaryButton}`}
+          disabled={isBound}
+        >
+          Save Ad Account settings
+        </button>
         </div>
         <div className={styles.section}>
           <h3>Subscription Details</h3>
           <p><strong>Plan:</strong> {subscriptionPlan}</p>
           <p><strong>Running Plan:</strong> {runningPlan}</p> {/* Display running plan */}
           <p><strong>Start Date:</strong> {subscriptionStartDate}</p>
+          {subscriptionEndDate && (
+            <p><strong>End Date:</strong> {subscriptionEndDate}</p>
+          )}
           {isActive ? (
             <p><strong>Status:</strong> Active</p>
           ) : (
             <p><strong>Status:</strong> Inactive</p>
           )}
-          {subscriptionEndDate && (
-            <p><strong>End Date:</strong> {subscriptionEndDate}</p>
-          )}
         </div>
-        <div className={styles.section}>
-          <h3>Manage Subscription</h3>
-          <button onClick={() => navigate('/pricing-section')} className={`${styles.button} ${styles.primaryButton}`}>
+      </div>
+      <div className={styles.footer}>
+        {/* <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
+          Go Back
+        </button> */}
+        <button onClick={() => navigate('/pricing-section')} className={`${styles.button} ${styles.primaryButton}`}>
             Change Plan
           </button>
           {runningPlan !== 'No active plan' && (
@@ -315,26 +331,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
               Renew Subscription
             </button>
           )}
-        </div>
-      </div>
-      <div className={styles.footer}>
-        <button
-          onClick={handleSaveChanges}
-          className={`${styles.button} ${styles.primaryButton}`}
-        >
-          Save Profile
-        </button>
-        <button
-          onClick={handleAdAccountSave}
-          className={`${styles.button} ${styles.primaryButton}`}
-          disabled={isBound}
-        >
-          Save Ad Account
-        </button>
-        <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
-          Go Back
-        </button>
-        <button onClick={onLogout} className={`${styles.button} ${styles.secondaryButton}`}>
+          <button onClick={onLogout} className={`${styles.button} ${styles.secondaryButton}`}>
           Logout
         </button>
       </div>

@@ -68,7 +68,7 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  gap: 10px;
+  gap: 20px;
   margin-top: 20px;
 }
 
@@ -88,16 +88,18 @@
 }
 
 .secondaryButton {
-  background-color: #FF3B30;
-  margin-left: 50px;
+  background-color: #fc443b;
 }
 
+.secondaryButton:hover{
+  background-color: #ff0f03; 
+}
 .goBackButton {
   background-color: #5356FF;
 }
 
-.button:hover {
-  opacity: 0.8;
+.goBackButton:hover{
+  background-color: #4044C9;
 }
 
 /* Media Queries for Responsive Design */

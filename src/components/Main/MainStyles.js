@@ -42,6 +42,20 @@ h1 {
   display: inline-block;
 }
 
+.cancel-button{
+  background-color: #5356FF;
+    padding: 10px 20px;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    color: white;
+    border: none;
+}
+
+.cancel-button:hover{
+    background-color: #4044C9;
+  }
+
 .option-button:hover {
   background-color: #4044C9;
 }
@@ -53,7 +67,7 @@ h1 {
       padding: 10px;
   }
 
-  .option-button {
+  .option-button , .cancel-button {
       font-size: 12px; /* Adjust font size for smaller screens */
       padding: 10px 14px; /* Adjust padding for smaller screens */
   }
@@ -69,7 +83,7 @@ h1 {
       font-size: 20px; /* Adjust font size for smaller screens */
   }
 
-  .option-button {
+  .option-button, .cancel-button {
       font-size: 12px; /* Adjust font size for smaller screens */
       padding: 8px 12px; /* Adjust padding for smaller screens */
   }

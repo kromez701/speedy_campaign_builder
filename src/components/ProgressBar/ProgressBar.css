@@ -18,7 +18,7 @@
 .progress-bar-fill {
   height: 100%;
   width: 0;
-  background-color: #007bff;
+  background-color: #5356FF;
   transition: width 0.3s;
   display: flex;
   align-items: center;
