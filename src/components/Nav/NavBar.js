@@ -10,7 +10,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
+        const response = await axios.get('http://91.108.112.100:8080/auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { profile_picture } = response.data.user;
           if (profile_picture) {
@@ -32,7 +32,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+      const response = await axios.post('http://91.108.112.100:8080/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         localStorage.removeItem('token');
         sessionStorage.removeItem('token');

@@ -17,7 +17,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     const fetchSubscriptionStatus = async () => {
       if (activeAccount) {
         try {
-          const response = await axios.get(`http://localhost:5000/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+          const response = await axios.get(`http://91.108.112.100:8080/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
           setIsActiveSubscription(response.data.is_active);
         } catch (error) {
           console.error('Error fetching subscription status:', error);
@@ -33,7 +33,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     // Fetch user's subscription plan
     const fetchUserPlan = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('http://91.108.112.100:8080/payment/user-subscription-status', { withCredentials: true });
         setUserPlan(response.data.plan);
       } catch (error) {
         console.error('Error fetching user plan:', error);
@@ -48,7 +48,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       // Fetch the count of active ad accounts for the current user
       const fetchActiveAdAccountsCount = async () => {
         try {
-          const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
+          const response = await axios.get('http://91.108.112.100:8080/payment/active-ad-accounts', { withCredentials: true });
           setActiveAdAccountsCount(response.data.count);
         } catch (error) {
           console.error('Error fetching active ad accounts count:', error);
