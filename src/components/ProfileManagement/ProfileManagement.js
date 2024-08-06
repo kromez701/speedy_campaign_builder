@@ -149,10 +149,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       const activeAdAccountsCount = response.data.count;
 
       const confirmCancel = window.confirm(
-        runningPlan === 'Enterprise Plan' && isActive && activeAdAccountsCount < 3
-          ? `There are fewer than 3 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
+        runningPlan === 'Enterprise' && isActive && activeAdAccountsCount < 3
+          ? `There are fewer only 2 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
           : `Are you sure you want to cancel the subscription for ad account: ${activeAccount.id}?`
       );
+
 
       if (confirmCancel) {
         const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
@@ -177,25 +178,17 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         { withCredentials: true }
       );
 
-      if (response.status === 200) {
-        alert('Subscription renewed successfully.');
-        setIsActive(true);
-        setRunningPlan(subscriptionPlan);
-        // Refresh the subscription details after renewal
-        const updatedSubscription = await axios.get(
-          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
-          { withCredentials: true }
-        );
-        if (updatedSubscription.status === 200) {
-          const { start_date, end_date } = updatedSubscription.data;
-          setSubscriptionStartDate(start_date);
-          setSubscriptionEndDate(end_date);
-        }
+      if (response.data.sessionId) {
+        // Redirect to Stripe checkout
+        const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+        stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      } else {
+        alert('Failed to create checkout session');
       }
     } catch (error) {
       console.error('Error renewing subscription:', error);
     }
-  };
+};
 
   return (
     <div className={styles.container}>
@@ -309,7 +302,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         </div>
         <div className={styles.section}>
           <h3>Manage Subscription</h3>
-          <button onClick={() => navigate('/subscription/plans')} className={`${styles.button} ${styles.primaryButton}`}>
+          <button onClick={() => navigate('/pricing-section')} className={`${styles.button} ${styles.primaryButton}`}>
             Change Plan
           </button>
           {runningPlan !== 'No active plan' && (
@@ -317,7 +310,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
               Cancel Subscription
             </button>
           )}
-          {subscriptionPlan === 'Professional' && runningPlan === 'No active plan' && (
+          {(subscriptionPlan === 'Professional' || subscriptionPlan === 'Enterprise') && runningPlan === 'No active plan' && (
             <button onClick={handleRenewSubscription} className={`${styles.button} ${styles.renewButton}`}>
               Renew Subscription
             </button>

@@ -33,43 +33,58 @@ const SubscriptionPlan = () => {
 
 
   const handleSubscribe = async (plan) => {
-
-    console.log(plan)
-    console.log(currentPlan)
     if (!selectedAdAccountId) {
       alert('Please select an ad account before subscribing.');
       return;
     }
-
+  
     if (plan === 'Free Trial' && hasUsedFreeTrial) {
       alert('You have already used the Free Trial. Please choose a different plan.');
       return;
     }
-
-    // Check if the user is trying to subscribe to the same plan
-    if (plan === currentPlan) {
-      alert('You are already subscribed to this plan. Visit profile management to renew subscription.');
-      return;
-    }
-
-    // Check for downgrades and prevent them
-    if (
-      (plan === 'Professional' && currentPlan === 'Enterprise Plan') || // Downgrade from Enterprise to Professional
-      (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
-      (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
-    ) {
-      alert('Kindly contact support for assistance with downgrading plan.');
-      return;
-    }
-
+  
     try {
+      // Fetch the current subscription status for the selected ad account
+      const adAccountResponse = await axios.get(`http://localhost:5000/payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
+      const { plan: adAccountPlan, is_active: adAccountIsActive } = adAccountResponse.data;
+  
+      if (plan === 'Professional' && adAccountPlan === 'Professional' && adAccountIsActive) {
+        alert('You are already subscribed to this plan.');
+        return;
+      }
+  
+      // Check if the user is trying to subscribe to the Enterprise plan while already subscribed
+      if (plan === 'Enterprise' && currentPlan === 'Enterprise') {
+        alert('You are already subscribed to the Enterprise plan. Visit profile management to manage your subscription.');
+        return;
+      }
+  
+      // Check for downgrades and prevent them
+      if (
+        (plan === 'Professional' && currentPlan === 'Enterprise') || // Downgrade from Enterprise to Professional
+        (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
+        (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial' && adAccountPlan !== 'No active plan') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
+      ) {
+        console.log(plan)
+        console.log(currentPlan)
+        console.log(adAccountPlan)
+        alert('Kindly contact support for assistance with downgrading plan.');
+        return;
+      }    
+  
+      // Proceed with subscription
       const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
         { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
         { withCredentials: true }
       );
+  
       if (response.data.sessionId) {
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      } else if (response.data.message) {
+        alert(response.data.message);
+        setCurrentPlan('Enterprise');
+        // Optionally, update any UI elements to reflect the plan change
       } else {
         alert('Failed to create checkout session');
       }
@@ -77,8 +92,8 @@ const SubscriptionPlan = () => {
       console.error('Error subscribing', error);
       alert('Error subscribing: ' + error.message);
     }
-  };
-
+  };  
+  
   return (
     <div className={styles.pricingSection}>
       <div className={styles.header}>

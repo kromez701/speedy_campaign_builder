@@ -10,6 +10,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [isActiveSubscription, setIsActiveSubscription] = useState(false);
   const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
+  const [userPlan, setUserPlan] = useState(''); // Added state for user plan
 
   useEffect(() => {
     // Fetch subscription status for the active ad account
@@ -27,6 +28,20 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
 
     fetchSubscriptionStatus();
   }, [activeAccount]);
+
+  useEffect(() => {
+    // Fetch user's subscription plan
+    const fetchUserPlan = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        setUserPlan(response.data.plan);
+      } catch (error) {
+        console.error('Error fetching user plan:', error);
+      }
+    };
+
+    fetchUserPlan();
+  }, []);
 
   useEffect(() => {
     if (isActiveSubscription) {
@@ -51,12 +66,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    if (!isActiveSubscription) {
+    // Check if user's plan is Enterprise and if there is an active subscription
+    if ( !isActiveSubscription) {
       alert('Please choose a subscription plan for the selected ad account before creating an ad.');
       return;
     }
 
-    if (activeAdAccountsCount < 2) {
+    if (userPlan === 'Enterprise' && activeAdAccountsCount < 2) {
       alert('Please purchase a second ad account to activate and enjoy the Enterprise plan.');
       return;
     }

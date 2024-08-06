@@ -154,7 +154,7 @@ const StickySide = ({ setActiveAccount, activeAccount }) => {
               onClick={handleAddAdAccountClick}
               aria-label="Create New Ad Account"
             >
-             Create New Ad Account
+             Add New Ad Account
             </button>
           )}
           <div className={styles.dropdownSection}>
