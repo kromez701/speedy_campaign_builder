@@ -116,7 +116,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
           <p className={styles.priceCardAccounts}>1 Ad Account</p>
           <p className={styles.priceCardPlan}>Free Trial</p>
           <p className={styles.priceCardPlanDesc}>
-            Try Speedy Campaign Builder Risk-Free For 5 days at no cost.
+            Try QuickCampaigns Now Risk-Free For 5 days at no cost.
           </p>
           <div className={styles.priceCardFeatureContainer}>
             <div className={styles.priceCardFeature}>

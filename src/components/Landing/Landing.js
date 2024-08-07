@@ -106,7 +106,7 @@ const Landing = () => {
           </svg>
           <p className="old-new-way-section-heading">
             The new way: Streamlined Campaign Upload from Your
-            <span>desktop</span>
+            <span> Desktop</span>
           </p>
           <p className="old-new-way-section-desc">
             Our revolutionary software eliminates the frustration of slow campaign
@@ -247,7 +247,7 @@ const Landing = () => {
             <p className="price-card-accounts">1 Ad Account</p>
             <p className="price-card-plan">Free Trial</p>
             <p className="price-card-plan-desc">
-              Try Speedy Campaign Builder Risk-Free
+              Try QuickCampaigns Now Risk-Free
             </p>
             <div className="price-card-feature-container">
               <div className="price-card-feature">
