@@ -13,12 +13,12 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await axios.get('http://91.108.112.100:8080/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         setCurrentPlan(response.data.plan);
         setHasUsedFreeTrial(response.data.has_used_free_trial);
 
         // Fetch ad accounts and set the first one as selected
-        const adAccountsResponse = await axios.get('http://91.108.112.100:8080/auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
         setAdAccounts(adAccountsResponse.data.ad_accounts);
 
         if (adAccountsResponse.data.ad_accounts.length > 0) {
@@ -45,7 +45,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
   
     try {
       // Fetch the current subscription status for the selected ad account
-      const adAccountResponse = await axios.get(`http://91.108.112.100:8080/payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
+      const adAccountResponse = await axios.get(`http://localhost:5000/payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
       const { plan: adAccountPlan, is_active: adAccountIsActive } = adAccountResponse.data;
   
       if (plan === 'Professional' && adAccountPlan === 'Professional' && adAccountIsActive) {
@@ -73,7 +73,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
       }    
   
       // Proceed with subscription
-      const response = await axios.post('http://91.108.112.100:8080/payment/create-checkout-session', 
+      const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
         { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
         { withCredentials: true }
       );

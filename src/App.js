@@ -21,7 +21,7 @@ const App = () => {
   useEffect(() => {
     const checkCurrentUser = async () => {
       try {
-        const response = await axios.get('http://91.108.112.100:8080/auth/current_user', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
         if (response.status === 200) {
           setUser(response.data.user);
         }
@@ -36,7 +36,7 @@ const App = () => {
 
   const handleAuthSuccess = async () => {
     try {
-      const response = await axios.get('http://91.108.112.100:8080/auth/current_user', { withCredentials: true });
+      const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
       if (response.status === 200) {
         setUser(response.data.user);
         setAuthMode(null);
@@ -49,7 +49,7 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://91.108.112.100:8080/auth/logout', {}, { withCredentials: true });
+      const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
         setRedirectToMain(false);

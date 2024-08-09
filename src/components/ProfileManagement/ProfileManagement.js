@@ -20,7 +20,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://91.108.112.100:8080/auth/profile', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { username, email, profile_picture } = response.data.user;
           setFullName(username);
@@ -37,7 +37,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchUserSubscriptionStatus = async () => {
       try {
-        const response = await axios.get('http://91.108.112.100:8080/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
           setSubscriptionPlan(plan);  // Set the user's overall plan
@@ -57,7 +57,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     const fetchSubscriptionDetails = async () => {
       try {
         const response = await axios.get(
-          `http://91.108.112.100:8080/payment/subscription-status/${activeAccount.id}`, 
+          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
           { withCredentials: true }
         );
   
@@ -83,7 +83,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const fetchAdAccountDetails = async (adAccountId) => {
     try {
-      const response = await axios.get(`http://91.108.112.100:8080/auth/ad_account/${adAccountId}`, { withCredentials: true });
+      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
       console.error('Error fetching ad account details', error);
@@ -105,7 +105,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
 
     try {
-      const response = await axios.post('http://91.108.112.100:8080/auth/profile', formData, { withCredentials: true });
+      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
       if (response.status === 200) {
         alert('Profile updated successfully');
       }
@@ -131,7 +131,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
     if (confirmSave) {
       try {
-        const response = await axios.post('http://91.108.112.100:8080/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
+        const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
         if (response.status === 200) {
           alert('Ad account updated successfully');
           setIsBound(true);
@@ -145,7 +145,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const handleCancelSubscription = async () => {
     try {
       // Fetch the total number of active ad accounts from the backend
-      const response = await axios.get('http://91.108.112.100:8080/payment/active-ad-accounts', { withCredentials: true });
+      const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
 
       const confirmCancel = window.confirm(
@@ -156,7 +156,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
 
       if (confirmCancel) {
-        const cancelResponse = await axios.post('http://91.108.112.100:8080/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
           alert(cancelResponse.data.message);
@@ -173,7 +173,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleRenewSubscription = async () => {
     try {
-      const response = await axios.post('http://91.108.112.100:8080/payment/renew-subscription', 
+      const response = await axios.post('http://localhost:5000/payment/renew-subscription', 
         { ad_account_id: activeAccount.id, plan: subscriptionPlan },
         { withCredentials: true }
       );
