@@ -33,27 +33,7 @@ const Navbar = () => {
   const handleProfileClick = () => {
     navigate('/profile-management');
   };
-
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
-      if (response.status === 200) {
-        localStorage.removeItem('token');
-        sessionStorage.removeItem('token');
-        localStorage.removeItem('user');
-        sessionStorage.removeItem('user');
-        toast.success('Logged out successfully');  // Notify user of successful logout
-        window.location.reload(); // Refresh the page to apply logout
-      } else {
-        toast.error('Failed to log out');  // Notify user of failed logout attempt
-        console.error('Failed to log out');
-      }
-    } catch (error) {
-      toast.error('Error logging out');  // Notify user of the error
-      console.error('Error logging out:', error);
-    }
-  };
-
+  
   return (
     <nav className="navbar">
       <div className="navbar-right">
@@ -64,7 +44,6 @@ const Navbar = () => {
           className="navbar-profile"
           onClick={handleProfileClick}
         />
-        <button onClick={handleLogout} className="navbar-logout">Logout</button>
       </div>
     </nav>
   );

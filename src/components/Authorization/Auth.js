@@ -4,6 +4,9 @@ import axios from 'axios';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
+import '../ToastifyOverrides.css';
 import styles from './Auth.module.css';
 
 const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => (
@@ -95,9 +98,10 @@ const Auth = ({ mode, onAuthSuccess }) => {
         });
         if (response.status === 200) {
           setIsPasswordResetSent(true); // Trigger password reset confirmation screen
+          toast.success('Password reset link sent to your email.');
         }
       } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     } else if (location.pathname.startsWith('/reset_password')) {
       const token = location.pathname.split('/').pop(); // Extract token from URL
@@ -105,11 +109,11 @@ const Auth = ({ mode, onAuthSuccess }) => {
       try {
         const response = await axios.post(url, { password: values.password });
         if (response.status === 200) {
-          setErrorMessage('Password reset successfully! You can now log in.');
+          toast.success('Password reset successfully! You can now log in.');
           navigate('/login');
         }
       } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     } else if (isLogin) {  // Login case
       url = 'http://localhost:5000/auth/login';
@@ -118,10 +122,10 @@ const Auth = ({ mode, onAuthSuccess }) => {
         if (response.status === 200 || response.status === 201) {
           onAuthSuccess();
           resetForm();
-          setErrorMessage('');
+          toast.success('Logged in successfully!');
         }
       } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     } else {  // Registration case
       url = 'http://localhost:5000/auth/register';
@@ -129,9 +133,10 @@ const Auth = ({ mode, onAuthSuccess }) => {
         const response = await axios.post(url, values, { withCredentials: true });
         if (response.status === 200 || response.status === 201) {
           setIsEmailSent(true); // Trigger email verification screen
+          toast.success('Registration successful! Please check your email for verification.');
         }
       } catch (error) {
-        setErrorMessage(error.response?.data?.message || 'An error occurred. Please try again.');
+        toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     }
   };
@@ -140,13 +145,14 @@ const Auth = ({ mode, onAuthSuccess }) => {
     try {
       await axios.post('http://localhost:5000/auth/google', { token: accessToken, remember }, { withCredentials: true });
       onAuthSuccess();
+      toast.success('Logged in with Google successfully!');
     } catch (error) {
-      setErrorMessage('Failed to authenticate with Google.');
+      toast.error('Failed to authenticate with Google.');
     }
   };
 
   const responseGoogleError = (error) => {
-    setErrorMessage('Failed to authenticate with Google.');
+    toast.error('Failed to authenticate with Google.');
   };
 
   return (
