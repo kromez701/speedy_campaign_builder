@@ -3,6 +3,9 @@ import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
 import ScopedGlobalStyle from './CampaignFormStyles';
 import axios from 'axios';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../ToastifyOverrides.css';
 
 const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount }) => {
   const [campaignName, setCampaignName] = useState('');
@@ -10,10 +13,9 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [isActiveSubscription, setIsActiveSubscription] = useState(false);
   const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
-  const [userPlan, setUserPlan] = useState(''); // Added state for user plan
+  const [userPlan, setUserPlan] = useState('');
 
   useEffect(() => {
-    // Fetch subscription status for the active ad account
     const fetchSubscriptionStatus = async () => {
       if (activeAccount) {
         try {
@@ -22,6 +24,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
         } catch (error) {
           console.error('Error fetching subscription status:', error);
           setIsActiveSubscription(false);
+          toast.error('Error fetching subscription status.');
         }
       }
     };
@@ -30,13 +33,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   }, [activeAccount]);
 
   useEffect(() => {
-    // Fetch user's subscription plan
     const fetchUserPlan = async () => {
       try {
         const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         setUserPlan(response.data.plan);
       } catch (error) {
         console.error('Error fetching user plan:', error);
+        toast.error('Error fetching user plan.');
       }
     };
 
@@ -45,13 +48,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
 
   useEffect(() => {
     if (isActiveSubscription) {
-      // Fetch the count of active ad accounts for the current user
       const fetchActiveAdAccountsCount = async () => {
         try {
           const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
           setActiveAdAccountsCount(response.data.count);
         } catch (error) {
           console.error('Error fetching active ad accounts count:', error);
+          toast.error('Error fetching active ad accounts count.');
         }
       };
 
@@ -66,14 +69,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    // Check if user's plan is Enterprise and if there is an active subscription
-    if ( !isActiveSubscription) {
-      alert('Please choose a subscription plan for the selected ad account before creating an ad.');
+    if (!isActiveSubscription) {
+      toast.error('Please choose a subscription plan for the selected ad account before creating an ad.');
       return;
     }
 
     if (userPlan === 'Enterprise' && activeAdAccountsCount < 2) {
-      alert('Please purchase a second ad account to activate and enjoy the Enterprise plan.');
+      toast.error('Please purchase a second ad account to activate and enjoy the Enterprise plan.');
       return;
     }
 
@@ -153,7 +155,7 @@ CampaignForm.propTypes = {
   initialConfig: PropTypes.object,
   isNewCampaign: PropTypes.bool.isRequired,
   onGoBack: PropTypes.func.isRequired,
-  activeAccount: PropTypes.object.isRequired, // Prop for activeAccount
+  activeAccount: PropTypes.object.isRequired,
 };
 
 export default CampaignForm;

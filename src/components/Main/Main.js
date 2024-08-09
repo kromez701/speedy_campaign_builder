@@ -7,6 +7,7 @@ import SuccessScreen from '../SuccessScreen';
 import ScopedGlobalStyle from './MainStyles';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import '../ToastifyOverrides.css';
 
 const socket = io('http://91.108.112.100:5001');
 
