@@ -1,6 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import ScopedGlobalStyle from './LandingStyles';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import '../ToastifyOverrides.css';
 
 const Landing = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -28,6 +31,28 @@ const Landing = () => {
       }
     }
   };
+
+const handleSubscribe = async (plan) => {
+  try {
+    console.log("Creating anonymous checkout session...");
+    const response = await axios.post('http://localhost:5000/payment/create-anonymous-checkout-session', 
+      { plan }, 
+      { withCredentials: true }
+    );
+
+    if (response.data.sessionId) {
+      console.log("Stripe session created, redirecting to checkout...");
+      const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+      stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+    } else {
+      console.error('Failed to create checkout session.');
+      toast.error('Failed to create checkout session');
+    }
+  } catch (error) {
+    console.error('Error during checkout or login process:', error);
+    toast.error('Error: ' + error.message);
+  }
+};
 
   return (
     <div id="home">
@@ -272,7 +297,7 @@ const Landing = () => {
                 Get a feel for the tool before subscribing.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => handleSubscribe('Free Trial')}>Get Started</button>
           </div>
           <div className="price-card popular-plan">
             <div className="popular-plan-wrapper">
@@ -317,7 +342,7 @@ const Landing = () => {
                 Receive dedicated support for your ad management needs.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => handleSubscribe('Professional')}>Get Started</button>
           </div>
           <div className="price-card popular-plan enterprise-plan">
             <div className="popular-plan-wrapper enterprise-plan-wrapper">
@@ -362,10 +387,11 @@ const Landing = () => {
                 Get priority support tailored for multi-account management.
               </div>
             </div>
-            <button className="price-start-btn" onClick={() => navigate('/register')}>Get Started</button>
+            <button className="price-start-btn" onClick={() => handleSubscribe('Enterprise')}>Get Started</button>
           </div>
         </div>
       </div>
+
 
       <div id="review-section" className="customer-say-section">
         <p className="customer-say-heading">What our customers says</p>

@@ -39,7 +39,9 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       toast.warn('Please select an ad account before subscribing.');
       return;
     }
-  
+
+    console.log(hasUsedFreeTrial)
+    
     if (plan === 'Free Trial' && hasUsedFreeTrial) {
       toast.info('You have already used the Free Trial. Please choose a different plan.');
       return;
@@ -54,6 +56,11 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         toast.info('You are already subscribed to this plan.');
         return;
       }
+
+      if (plan === 'Free Trial' && adAccountPlan === 'Free Trial' && adAccountIsActive) {
+        toast.info('You are already subscribed to this plan.');
+        return;
+      }
   
       // Check if the user is trying to subscribe to the Enterprise plan while already subscribed
       if (plan === 'Enterprise' && currentPlan === 'Enterprise') {
@@ -61,19 +68,22 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         return;
       }
   
-      // Check for downgrades and prevent them
-      if (
-        (plan === 'Professional' && currentPlan === 'Enterprise') || // Downgrade from Enterprise to Professional
-        (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
-        (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial' && adAccountPlan !== 'No active plan') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
-      ) {
+      // // Check for downgrades and prevent them
+      if (plan === 'Free Trial' && currentPlan !== 'No active plan') {
+        console.log(plan);
+        console.log(currentPlan);
+        toast.warn('You cannot downgrade to Free Trial from a paid plan.');
+        return;
+      }
+    
+      if (plan === 'Professional' && currentPlan === 'Enterprise' && adAccountPlan !== 'No active plan') {
         console.log(plan);
         console.log(currentPlan);
         console.log(adAccountPlan);
-        toast.warn('Kindly contact support for assistance with downgrading plan.');
+        toast.warn('Please cancel all active subscriptions before downgrading from Enterprise to Professional.');
         return;
       }
-  
+
       // Proceed with subscription
       const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
         { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
