@@ -24,7 +24,7 @@
 .goBackIcon {
   cursor: pointer;
   margin-right: 20px;
-  width: 13px;
+  width: 10px;
   height: 16px;
 }
 
@@ -81,10 +81,12 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  margin-top: 10px;
 }
 
 .primaryButton {
   background-color: #28a745;
+  
 }
 
 .secondaryButton {

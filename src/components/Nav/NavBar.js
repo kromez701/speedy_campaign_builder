@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';  // Import toast from react-toastify
+import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
+import '../ToastifyOverrides.css';
 import './NavBar.css';
 
 const Navbar = () => {
@@ -16,10 +19,11 @@ const Navbar = () => {
           if (profile_picture) {
             const profilePicUrl = profile_picture;
             setProfilePic(profilePicUrl);
-            console.log(`Profile picture URL set in navbar: ${profilePicUrl}`);  // Log the URL being requested
+            toast.success('Profile picture loaded successfully');  // Notify user of successful profile picture load
           }
         }
       } catch (error) {
+        toast.error('Error fetching profile');  // Notify user of the error
         console.error('Error fetching profile', error);
       }
     };
@@ -38,11 +42,14 @@ const Navbar = () => {
         sessionStorage.removeItem('token');
         localStorage.removeItem('user');
         sessionStorage.removeItem('user');
+        toast.success('Logged out successfully');  // Notify user of successful logout
         window.location.reload(); // Refresh the page to apply logout
       } else {
+        toast.error('Failed to log out');  // Notify user of failed logout attempt
         console.error('Failed to log out');
       }
     } catch (error) {
+      toast.error('Error logging out');  // Notify user of the error
       console.error('Error logging out:', error);
     }
   };
@@ -57,6 +64,7 @@ const Navbar = () => {
           className="navbar-profile"
           onClick={handleProfileClick}
         />
+        <button onClick={handleLogout} className="navbar-logout">Logout</button>
       </div>
     </nav>
   );

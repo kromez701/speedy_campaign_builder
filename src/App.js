@@ -9,6 +9,8 @@ import ProfileManagement from './components/ProfileManagement/ProfileManagement'
 import PricingSection from './components/PricingSection/PricingSection';
 import axios from 'axios';
 import './App.css';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for toastify
 
 const App = () => {
   const [authMode, setAuthMode] = useState(null);
@@ -78,6 +80,7 @@ const App = () => {
   return (
     <Router>
       <div className="app">
+      <ToastContainer />
         {user ? (
           <>
             {redirectToMain && <Navigate to="/" replace />}

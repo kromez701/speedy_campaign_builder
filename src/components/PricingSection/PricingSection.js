@@ -2,8 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import styles from './PricingSection.module.css';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../ToastifyOverrides.css';
 
-const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
+const SubscriptionPlan = ({ onPlanUpgrade }) => { 
   const navigate = useNavigate();
   const [currentPlan, setCurrentPlan] = useState(null);
   const [hasUsedFreeTrial, setHasUsedFreeTrial] = useState(false);
@@ -31,15 +34,14 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
     fetchSubscriptionDetails();
   }, []);
 
-
   const handleSubscribe = async (plan) => {
     if (!selectedAdAccountId) {
-      alert('Please select an ad account before subscribing.');
+      toast.warn('Please select an ad account before subscribing.');
       return;
     }
   
     if (plan === 'Free Trial' && hasUsedFreeTrial) {
-      alert('You have already used the Free Trial. Please choose a different plan.');
+      toast.info('You have already used the Free Trial. Please choose a different plan.');
       return;
     }
   
@@ -49,13 +51,13 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
       const { plan: adAccountPlan, is_active: adAccountIsActive } = adAccountResponse.data;
   
       if (plan === 'Professional' && adAccountPlan === 'Professional' && adAccountIsActive) {
-        alert('You are already subscribed to this plan.');
+        toast.info('You are already subscribed to this plan.');
         return;
       }
   
       // Check if the user is trying to subscribe to the Enterprise plan while already subscribed
       if (plan === 'Enterprise' && currentPlan === 'Enterprise') {
-        alert('You are already subscribed to the Enterprise plan. Visit profile management to manage your subscription.');
+        toast.info('You are already subscribed to the Enterprise plan. Visit profile management to manage your subscription.');
         return;
       }
   
@@ -65,12 +67,12 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
         (plan === 'Free Trial' && currentPlan !== 'No active plan') || // Downgrade to Free Trial if already on a paid plan
         (plan === 'Professional' && currentPlan !== 'No active plan' && currentPlan !== 'Free Trial' && adAccountPlan !== 'No active plan') // Prevent downgrading to Professional from any plan other than Free Trial or No active plan
       ) {
-        console.log(plan)
-        console.log(currentPlan)
-        console.log(adAccountPlan)
-        alert('Kindly contact support for assistance with downgrading plan.');
+        console.log(plan);
+        console.log(currentPlan);
+        console.log(adAccountPlan);
+        toast.warn('Kindly contact support for assistance with downgrading plan.');
         return;
-      }    
+      }
   
       // Proceed with subscription
       const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
@@ -82,16 +84,15 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => { // Add onPlanUpgrade prop
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
-        alert(response.data.message);
+        toast.success(response.data.message);
         setCurrentPlan('Enterprise');
         onPlanUpgrade(); 
-        // Optionally, update any UI elements to reflect the plan change
       } else {
-        alert('Failed to create checkout session');
+        toast.error('Failed to create checkout session');
       }
     } catch (error) {
       console.error('Error subscribing', error);
-      alert('Error subscribing: ' + error.message);
+      toast.error('Error subscribing: ' + error.message);
     }
   };  
   

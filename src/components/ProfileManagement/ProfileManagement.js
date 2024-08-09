@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';  // Import toast from react-toastify
+import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
+import '../ToastifyOverrides.css';
 import styles from './ProfileManagement.module.css';
 
 const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
@@ -28,6 +31,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           setProfilePic(profile_picture ? profile_picture : null);
         }
       } catch (error) {
+        toast.error('Error fetching profile');  // Notify user of the error
         console.error('Error fetching profile', error);
       }
     };
@@ -46,6 +50,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           setIsActive(is_active);
         }
       } catch (error) {
+        toast.error('Error fetching user subscription status');  // Notify user of the error
         console.error('Error fetching user subscription status', error);
       }
     };
@@ -70,6 +75,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           setIsActive(is_active);
         }
       } catch (error) {
+        toast.error('Error fetching subscription details');  // Notify user of the error
         console.error('Error fetching subscription details', error);
       }
     };
@@ -86,6 +92,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
+      toast.error('Error fetching ad account details');  // Notify user of the error
       console.error('Error fetching ad account details', error);
     }
   };
@@ -95,7 +102,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     if (file && file.size <= 5242880) {
       setProfilePic(URL.createObjectURL(file));
     } else {
-      alert('File size should be less than 5MB');
+      toast.error('File size should be less than 5MB');  // Notify user of the file size error
     }
   };
 
@@ -107,9 +114,10 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     try {
       const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
       if (response.status === 200) {
-        alert('Profile updated successfully');
+        toast.success('Profile updated successfully');  // Notify user of the success
       }
     } catch (error) {
+      toast.error('Error saving profile');  // Notify user of the error
       console.error('Error saving profile', error);
     }
   };
@@ -121,22 +129,23 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleAdAccountSave = async () => {
     if (isBound) {
-      alert('Ad account settings can only be changed once.');
+      toast.error('Ad account settings can only be changed once.');  // Notify user of the error
       return;
     }
 
     const confirmSave = window.confirm(
-      'Ad account settings can not be changed later. Are you sure you want to proceed?'
+      'Ad account settings cannot be changed later. Are you sure you want to proceed?'
     );
 
     if (confirmSave) {
       try {
         const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
         if (response.status === 200) {
-          alert('Ad account updated successfully');
+          toast.success('Ad account updated successfully');  // Notify user of the success
           setIsBound(true);
         }
       } catch (error) {
+        toast.error('Error saving ad account');  // Notify user of the error
         console.error('Error saving ad account', error);
       }
     }
@@ -150,16 +159,15 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
       const confirmCancel = window.confirm(
         runningPlan === 'Enterprise' && isActive && activeAdAccountsCount < 3
-          ? `There are fewer only 2 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
+          ? `There are only 2 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
           : `Are you sure you want to cancel the subscription for ad account: ${activeAccount.id}?`
       );
-
 
       if (confirmCancel) {
         const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
-          alert(cancelResponse.data.message);
+          toast.success(cancelResponse.data.message);  // Notify user of the success
           setIsActive(false);
           setSubscriptionStartDate('-- -- --');
           setSubscriptionEndDate('-- -- --');
@@ -167,6 +175,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         }
       }
     } catch (error) {
+      toast.error('Error fetching active ad accounts or canceling subscription');  // Notify user of the error
       console.error('Error fetching active ad accounts or canceling subscription:', error);
     }
   };
@@ -183,9 +192,10 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {
-        alert('Failed to create checkout session');
+        toast.error('Failed to create checkout session');  // Notify user of the error
       }
     } catch (error) {
+      toast.error('Error renewing subscription');  // Notify user of the error
       console.error('Error renewing subscription:', error);
     }
 };

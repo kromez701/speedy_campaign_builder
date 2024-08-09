@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import { toast } from 'react-toastify';  // Import toast from react-toastify
+import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
 import styles from './StickySide.module.css';
+import '../ToastifyOverrides.css';
 
 const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
@@ -20,6 +23,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
       const response = await axios.get(`http://localhost:5000/auth/ad_account/${id}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
+      toast.error('Error fetching ad account details');  // Notify user of the error
       console.error('Error fetching ad account details', error);
     }
   };
@@ -43,6 +47,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
       } catch (error) {
         setError(error);
         setIsLoading(false);
+        toast.error('Error fetching ad accounts or user plan');  // Notify user of the error
         console.error('Error fetching ad accounts or user plan', error);
       }
     };
@@ -96,8 +101,10 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         } else {
           console.error('No session ID returned from backend');
         }
+        toast.success('Ad account added successfully');  // Notify user of the success
       }
     } catch (error) {
+      toast.error('Error adding ad account');  // Notify user of the error
       console.error('Error adding ad account', error);
     }
   };
