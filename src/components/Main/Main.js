@@ -5,6 +5,8 @@ import ConfigForm from '../Forms/ConfigForm';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import SuccessScreen from '../SuccessScreen';
 import ScopedGlobalStyle from './MainStyles';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const socket = io('http://91.108.112.100:5001');
 
@@ -83,13 +85,14 @@ const Main = ({ activeAccount }) => {
       if (data.task_id === taskId) {
         clearInterval(logInterval);
         setFormId('successScreen');
+        toast.success('Task completed successfully!');
       }
     });
 
     socket.on('error', (data) => {
       if (data.task_id === taskId) {
         clearInterval(logInterval);
-        alert(`Error: ${data.message}`);
+        toast.error(`Error: ${data.message}`);
         setFormId('mainForm');
       }
     });
@@ -113,8 +116,7 @@ const Main = ({ activeAccount }) => {
   const handleShowForm = (formId) => {
     setPreviousForm(formId === 'configForm' ? previousForm : formId);
     setFormId(formId);
-    if (formId !== 'mainForm') setShowHeader(false);
-    else setShowHeader(true);
+    setShowHeader(formId === 'mainForm');
   };
 
   const handleEditConfig = () => {
@@ -135,6 +137,7 @@ const Main = ({ activeAccount }) => {
     if (uploadController) {
       uploadController.abort();
       setUploadController(null);
+      toast.info('Upload canceled.');
     }
 
     if (taskId) {
@@ -145,11 +148,11 @@ const Main = ({ activeAccount }) => {
       })
         .then((response) => response.json())
         .then((data) => {
-          alert(data.message);
+          toast.info(data.message);
           setFormId('mainForm');
         })
         .catch((error) => {
-          alert('An error occurred while canceling the upload');
+          toast.error('An error occurred while canceling the upload.');
           setFormId('mainForm');
         });
     }
@@ -163,7 +166,7 @@ const Main = ({ activeAccount }) => {
     console.log('activeAccount:', activeAccount);
 
     if (!activeAccount || !activeAccount.ad_account_id) {
-      alert('Ad account details are missing.');
+      toast.error('Ad account details are missing.');
       return;
     }
 
@@ -203,7 +206,7 @@ const Main = ({ activeAccount }) => {
       .then((response) => response.json())
       .then((data) => {
         if (data.error) {
-          alert(data.error);
+          toast.error(data.error);
           setFormId('mainForm');
         }
       })
@@ -211,7 +214,7 @@ const Main = ({ activeAccount }) => {
         if (error.name === 'AbortError') {
           console.log('Upload canceled by user');
         } else {
-          alert('An error occurred while creating the campaign');
+          toast.error('An error occurred while creating the campaign.');
         }
         setFormId('mainForm');
       });
