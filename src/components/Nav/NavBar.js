@@ -19,7 +19,6 @@ const Navbar = () => {
           if (profile_picture) {
             const profilePicUrl = profile_picture;
             setProfilePic(profilePicUrl);
-            toast.success('Profile picture loaded successfully');  // Notify user of successful profile picture load
           }
         }
       } catch (error) {
@@ -33,7 +32,7 @@ const Navbar = () => {
   const handleProfileClick = () => {
     navigate('/profile-management');
   };
-  
+
   return (
     <nav className="navbar">
       <div className="navbar-right">
