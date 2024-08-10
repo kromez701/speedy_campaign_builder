@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';  // Import toast from react-toastify
-import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 import styles from './ProfileManagement.module.css';
 
@@ -14,11 +14,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [isBound, setIsBound] = useState(false);
 
-  const [subscriptionPlan, setSubscriptionPlan] = useState('');  // User's overall plan
+  const [subscriptionPlan, setSubscriptionPlan] = useState('');  
   const [subscriptionStartDate, setSubscriptionStartDate] = useState('-- -- --');
   const [subscriptionEndDate, setSubscriptionEndDate] = useState('-- -- --');
   const [isActive, setIsActive] = useState(false);  
-  const [runningPlan, setRunningPlan] = useState('No active plan'); // Running plan for active ad account
+  const [runningPlan, setRunningPlan] = useState('No active plan');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -31,7 +31,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           setProfilePic(profile_picture ? profile_picture : null);
         }
       } catch (error) {
-        toast.error('Error fetching profile');  // Notify user of the error
+        toast.error('Error fetching profile');
         console.error('Error fetching profile', error);
       }
     };
@@ -44,13 +44,13 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
-          setSubscriptionPlan(plan);  // Set the user's overall plan
+          setSubscriptionPlan(plan);
           setSubscriptionStartDate(start_date);
           setSubscriptionEndDate(end_date);
           setIsActive(is_active);
         }
       } catch (error) {
-        toast.error('Error fetching user subscription status');  // Notify user of the error
+        toast.error('Error fetching user subscription status');
         console.error('Error fetching user subscription status', error);
       }
     };
@@ -68,14 +68,13 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
-  
-          setRunningPlan(plan);  // Set the running plan for the active ad account
+          setRunningPlan(plan);
           setSubscriptionStartDate(start_date);
           setSubscriptionEndDate(end_date);
           setIsActive(is_active);
         }
       } catch (error) {
-        toast.error('Error fetching subscription details');  // Notify user of the error
+        toast.error('Error fetching subscription details');
         console.error('Error fetching subscription details', error);
       }
     };
@@ -92,7 +91,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
-      toast.error('Error fetching ad account details');  // Notify user of the error
+      toast.error('Error fetching ad account details');
       console.error('Error fetching ad account details', error);
     }
   };
@@ -102,83 +101,17 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     if (file && file.size <= 5242880) {
       setProfilePic(URL.createObjectURL(file));
     } else {
-      toast.error('File size should be less than 5MB');  // Notify user of the file size error
+      toast.error('File size should be less than 5MB');
     }
   };
 
-  const verifyAdAccountId = async (adAccountId, accessToken) => {
+  const verifyField = async (url, fieldData) => {
     try {
-      const response = await axios.get(`https://graph.facebook.com/v15.0/${adAccountId}`, {
-        params: { access_token: accessToken },
-      });
-      return response.status === 200;
+      const response = await axios.post(url, fieldData, { withCredentials: true });
+      return response.data.valid;
     } catch (error) {
-      toast.error('Invalid Ad Account ID');
+      console.error('Verification error:', error);
       return false;
-    }
-  };
-
-  const verifyPixelId = async (pixelId, accessToken) => {
-    try {
-      const response = await axios.get(`https://graph.facebook.com/v15.0/${pixelId}`, {
-        params: { access_token: accessToken },
-      });
-      return response.status === 200;
-    } catch (error) {
-      toast.error('Invalid Pixel ID');
-      return false;
-    }
-  };
-
-  const verifyFacebookPageId = async (pageId, accessToken) => {
-    try {
-      const response = await axios.get(`https://graph.facebook.com/v15.0/${pageId}`, {
-        params: { access_token: accessToken },
-      });
-      return response.status === 200;
-    } catch (error) {
-      toast.error('Invalid Facebook Page ID');
-      return false;
-    }
-  };
-
-  const verifyAppId = async (appId, accessToken) => {
-    try {
-      const response = await axios.get(`https://graph.facebook.com/v15.0/${appId}`, {
-        params: { access_token: accessToken },
-      });
-      return response.status === 200;
-    } catch (error) {
-      toast.error('Invalid App ID');
-      return false;
-    }
-  };
-
-  const verifyAccessToken = async (accessToken) => {
-    try {
-      const response = await axios.get(`https://graph.facebook.com/debug_token`, {
-        params: { input_token: accessToken, access_token: accessToken },
-      });
-      return response.status === 200;
-    } catch (error) {
-      toast.error('Invalid Access Token');
-      return false;
-    }
-  };
-
-  const handleSaveChanges = async () => {
-    const formData = new FormData();
-    formData.append('username', fullName);
-    formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
-
-    try {
-      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
-      if (response.status === 200) {
-        toast.success('Profile updated successfully');  // Notify user of the success
-      }
-    } catch (error) {
-      toast.error('Error saving profile');  // Notify user of the error
-      console.error('Error saving profile', error);
     }
   };
 
@@ -189,7 +122,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleAdAccountSave = async () => {
     if (isBound) {
-      toast.error('Ad account settings can only be changed once.');  // Notify user of the error
+      toast.error('Ad account settings can only be changed once.');
       return;
     }
 
@@ -198,16 +131,16 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     );
 
     if (confirmSave) {
-      const { ad_account_id, pixel_id, facebook_page_id, app_id, access_token } = adAccountDetails;
+      const { ad_account_id, pixel_id, facebook_page_id, app_id, app_secret, access_token } = adAccountDetails;
 
-      // Verify each detail before saving
-      const isAdAccountValid = await verifyAdAccountId(ad_account_id, access_token);
-      const isPixelValid = await verifyPixelId(pixel_id, access_token);
-      const isPageValid = await verifyFacebookPageId(facebook_page_id, access_token);
-      const isAppValid = await verifyAppId(app_id, access_token);
-      const isTokenValid = await verifyAccessToken(access_token);
+      const isAdAccountValid = await verifyField('http://localhost:5000/auth/verify_ad_account', { ad_account_id, access_token });
+      const isPixelValid = await verifyField('http://localhost:5000/auth/verify_pixel_id', { pixel_id, access_token });
+      const isPageValid = await verifyField('http://localhost:5000/auth/verify_facebook_page_id', { facebook_page_id, access_token });
+      const isAppValid = await verifyField('http://localhost:5000/auth/verify_app_id', { app_id, access_token });
+      const isAppSecretValid = await verifyField('http://localhost:5000/auth/verify_app_secret', { app_secret, access_token });
+      const isTokenValid = await verifyField('http://localhost:5000/auth/verify_access_token', { access_token });
 
-      if (isAdAccountValid && isPixelValid && isPageValid && isAppValid && isTokenValid) {
+      if (isAdAccountValid && isPixelValid && isPageValid && isAppValid && isAppSecretValid && isTokenValid) {
         try {
           const response = await axios.post(
             'http://localhost:5000/auth/ad_account',
@@ -222,15 +155,36 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           toast.error('Error saving ad account');
           console.error('Error saving ad account', error);
         }
+      } else {
+        toast.error('Invalid ad account details for one or more fields.');
       }
+    }
+  };
+
+  const handleSaveChanges = async () => {
+    const formData = new FormData();
+    formData.append('username', fullName);
+    formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
+
+    try {
+      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
+      if (response.status === 200) {
+        toast.success('Profile updated successfully');
+      }
+    } catch (error) {
+      toast.error('Error saving profile');
+      console.error('Error saving profile', error);
     }
   };
 
   const handleCancelSubscription = async () => {
     try {
-      // Fetch the total number of active ad accounts from the backend
       const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
+
+      console.log(runningPlan)
+      console.log(isActive)
+      console.log(activeAdAccountsCount)
 
       const confirmCancel = window.confirm(
         runningPlan === 'Enterprise' && isActive && activeAdAccountsCount < 3
@@ -242,15 +196,15 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
-          toast.success(cancelResponse.data.message);  // Notify user of the success
+          toast.success(cancelResponse.data.message);
           setIsActive(false);
           setSubscriptionStartDate('-- -- --');
           setSubscriptionEndDate('-- -- --');
-          setRunningPlan('No active plan');  // Update running plan
+          setRunningPlan('No active plan');
         }
       }
     } catch (error) {
-      toast.error('Error fetching active ad accounts or canceling subscription');  // Notify user of the error
+      toast.error('Error fetching active ad accounts or canceling subscription');
       console.error('Error fetching active ad accounts or canceling subscription:', error);
     }
   };
@@ -263,14 +217,13 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       );
 
       if (response.data.sessionId) {
-        // Redirect to Stripe checkout
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {
-        toast.error('Failed to create checkout session');  // Notify user of the error
+        toast.error('Failed to create checkout session');
       }
     } catch (error) {
-      toast.error('Error renewing subscription');  // Notify user of the error
+      toast.error('Error renewing subscription');
       console.error('Error renewing subscription:', error);
     }
 };
@@ -329,6 +282,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.ad_account_id || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <input
@@ -338,6 +292,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.pixel_id || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <input
@@ -347,6 +302,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.facebook_page_id || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <input
@@ -356,6 +312,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.app_id || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <input
@@ -365,6 +322,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.app_secret || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <input
@@ -374,6 +332,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.access_token || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
+            required
             disabled={isBound}
           />
           <button
@@ -387,7 +346,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         <div className={styles.section}>
           <h3>Subscription Details</h3>
           <p><strong>Plan:</strong> {subscriptionPlan}</p>
-          <p><strong>Running Plan:</strong> {runningPlan}</p> {/* Display running plan */}
+          <p><strong>Running Plan:</strong> {runningPlan}</p>
           <p><strong>Start Date:</strong> {subscriptionStartDate}</p>
           {subscriptionEndDate && (
             <p><strong>End Date:</strong> {subscriptionEndDate}</p>
@@ -400,23 +359,20 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         </div>
       </div>
       <div className={styles.footer}>
-        {/* <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
-          Go Back
-        </button> */}
         <button onClick={() => navigate('/pricing-section')} className={`${styles.button} ${styles.primaryButton}`}>
             Change Plan
+        </button>
+        {runningPlan !== 'No active plan' && (
+          <button onClick={handleCancelSubscription} className={`${styles.button} ${styles.secondaryButton}`}>
+            Cancel Subscription
           </button>
-          {runningPlan !== 'No active plan' && (
-            <button onClick={handleCancelSubscription} className={`${styles.button} ${styles.secondaryButton}`}>
-              Cancel Subscription
-            </button>
-          )}
-          {(subscriptionPlan === 'Professional' || subscriptionPlan === 'Enterprise') && runningPlan === 'No active plan' && (
-            <button onClick={handleRenewSubscription} className={`${styles.button} ${styles.renewButton}`}>
-              Renew Subscription
-            </button>
-          )}
-          <button onClick={onLogout} className={`${styles.button} ${styles.secondaryButton}`}>
+        )}
+        {(subscriptionPlan === 'Professional' || subscriptionPlan === 'Enterprise') && runningPlan === 'No active plan' && (
+          <button onClick={handleRenewSubscription} className={`${styles.button} ${styles.renewButton}`}>
+            Renew Subscription
+          </button>
+        )}
+        <button onClick={onLogout} className={`${styles.button} ${styles.secondaryButton}`}>
           Logout
         </button>
       </div>
