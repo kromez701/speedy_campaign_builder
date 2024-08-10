@@ -75,6 +75,10 @@ nav .header-logo {
     margin-left: auto;
 }
 
+.no-dec{
+    text-decoration: none;
+}
+
 nav ul {
     display: flex;
     align-items: center;

@@ -106,6 +106,66 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     }
   };
 
+  const verifyAdAccountId = async (adAccountId, accessToken) => {
+    try {
+      const response = await axios.get(`https://graph.facebook.com/v15.0/${adAccountId}`, {
+        params: { access_token: accessToken },
+      });
+      return response.status === 200;
+    } catch (error) {
+      toast.error('Invalid Ad Account ID');
+      return false;
+    }
+  };
+
+  const verifyPixelId = async (pixelId, accessToken) => {
+    try {
+      const response = await axios.get(`https://graph.facebook.com/v15.0/${pixelId}`, {
+        params: { access_token: accessToken },
+      });
+      return response.status === 200;
+    } catch (error) {
+      toast.error('Invalid Pixel ID');
+      return false;
+    }
+  };
+
+  const verifyFacebookPageId = async (pageId, accessToken) => {
+    try {
+      const response = await axios.get(`https://graph.facebook.com/v15.0/${pageId}`, {
+        params: { access_token: accessToken },
+      });
+      return response.status === 200;
+    } catch (error) {
+      toast.error('Invalid Facebook Page ID');
+      return false;
+    }
+  };
+
+  const verifyAppId = async (appId, accessToken) => {
+    try {
+      const response = await axios.get(`https://graph.facebook.com/v15.0/${appId}`, {
+        params: { access_token: accessToken },
+      });
+      return response.status === 200;
+    } catch (error) {
+      toast.error('Invalid App ID');
+      return false;
+    }
+  };
+
+  const verifyAccessToken = async (accessToken) => {
+    try {
+      const response = await axios.get(`https://graph.facebook.com/debug_token`, {
+        params: { input_token: accessToken, access_token: accessToken },
+      });
+      return response.status === 200;
+    } catch (error) {
+      toast.error('Invalid Access Token');
+      return false;
+    }
+  };
+
   const handleSaveChanges = async () => {
     const formData = new FormData();
     formData.append('username', fullName);
@@ -138,18 +198,33 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     );
 
     if (confirmSave) {
-      try {
-        const response = await axios.post('http://localhost:5000/auth/ad_account', { id: activeAccount.id, ...adAccountDetails }, { withCredentials: true });
-        if (response.status === 200) {
-          toast.success('Ad account updated successfully');  // Notify user of the success
-          setIsBound(true);
+      const { ad_account_id, pixel_id, facebook_page_id, app_id, access_token } = adAccountDetails;
+
+      // Verify each detail before saving
+      const isAdAccountValid = await verifyAdAccountId(ad_account_id, access_token);
+      const isPixelValid = await verifyPixelId(pixel_id, access_token);
+      const isPageValid = await verifyFacebookPageId(facebook_page_id, access_token);
+      const isAppValid = await verifyAppId(app_id, access_token);
+      const isTokenValid = await verifyAccessToken(access_token);
+
+      if (isAdAccountValid && isPixelValid && isPageValid && isAppValid && isTokenValid) {
+        try {
+          const response = await axios.post(
+            'http://localhost:5000/auth/ad_account',
+            { id: activeAccount.id, ...adAccountDetails },
+            { withCredentials: true }
+          );
+          if (response.status === 200) {
+            toast.success('Ad account updated successfully');
+            setIsBound(true);
+          }
+        } catch (error) {
+          toast.error('Error saving ad account');
+          console.error('Error saving ad account', error);
         }
-      } catch (error) {
-        toast.error('Error saving ad account');  // Notify user of the error
-        console.error('Error saving ad account', error);
       }
     }
-  };  
+  };
 
   const handleCancelSubscription = async () => {
     try {

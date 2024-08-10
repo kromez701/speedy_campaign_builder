@@ -7,6 +7,7 @@ import Navbar from './components/Nav/NavBar';
 import StickySide from './components/StickySide/StickySide';
 import ProfileManagement from './components/ProfileManagement/ProfileManagement';
 import PricingSection from './components/PricingSection/PricingSection';
+import PaymentSuccess from './components/PaymentSuccess/PaymentSuccess';
 import axios from 'axios';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
@@ -92,6 +93,7 @@ const App = () => {
                   <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
                   <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
+                  <Route path="/success" element={<PaymentSuccess />} /> {/* New route */}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>

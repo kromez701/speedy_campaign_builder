@@ -77,12 +77,14 @@ const handleSubscribe = async (plan) => {
           </ul>
           <div className="nav-btn-container">
             <button onClick={() => navigate('/login')}>Login</button>
-            <button className="get-started" onClick={() => navigate('/register')}>
-              Get Started
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </button>
+            <a className="no-dec" href="#pricing-section">
+              <button className="get-started">
+                Get Started
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </a>
           </div>
         </div>
       </nav>

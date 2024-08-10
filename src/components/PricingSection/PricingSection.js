@@ -40,8 +40,6 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       return;
     }
 
-    console.log(hasUsedFreeTrial)
-    
     if (plan === 'Free Trial' && hasUsedFreeTrial) {
       toast.info('You have already used the Free Trial. Please choose a different plan.');
       return;
@@ -62,24 +60,17 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         return;
       }
   
-      // Check if the user is trying to subscribe to the Enterprise plan while already subscribed
       if (plan === 'Enterprise' && currentPlan === 'Enterprise') {
         toast.info('You are already subscribed to the Enterprise plan. Visit profile management to manage your subscription.');
         return;
       }
   
-      // // Check for downgrades and prevent them
       if (plan === 'Free Trial' && currentPlan !== 'No active plan') {
-        console.log(plan);
-        console.log(currentPlan);
         toast.warn('You cannot downgrade to Free Trial from a paid plan.');
         return;
       }
     
       if (plan === 'Professional' && currentPlan === 'Enterprise' && adAccountPlan !== 'No active plan') {
-        console.log(plan);
-        console.log(currentPlan);
-        console.log(adAccountPlan);
         toast.warn('Please cancel all active subscriptions before downgrading from Enterprise to Professional.');
         return;
       }
@@ -94,8 +85,8 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
-        toast.success(response.data.message);
-        setCurrentPlan('Enterprise');
+        toast.success('Subscription successful! Thank you for subscription.');
+        setCurrentPlan(plan); // Update the current plan to the newly subscribed plan
         onPlanUpgrade(); 
       } else {
         toast.error('Failed to create checkout session');
@@ -104,7 +95,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       console.error('Error subscribing', error);
       toast.error('Error subscribing: ' + error.message);
     }
-  };  
+  }; 
   
   return (
     <div className={styles.pricingSection}>
