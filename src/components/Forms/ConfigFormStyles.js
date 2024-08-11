@@ -110,6 +110,17 @@ const GlobalStyle = createGlobalStyle`
     max-width: 420px;
   }
 
+  .button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 600;
+}
   `;
 
   export default GlobalStyle;

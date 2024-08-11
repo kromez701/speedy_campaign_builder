@@ -15,7 +15,7 @@ const getDefaultStartTime = () => {
 
 const getDefaultEndTime = () => {
   const endTime = new Date();
-  endTime.setUTCDate(endTime.getUTCDate() + 2); // Default end time set to 2 days later
+  endTime.setUTCDate(endTime.getUTCDate() + 2);
   endTime.setUTCHours(4, 0, 0, 0);
   const isoString = endTime.toISOString();
   return isoString.slice(0, 19); // Ensure it is in correct format for datetime-local input with seconds
@@ -41,8 +41,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     campaign_bid_strategy: initialConfig.campaign_bid_strategy || 'LOWEST_COST_WITHOUT_CAP',
     bid_amount: initialConfig.bid_amount || '',
     ad_format: initialConfig.ad_format || 'Single image or video',
-    ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(), // New field for end time
-    prediction_id: initialConfig.prediction_id || '', // New field for prediction ID
+    ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(),
+    prediction_id: initialConfig.prediction_id || '',
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(initialConfig.objective === 'OUTCOME_APP_PROMOTION');
@@ -84,10 +84,9 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         [name]: value,
       };
 
-      // Automatically set campaign_budget_optimization to AD_SET_BUDGET_OPTIMIZATION if buying_type is RESERVED
       if (name === 'buying_type' && value === 'RESERVED') {
         newConfig.campaign_budget_optimization = 'AD_SET_BUDGET_OPTIMIZATION';
-        newConfig.ad_set_bid_strategy = ''; // Clear the ad set bid strategy
+        newConfig.ad_set_bid_strategy = '';
       }
 
       if (name === 'campaign_budget_optimization' && value !== 'AD_SET_BUDGET_OPTIMIZATION') {
@@ -114,7 +113,6 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   };
 
   useEffect(() => {
-    // Fetch config from backend on mount
     const fetchConfig = async () => {
       try {
         const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
@@ -137,30 +135,11 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   
     fetchConfig();
   }, [activeAccount.id]);
-  
-  const handleSave = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Include credentials (cookies) in the request
-        body: JSON.stringify(config),
-      });
-  
-      const result = await response.json();
-      if (response.ok) {
-        toast.success(result.message);
-        onSaveConfig(config);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error) {
-      toast.error('Failed to save configuration.');
-    }
-  };
-  
+
+  // Pass the config and handleChange back to the parent component
+  useEffect(() => {
+    onSaveConfig(config);
+  }, [config, onSaveConfig]);
 
   return (
     <div className="form-container2">
@@ -531,7 +510,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         <option value="ZW">Zimbabwe</option>
         <option value="PS">Palestine</option>
         {/* Add more locations as needed */}
-      </select>
+        </select>
 
       <label htmlFor="age_range">Age Range:</label>
       <div className="age-range-container">
@@ -655,7 +634,6 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         value={config.url_parameters}
         onChange={handleChange}
       />
-      <button type="button" onClick={handleSave}>Save Config</button>
     </div>
   );
 };

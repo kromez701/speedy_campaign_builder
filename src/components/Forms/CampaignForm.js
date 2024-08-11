@@ -62,8 +62,27 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     }
   }, [isActiveSubscription]);
 
-  const handleSaveConfig = (config) => {
-    setSavedConfig(config);
+  const handleSaveConfig = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include credentials (cookies) in the request
+        body: JSON.stringify(savedConfig),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message);
+        // You can remove the call to onSaveConfig here since we are saving the config directly
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Failed to save configuration.');
+    }
   };
 
   const handleSubmit = (event) => {
@@ -141,11 +160,12 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
         <ConfigForm 
           initialConfig={initialConfig} 
           isNewCampaign={isNewCampaign} 
-          onSaveConfig={handleSaveConfig} 
+          onSaveConfig={setSavedConfig} 
           activeAccount={activeAccount} // Passing activeAccount here
         />
 
         <div className='button-container2'>
+          <button type="button" onClick={handleSaveConfig} className="save-config-button">Save Config</button>
           <button type="submit" className="create-ad-button">Create Ad</button>
           <button type="button" className="go-back-button" onClick={onGoBack}>Cancel</button>
         </div>
