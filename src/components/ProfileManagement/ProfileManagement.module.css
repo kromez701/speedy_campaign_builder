@@ -104,6 +104,10 @@
   background-color: #4044C9;
 }
 
+.infoText{
+  text-align: center;
+}
+
 /* Media Queries for Responsive Design */
 @media (max-width: 900px) {
   .container {

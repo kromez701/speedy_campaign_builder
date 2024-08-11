@@ -86,7 +86,7 @@ const Main = ({ activeAccount }) => {
       if (data.task_id === taskId) {
         clearInterval(logInterval);
         setFormId('successScreen');
-        toast.success('Task completed successfully!');
+        toast.success('Ad created successfully!');
       }
     });
 
@@ -256,6 +256,7 @@ const Main = ({ activeAccount }) => {
 
       {formId === 'configForm' && (
         <ConfigForm
+          activeAccount={activeAccount}  // Pass activeAccount here
           initialConfig={config}
           onSaveConfig={handleSaveConfig}
           onCancel={handleCancelConfig}

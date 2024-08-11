@@ -138,7 +138,12 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
         <label htmlFor="uploadFolders">Upload Folders:</label>
         <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory="true" directory="true" multiple required />
 
-        <ConfigForm initialConfig={initialConfig} isNewCampaign={isNewCampaign} onSaveConfig={handleSaveConfig} />
+        <ConfigForm 
+          initialConfig={initialConfig} 
+          isNewCampaign={isNewCampaign} 
+          onSaveConfig={handleSaveConfig} 
+          activeAccount={activeAccount} // Passing activeAccount here
+        />
 
         <div className='button-container2'>
           <button type="submit" className="create-ad-button">Create Ad</button>

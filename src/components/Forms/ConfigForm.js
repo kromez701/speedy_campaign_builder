@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ScopedGlobalStyle from './ConfigFormStyles';
-
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import '../ToastifyOverrides.css';
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -19,26 +21,18 @@ const getDefaultEndTime = () => {
   return isoString.slice(0, 19); // Ensure it is in correct format for datetime-local input with seconds
 };
 
-const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign }) => {
-  const defaultPrimaryText = "";
-
-  const defaultHeadline = "";
-  const defaultDescription = "";
-  const defaultCallToAction = "SHOP_NOW";
-  const defaultLink = '';
-  const defaultURLParameters = '';
-
+const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount }) => {
   const [config, setConfig] = useState({
     ...initialConfig,
     app_events: getDefaultStartTime(),
-    ad_creative_primary_text: defaultPrimaryText,
-    ad_creative_headline: defaultHeadline,
-    ad_creative_description: defaultDescription,
-    call_to_action: defaultCallToAction,
-    link: defaultLink,
-    url_parameters: defaultURLParameters,
-    display_link: initialConfig.display_link || defaultLink,
-    destination_url: initialConfig.destination_url || defaultLink,
+    ad_creative_primary_text: "",
+    ad_creative_headline: "",
+    ad_creative_description: "",
+    call_to_action: "SHOP_NOW",
+    link: '',
+    url_parameters: '',
+    display_link: initialConfig.display_link || '',
+    destination_url: initialConfig.destination_url || '',
     campaign_budget_optimization: isNewCampaign ? (initialConfig.campaign_budget_optimization || 'AD_SET_BUDGET_OPTIMIZATION') : 'AD_SET_BUDGET_OPTIMIZATION',
     ad_set_budget_optimization: initialConfig.ad_set_budget_optimization || 'DAILY_BUDGET',
     ad_set_budget_value: initialConfig.ad_set_budget_value || initialConfig.budget_value || '50.00',
@@ -105,27 +99,68 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign }) => {
 
     if (name === 'objective') {
       setShowAppStoreUrl(value === 'OUTCOME_APP_PROMOTION');
-      console.log('Show app store URL:', value === 'OUTCOME_APP_PROMOTION');
     }
     if (name === 'ad_set_bid_strategy' || name === 'campaign_bid_strategy') {
       setShowBidAmount(['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(value));
-      console.log('Show bid amount:', ['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(value));
     }
     if (name === 'ad_set_budget_optimization' || name === 'campaign_budget_optimization') {
       const shouldShowEndDate = (name === 'campaign_budget_optimization' && value === 'LIFETIME_BUDGET') ||
                                 (name === 'ad_set_budget_optimization' && value === 'LIFETIME_BUDGET' && config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION');
       setShowEndDate(shouldShowEndDate);
-      console.log('Show end date:', shouldShowEndDate);
     }
     if (name === 'buying_type') {
       setShowPredictionId(value === 'RESERVED');
     }
   };
 
-  // Trigger onSaveConfig when config changes
   useEffect(() => {
-    onSaveConfig(config);
-  }, [config, onSaveConfig]);
+    // Fetch config from backend on mount
+    const fetchConfig = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
+          credentials: 'include' // Include credentials (cookies) in the request
+        });
+        const result = await response.json();
+  
+        if (response.ok) {
+          setConfig({
+            ...config,
+            ...result,
+          });
+        } else {
+          toast.error(result.message || 'Failed to load configuration.');
+        }
+      } catch (error) {
+        toast.error('Failed to load configuration.');
+      }
+    };
+  
+    fetchConfig();
+  }, [activeAccount.id]);
+  
+  const handleSave = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include credentials (cookies) in the request
+        body: JSON.stringify(config),
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        toast.success(result.message);
+        onSaveConfig(config);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      toast.error('Failed to save configuration.');
+    }
+  };
+  
 
   return (
     <div className="form-container2">
@@ -620,7 +655,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign }) => {
         value={config.url_parameters}
         onChange={handleChange}
       />
-
+      <button type="button" onClick={handleSave}>Save Config</button>
     </div>
   );
 };
@@ -628,7 +663,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign }) => {
 ConfigForm.propTypes = {
   onSaveConfig: PropTypes.func.isRequired,
   initialConfig: PropTypes.object.isRequired,
-  isNewCampaign: PropTypes.bool.isRequired, // New prop to indicate if it's a new campaign
+  isNewCampaign: PropTypes.bool.isRequired,
+  activeAccount: PropTypes.object.isRequired, // Pass activeAccount as prop
 };
 
 export default ConfigForm;
