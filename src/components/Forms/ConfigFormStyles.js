@@ -121,6 +121,37 @@ const GlobalStyle = createGlobalStyle`
   transition: background-color 0.3s;
   font-weight: 600;
 }
+
+.manual-options {
+    display: flex;
+    flex-direction: column;
+}
+
+.manual-options .option-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.manual-options input[type="checkbox"] {
+    margin-right: 10px;
+}
+
+.manual-options h4 {
+    font-weight: bold;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* styles.css */
+.MuiCheckbox-root {
+  color: #5356FF;
+}
+
+.MuiCheckbox-root.Mui-checked {
+  color: #5356FF !important;
+}
+
   `;
 
   export default GlobalStyle;

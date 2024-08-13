@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import ScopedGlobalStyle from './ConfigFormStyles';
 import { toast } from 'react-toastify';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 
@@ -43,6 +45,21 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     ad_format: initialConfig.ad_format || 'Single image or video',
     ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(),
     prediction_id: initialConfig.prediction_id || '',
+    placement_type: initialConfig.placement_type || 'advantage_plus',
+    platforms: initialConfig.platforms || {
+      facebook: false,
+      instagram: false,
+      audience_network: false,
+      messenger: false,
+    },
+    placements: initialConfig.placements || {
+      feeds: false,
+      stories: false,
+      in_stream: false,
+      search: false,
+      messages: false,
+      apps_sites: false,
+    },
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(initialConfig.objective === 'OUTCOME_APP_PROMOTION');
@@ -112,6 +129,35 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     }
   };
 
+  const handlePlatformChange = (e) => {
+    const { name, checked } = e.target;
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      platforms: {
+        ...prevConfig.platforms,
+        [name]: checked,
+      },
+    }));
+  };
+
+  const handlePlacementChange = (e) => {
+    const { name, checked } = e.target;
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      placements: {
+        ...prevConfig.placements,
+        [name]: checked,
+      },
+    }));
+  };
+
+  const handlePlacementTypeChange = (e) => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      placement_type: e.target.value,
+    }));
+  };
+
   useEffect(() => {
     const fetchConfig = async () => {
       try {
@@ -119,7 +165,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
           credentials: 'include' // Include credentials (cookies) in the request
         });
         const result = await response.json();
-  
+
         if (response.ok) {
           setConfig({
             ...config,
@@ -132,7 +178,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         toast.error('Failed to load configuration.');
       }
     };
-  
+
     fetchConfig();
   }, [activeAccount.id]);
 
@@ -509,8 +555,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         <option value="ZM">Zambia</option>
         <option value="ZW">Zimbabwe</option>
         <option value="PS">Palestine</option>
-        {/* Add more locations as needed */}
-        </select>
+        {/* Add location options here */}
+      </select>
 
       <label htmlFor="age_range">Age Range:</label>
       <div className="age-range-container">
@@ -548,6 +594,126 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         <option value="Male">Male</option>
         <option value="Female">Female</option>
       </select>
+
+      <label htmlFor="placement_type">Placement Type:</label>
+      <select
+        id="placement_type"
+        name="placement_type"
+        value={config.placement_type}
+        onChange={handlePlacementTypeChange}
+      >
+        <option value="Advantage">Advantage+ placements</option>
+        <option value="Manual">Manual</option>
+      </select>
+
+      {config.placement_type === 'Manual' && (
+        <div className="manual-options">
+          <h4>Platforms</h4>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.platforms.facebook}
+                onChange={handlePlatformChange}
+                name="facebook"
+              />
+            }
+            label="Facebook"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.platforms.instagram}
+                onChange={handlePlatformChange}
+                name="instagram"
+              />
+            }
+            label="Instagram"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.platforms.audience_network}
+                onChange={handlePlatformChange}
+                name="audience_network"
+              />
+            }
+            label="Audience Network"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.platforms.messenger}
+                onChange={handlePlatformChange}
+                name="messenger"
+              />
+            }
+            label="Messenger"
+          />
+
+          <h4>Placements</h4>
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.feeds}
+                onChange={handlePlacementChange}
+                name="feeds"
+              />
+            }
+            label="Feeds"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.stories}
+                onChange={handlePlacementChange}
+                name="stories"
+              />
+            }
+            label="Stories"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.in_stream}
+                onChange={handlePlacementChange}
+                name="in_stream"
+              />
+            }
+            label="In-stream ads for videos and reels"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.search}
+                onChange={handlePlacementChange}
+                name="search"
+              />
+            }
+            label="Search results"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.messages}
+                onChange={handlePlacementChange}
+                name="messages"
+              />
+            }
+            label="Messages"
+          />
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={config.placements.apps_sites}
+                onChange={handlePlacementChange}
+                name="apps_sites"
+              />
+            }
+            label="Apps and sites"
+          />
+        </div>
+      )}
+
       <label htmlFor="app_events">Schedule:</label>
       <input
         type="datetime-local"

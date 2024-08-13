@@ -165,9 +165,9 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
         />
 
         <div className='button-container2'>
-          <button type="button" onClick={handleSaveConfig} className="save-config-button">Save Config</button>
           <button type="submit" className="create-ad-button">Create Ad</button>
           <button type="button" className="go-back-button" onClick={onGoBack}>Cancel</button>
+          <button type="button" onClick={handleSaveConfig} className="create-ad-button">Save Config</button>
         </div>
       </form>
     </div>

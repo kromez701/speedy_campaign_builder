@@ -55,6 +55,21 @@ const Main = ({ activeAccount }) => {
     end_time: getDefaultEndTime(),
     ad_set_bid_strategy: 'LOWEST_COST_WITHOUT_CAP',
     prediction_id: '',
+    placement_type: 'advantage_plus',
+    platforms: {
+      facebook: true,
+      instagram: true,
+      audience_network: true,
+      messenger: true,
+    },
+    placements: {
+      feeds: true,
+      stories: true,
+      in_stream: true,
+      search: true,
+      apps_sites: true,
+      messages: true,
+    },
   });
   const [taskId, setTaskId] = useState(null);
   const [uploadController, setUploadController] = useState(null);
@@ -186,7 +201,13 @@ const Main = ({ activeAccount }) => {
 
     // Append all config values to formData
     Object.keys(finalConfig).forEach((key) => {
-      formData.append(key, finalConfig[key]);
+      if (typeof finalConfig[key] === 'object') {
+        formData.append(key, JSON.stringify(finalConfig[key]));
+        console.log(`Appending to formData: ${key} = ${JSON.stringify(finalConfig[key])}`);
+      } else {
+        formData.append(key, finalConfig[key]);
+        console.log(`Appending to formData: ${key} = ${finalConfig[key]}`);
+      }
     });
 
     if (finalConfig.buying_type === 'RESERVED' && finalConfig.prediction_id) {
