@@ -32,7 +32,6 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <!-- Add this inside the <head> or <body> tag of your public/index.html -->
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js"></script>
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <script src="https://js.stripe.com/v3/"></script>
 
@@ -60,7 +59,7 @@
         console.log('ID Token: ' + id_token);
     
         // Send the ID token to your backend
-        fetch('http://localhost:5000/auth/google', {
+        fetch('https://backend.quickcampaigns.io/auth/google', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -76,6 +75,7 @@
           console.error('Error:', error);
         });
       }
-    </script>    
+    </script>
+    <!-- Facebook SDK -->
   </body>
 </html>

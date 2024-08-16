@@ -9,7 +9,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 
-const socket = io('http://91.108.112.100:5001');
+const socket = io('https://fbbackend.quickcampaigns.io');
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -157,7 +157,7 @@ const Main = ({ activeAccount }) => {
     }
 
     if (taskId) {
-      fetch('http://91.108.112.100:5001/cancel_task', {
+      fetch('https://fbbackend.quickcampaigns.io/cancel_task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task_id: taskId }),
@@ -220,7 +220,7 @@ const Main = ({ activeAccount }) => {
     setProgress(0);
     setStepVisible(false);
 
-    fetch('http://91.108.112.100:5001/create_campaign', {
+    fetch('https://fbbackend.quickcampaigns.io/create_campaign', {
       method: 'POST',
       body: formData,
       signal: controller.signal,

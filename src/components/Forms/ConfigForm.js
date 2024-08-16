@@ -25,7 +25,6 @@ const getDefaultEndTime = () => {
 
 const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount }) => {
   const [config, setConfig] = useState({
-    ...initialConfig,
     app_events: getDefaultStartTime(),
     ad_creative_primary_text: "",
     ad_creative_headline: "",
@@ -46,21 +45,21 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(),
     prediction_id: initialConfig.prediction_id || '',
     placement_type: initialConfig.placement_type || 'advantage_plus',
-    platforms: initialConfig.platforms || {
-      facebook: false,
-      instagram: false,
-      audience_network: false,
-      messenger: false,
+    platforms: {
+      facebook: true,
+      instagram: true,
+      audience_network: true,
+      messenger: true,
     },
-    placements: initialConfig.placements || {
-      feeds: false,
-      stories: false,
-      in_stream: false,
-      search: false,
-      messages: false,
-      apps_sites: false,
+    placements: {
+      feeds: true,
+      stories: true,
+      in_stream: true,
+      search: true,
+      messages: true,
+      apps_sites: true,
     },
-  });
+  });  
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(initialConfig.objective === 'OUTCOME_APP_PROMOTION');
   const [showBidAmount, setShowBidAmount] = useState(
@@ -161,7 +160,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
+        const response = await fetch(`https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`, {
           credentials: 'include' // Include credentials (cookies) in the request
         });
         const result = await response.json();

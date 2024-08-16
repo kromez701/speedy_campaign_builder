@@ -35,7 +35,7 @@ const Landing = () => {
 const handleSubscribe = async (plan) => {
   try {
     console.log("Creating anonymous checkout session...");
-    const response = await axios.post('http://localhost:5000/payment/create-anonymous-checkout-session', 
+    const response = await axios.post('https://backend.quickcampaigns.io/payment/create-anonymous-checkout-session', 
       { plan }, 
       { withCredentials: true }
     );

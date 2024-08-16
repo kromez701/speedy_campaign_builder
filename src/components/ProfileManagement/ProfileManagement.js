@@ -1,3 +1,5 @@
+/* global FB */
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -13,7 +15,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [email, setEmail] = useState('');
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [isBound, setIsBound] = useState(false);
-
   const [subscriptionPlan, setSubscriptionPlan] = useState('');  
   const [subscriptionStartDate, setSubscriptionStartDate] = useState('-- -- --');
   const [subscriptionEndDate, setSubscriptionEndDate] = useState('-- -- --');
@@ -23,7 +24,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { username, email, profile_picture } = response.data.user;
           setFullName(username);
@@ -41,7 +42,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchUserSubscriptionStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
           setSubscriptionPlan(plan);
@@ -62,7 +63,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     const fetchSubscriptionDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
+          `https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`, 
           { withCredentials: true }
         );
   
@@ -88,7 +89,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const fetchAdAccountDetails = async (adAccountId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
+      const response = await axios.get(`https://backend.quickcampaigns.io/auth/ad_account/${adAccountId}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
       toast.error('Error fetching ad account details');
@@ -131,25 +132,57 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     );
 
     if (confirmSave) {
-      const { ad_account_id, pixel_id, facebook_page_id, app_id, app_secret, access_token } = adAccountDetails;
+      // Trigger Facebook login after confirmation
+      FB.login(response => {
+        if (response.authResponse) {
+          const accessToken = response.authResponse.accessToken;
+          verifyAndSaveAdAccount(accessToken);
+        } else {
+          toast.error('Facebook login failed or was cancelled.');
+        }
+      }, { scope: 'ads_management,ads_read' });
+    }
+  };
 
-      const isAdAccountValid = await verifyField('http://localhost:5000/auth/verify_ad_account', { ad_account_id, access_token });
-      const isPixelValid = await verifyField('http://localhost:5000/auth/verify_pixel_id', { pixel_id, access_token });
-      const isPageValid = await verifyField('http://localhost:5000/auth/verify_facebook_page_id', { facebook_page_id, access_token });
-      const isAppValid = await verifyField('http://localhost:5000/auth/verify_app_id', { app_id, access_token });
-      const isAppSecretValid = await verifyField('http://localhost:5000/auth/verify_app_secret', { app_secret, access_token });
-      const isTokenValid = await verifyField('http://localhost:5000/auth/verify_access_token', { access_token });
-
-      if (isAdAccountValid && isPixelValid && isPageValid && isAppValid && isAppSecretValid && isTokenValid) {
+  const verifyAndSaveAdAccount = async (accessToken) => {
+    const { ad_account_id, pixel_id, facebook_page_id } = adAccountDetails;
+  
+    try {
+      const isAdAccountValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_ad_account', { ad_account_id, access_token: accessToken });
+      const isPixelValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_pixel_id', { pixel_id, access_token: accessToken });
+      const isPageValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_facebook_page_id', { facebook_page_id, access_token: accessToken });
+  
+      if (isAdAccountValid && isPixelValid && isPageValid) {
         try {
-          const response = await axios.post(
-            'http://localhost:5000/auth/ad_account',
-            { id: activeAccount.id, ...adAccountDetails },
+          // Exchange the token and save it
+          const exchangeResponse = await axios.post(
+            `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/exchange-token`,
+            { access_token: accessToken },
             { withCredentials: true }
           );
-          if (response.status === 200) {
-            toast.success('Ad account updated successfully');
-            setIsBound(true);
+  
+          if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
+            // Update adAccountDetails with the long-lived token
+            const updatedAdAccountDetails = {
+              ...adAccountDetails,
+              access_token: exchangeResponse.data.long_lived_token,
+              app_id: '1153977715716035',  // Add the app ID
+              app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
+            };
+  
+            // Save the updated ad account details
+            const saveResponse = await axios.post(
+              'https://backend.quickcampaigns.io/auth/ad_account',
+              { id: activeAccount.id, ...updatedAdAccountDetails },
+              { withCredentials: true }
+            );
+  
+            if (saveResponse.status === 200) {
+              toast.success('Ad account updated successfully');
+              setIsBound(true);
+            }
+          } else {
+            toast.error('Failed to exchange token.');
           }
         } catch (error) {
           toast.error('Error saving ad account');
@@ -158,8 +191,11 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       } else {
         toast.error('Invalid ad account details for one or more fields.');
       }
+    } catch (error) {
+      console.error('Error verifying ad account details:', error);
+      toast.error('Error verifying ad account details.');
     }
-  };
+  };  
 
   const handleSaveChanges = async () => {
     const formData = new FormData();
@@ -167,7 +203,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
+      const response = await axios.post('https://backend.quickcampaigns.io/auth/profile', formData, { withCredentials: true });
       if (response.status === 200) {
         toast.success('Profile updated successfully');
       }
@@ -177,14 +213,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     }
   };
 
+  
+
   const handleCancelSubscription = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
+      const response = await axios.get('https://backend.quickcampaigns.io/payment/active-ad-accounts', { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
-
-      console.log(runningPlan)
-      console.log(isActive)
-      console.log(activeAdAccountsCount)
 
       const confirmCancel = window.confirm(
         runningPlan === 'Enterprise' && isActive && activeAdAccountsCount < 3
@@ -193,7 +227,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       );
 
       if (confirmCancel) {
-        const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        const cancelResponse = await axios.post('https://backend.quickcampaigns.io/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
           toast.success(cancelResponse.data.message);
@@ -211,7 +245,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleRenewSubscription = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/payment/renew-subscription', 
+      const response = await axios.post('https://backend.quickcampaigns.io/payment/renew-subscription', 
         { ad_account_id: activeAccount.id, plan: subscriptionPlan },
         { withCredentials: true }
       );
@@ -226,7 +260,32 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       toast.error('Error renewing subscription');
       console.error('Error renewing subscription:', error);
     }
-};
+  };
+
+  useEffect(() => {
+    // Load the Facebook SDK script asynchronously
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+
+    // Initialize the Facebook SDK once the script has loaded
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1153977715716035',
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v20.0'
+      });
+
+      FB.getLoginStatus(function(response) {
+        console.log('FB SDK Initialized', response);
+      });
+    };
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -300,36 +359,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             name="facebook_page_id"
             placeholder="Facebook Page ID"
             value={adAccountDetails.facebook_page_id || ''}
-            onChange={handleAdAccountChange}
-            className={styles.profileInput}
-            required
-            disabled={isBound}
-          />
-          <input
-            type="text"
-            name="app_id"
-            placeholder="App ID"
-            value={adAccountDetails.app_id || ''}
-            onChange={handleAdAccountChange}
-            className={styles.profileInput}
-            required
-            disabled={isBound}
-          />
-          <input
-            type="text"
-            name="app_secret"
-            placeholder="App Secret"
-            value={adAccountDetails.app_secret || ''}
-            onChange={handleAdAccountChange}
-            className={styles.profileInput}
-            required
-            disabled={isBound}
-          />
-          <input
-            type="text"
-            name="access_token"
-            placeholder="Access Token"
-            value={adAccountDetails.access_token || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
             required
