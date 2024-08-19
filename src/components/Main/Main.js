@@ -178,14 +178,14 @@ const Main = ({ activeAccount }) => {
     const taskId = `task-${Math.random().toString(36).substr(2, 9)}`;
     setTaskId(taskId);
     formData.append('task_id', taskId);
-
+  
     console.log('activeAccount:', activeAccount);
-
+  
     if (!activeAccount || !activeAccount.ad_account_id) {
       toast.error('Ad account details are missing.');
       return;
     }
-
+  
     // Use activeAccount's Facebook settings
     const adAccountConfig = {
       ad_account_id: activeAccount.ad_account_id,
@@ -195,31 +195,24 @@ const Main = ({ activeAccount }) => {
       app_secret: activeAccount.app_secret,
       access_token: activeAccount.access_token,
     };
-
-    // Merge activeAccount's config with the current config
-    const finalConfig = { ...config, ...adAccountConfig };
-
-    // Append all config values to formData
-    Object.keys(finalConfig).forEach((key) => {
-      if (typeof finalConfig[key] === 'object') {
-        formData.append(key, JSON.stringify(finalConfig[key]));
-        console.log(`Appending to formData: ${key} = ${JSON.stringify(finalConfig[key])}`);
-      } else {
-        formData.append(key, finalConfig[key]);
-        console.log(`Appending to formData: ${key} = ${finalConfig[key]}`);
-      }
+    
+    // Append adAccountConfig to formData
+    Object.entries(adAccountConfig).forEach(([key, value]) => {
+      formData.append(key, value);
     });
-
-    if (finalConfig.buying_type === 'RESERVED' && finalConfig.prediction_id) {
-      formData.append('prediction_id', finalConfig.prediction_id);
+    
+    // Debug: Log all the formData entries before submission
+    console.log("Final formData entries before submission:");
+    for (const pair of formData.entries()) {
+      console.log(`${pair[0]}: ${pair[1]}`);
     }
 
     const controller = new AbortController();
     setUploadController(controller);
-
+  
     setProgress(0);
     setStepVisible(false);
-
+  
     fetch('https://fbbackend.quickcampaigns.io/create_campaign', {
       method: 'POST',
       body: formData,
@@ -240,9 +233,9 @@ const Main = ({ activeAccount }) => {
         }
         setFormId('mainForm');
       });
-
+  
     handleShowForm('progress');
-  };
+};
 
   return (
     <div className="container">

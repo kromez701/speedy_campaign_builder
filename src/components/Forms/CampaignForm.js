@@ -107,9 +107,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     }
 
     for (const [key, value] of Object.entries(savedConfig)) {
-      formData.append(key, value);
+      if (typeof value === 'object') {
+        formData.append(key, JSON.stringify(value));
+      } else {
+        formData.append(key, value);
+      }
     }
-
+        
     onSubmit(formData, formId === 'newCampaign');
   };
 

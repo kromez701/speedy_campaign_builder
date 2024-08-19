@@ -1,3 +1,5 @@
+/* global FB */
+
 import React, { useState, useEffect } from 'react';
 import { GoogleOAuthProvider, useGoogleLogin } from '@react-oauth/google';
 import axios from 'axios';
@@ -48,6 +50,70 @@ const CustomGoogleLogin = ({ isLogin, onSuccess, onError, remember }) => {
     <button className={`${styles['social-button']} ${styles.googleLogin}`} onClick={() => login()}>
       <img src="/assets/google-icon.png" alt="Google icon" className={styles.icon} />
       {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
+    </button>
+  );
+};
+
+const CustomFacebookLogin = ({ isLogin, onSuccess, onError }) => {
+  useEffect(() => {
+    // Load the Facebook SDK script asynchronously
+    (function(d, s, id){
+      var js, fjs = d.getElementsByTagName(s)[0];
+      if (d.getElementById(id)) return;
+      js = d.createElement(s); js.id = id;
+      js.src = "https://connect.facebook.net/en_US/sdk.js";
+      fjs.parentNode.insertBefore(js, fjs);
+    }(document, 'script', 'facebook-jssdk'));
+  
+    // Initialize the Facebook SDK once the script has loaded
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '1153977715716035',
+        cookie     : true,
+        xfbml      : true,
+        version    : 'v20.0'
+      });
+  
+      FB.getLoginStatus(function(response) {
+        console.log('FB SDK Initialized', response);
+      });
+    };
+  }, []);
+  
+
+  const handleFacebookLogin = () => {
+    FB.login(response => {
+      if (response.authResponse) {
+        const accessToken = response.authResponse.accessToken;
+        console.log(response.authResponse);
+  
+        axios.get(`https://graph.facebook.com/v12.0/me`, {
+          params: {
+            fields: 'id,name,email',
+            access_token: accessToken
+          }
+        }).then(userInfoResponse => {
+          const { id, name, email } = userInfoResponse.data;
+          console.log('User Info:', { id, name, email });
+  
+          // Call onSuccess without making it async within FB.login
+          onSuccess({ accessToken, name, email });
+        }).catch(error => {
+          console.error('Error fetching user info from Facebook:', error);
+          onError('Failed to retrieve user info from Facebook.');
+        });
+  
+      } else {
+        toast.error('Facebook login failed or was cancelled.');
+      }
+    }, { scope: 'ads_management,ads_read' });
+  };
+  
+
+  return (
+    <button className={`${styles['social-button']} ${styles.facebookLogin}`} onClick={handleFacebookLogin}>
+      <img src="/assets/facebook-icon.png" alt="Facebook icon" className={styles.icon} />
+      {isLogin ? 'Sign in with Facebook' : 'Sign up with Facebook'}
     </button>
   );
 };
@@ -155,6 +221,16 @@ const Auth = ({ mode, onAuthSuccess }) => {
     toast.error('Failed to authenticate with Google.');
   };
 
+  const responseFacebook = async ({ accessToken, name, email }) => {
+    try {
+      await axios.post('https://backend.quickcampaigns.io/auth/facebook', { accessToken, name, email }, { withCredentials: true });
+      onAuthSuccess();
+      toast.success('Logged in with Facebook successfully!');
+    } catch (error) {
+      toast.error('Failed to authenticate with Facebook.');
+    }
+  };
+
   return (
     <GoogleOAuthProvider clientId='362986823691-u76e3r421e7ts51cphcpcitihpu6ks51.apps.googleusercontent.com'>
       <div className={styles['page-container']}>
@@ -166,7 +242,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
             <>
               <h1>Email Sent</h1>
               <p>An email has been sent to verify your account. Please check your inbox and click the verification link. Once verified, come back to login.</p>
-              <span 
+              <span
                 className={styles.linkText}
                 onClick={() => {
                   setIsEmailSent(false);
@@ -180,7 +256,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
             <>
               <h1>Password Reset</h1>
               <p>Password reset link sent to your email address.</p>
-              <span 
+              <span
                 className={styles.linkText}
                 onClick={() => {
                   setIsPasswordResetSent(false);
@@ -267,6 +343,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
               {!isForgotPassword && (
                 <div className={styles.socialLogin}>
                   <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
+                  <CustomFacebookLogin isLogin={isLogin} onSuccess={responseFacebook} onError={responseGoogleError} />
                 </div>
               )}
               {!isForgotPassword && (
