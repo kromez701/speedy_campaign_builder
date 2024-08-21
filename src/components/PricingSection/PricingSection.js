@@ -82,7 +82,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       );
   
       if (response.data.sessionId) {
-        const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+        const stripe = window.Stripe('pk_live_51Ld9QOJd93BCcOTa5xS2wKbsPgFyhhgNJsYFQckPbd1YzeHiWdiB4seDmZmDOQvp8WE3FjCkDuSwhfes0wgUcxDA00SYWlIP2K');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
         toast.success('Subscription successful! Thank you for subscription.');
