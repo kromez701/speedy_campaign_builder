@@ -85,10 +85,12 @@
 }
 
 .primaryButton {
-  background-color: #28a745;
+  background-color: #5356FF;
   
 }
-
+.primaryButton:hover{
+  background-color: #4044C9;
+}
 .secondaryButton {
   background-color: #fc443b;
 }

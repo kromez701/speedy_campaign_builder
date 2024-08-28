@@ -13,7 +13,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('https://backend.quickcampaigns.io/auth/profile', { withCredentials: true });
+        const response = await axios.get('https://localhost/auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { profile_picture } = response.data.user;
           if (profile_picture) {
