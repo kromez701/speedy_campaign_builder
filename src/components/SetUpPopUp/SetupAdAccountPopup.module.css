@@ -1,3 +1,4 @@
+/* General styles for the popup */
 .popupOverlay {
     position: fixed;
     top: 0;
@@ -10,8 +11,8 @@
     align-items: center;
     z-index: 1000;
     font-family: 'Poppins', sans-serif;
-    overflow-y: auto; /* Allow scrolling if needed */
-    padding: 20px; /* Add padding to ensure the popup is not flush with screen edges */
+    overflow-y: auto;
+    padding: 0; /* Removed padding to ensure no extra space */
 }
 
 .popupContent {
@@ -22,9 +23,10 @@
     width: 900px;
     max-width: 90%;
     height: 600px;
-    max-height: 90%; /* Ensure it doesn't exceed 90% of the viewport */
+    max-height: 90%;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     position: relative;
+    margin: auto; /* Centered horizontally and vertically */
 }
 
 .leftSide {
@@ -75,8 +77,8 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start;
-    text-align: left;
+    align-items: center;
+    text-align: center;
 }
 
 .stepContent h3 {
@@ -148,7 +150,7 @@
     margin-right: 10px;
 }
 
-/* Custom button styles for this component */
+/* Custom button styles */
 .TheButtons {
     display: flex;
     justify-content: flex-end;
