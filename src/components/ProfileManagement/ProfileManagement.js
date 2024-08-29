@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 import styles from './ProfileManagement.module.css';
-import SetupAdAccountPopup from '../SetupAdAccountPopup/SetupAdAccountPopup';
+import SetupAdAccountPopup from '../SetUpPopUp/SetupAdAccountPopup';
 
 const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const navigate = useNavigate();
@@ -143,62 +143,75 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   };  
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
+    console.log('Popup submitted with the following values:');
+    console.log('Ad Account:', adAccount);
+    console.log('Page:', page);
+    console.log('Pixel:', pixel);
+
     setShowPopup(false); // Close the popup after submission
     verifyAndSaveAdAccount(accessToken, adAccount, page, pixel); // Adjust to use selected values
-  };
+};
+
 
   const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
+    console.log('Before updating, adAccountDetails:', adAccountDetails);
+
     const { ad_account_id, pixel_id, facebook_page_id } = adAccountDetails;
   
     try {
-      const isAdAccountValid = await verifyField('https://localhost/auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
-      const isPixelValid = await verifyField('https://localhost/auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
-      const isPageValid = await verifyField('https://localhost/auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
-  
-      if (isAdAccountValid && isPixelValid && isPageValid) {
-        try {
-          // Exchange the token and save it
-          const exchangeResponse = await axios.post(
-            `https://localhost/config/ad_account/${activeAccount.id}/exchange-token`,
-            { access_token: accessToken },
-            { withCredentials: true }
-          );
-  
-          if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
-            // Update adAccountDetails with the long-lived token
-            const updatedAdAccountDetails = {
-              ...adAccountDetails,
-              access_token: exchangeResponse.data.long_lived_token,
-              app_id: '1153977715716035',  // Add the app ID
-              app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
-            };
-  
-            // Save the updated ad account details
-            const saveResponse = await axios.post(
-              'https://localhost/auth/ad_account',
-              { id: activeAccount.id, ...updatedAdAccountDetails },
-              { withCredentials: true }
-            );
-  
-            if (saveResponse.status === 200) {
-              toast.success('Ad account updated successfully');
-              setIsBound(true);
+        const isAdAccountValid = await verifyField('https://localhost/auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
+        const isPixelValid = await verifyField('https://localhost/auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
+        const isPageValid = await verifyField('https://localhost/auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
+
+        if (isAdAccountValid && isPixelValid && isPageValid) {
+            try {
+                const exchangeResponse = await axios.post(
+                    `https://localhost/config/ad_account/${activeAccount.id}/exchange-token`,
+                    { access_token: accessToken },
+                    { withCredentials: true }
+                );
+
+                if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
+                    const updatedAdAccountDetails = {
+                        ...adAccountDetails,
+                        ad_account_id: adAccount,
+                        facebook_page_id: page,
+                        pixel_id: pixel,
+                        access_token: exchangeResponse.data.long_lived_token,
+                        app_id: '1153977715716035',  // Add the app ID
+                        app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
+                    };
+
+                    console.log('After updating, updatedAdAccountDetails:', updatedAdAccountDetails);
+
+                    const saveResponse = await axios.post(
+                        'https://localhost/auth/ad_account',
+                        { id: activeAccount.id, ...updatedAdAccountDetails },
+                        { withCredentials: true }
+                    );
+
+                    if (saveResponse.status === 200) {
+                        toast.success('Ad account updated successfully');
+                        setIsBound(true);
+                        setTimeout(() => {
+                          window.location.reload();  // Refresh the page after the toast
+                      }, 700); 
+                    }
+                } else {
+                    toast.error('Failed to exchange token.');
+                }
+            } catch (error) {
+                toast.error('Error saving ad account');
+                console.error('Error saving ad account', error);
             }
-          } else {
-            toast.error('Failed to exchange token.');
-          }
-        } catch (error) {
-          toast.error('Error saving ad account');
-          console.error('Error saving ad account', error);
+        } else {
+            toast.error('Invalid ad account details for one or more fields.');
         }
-      } else {
-        toast.error('Invalid ad account details for one or more fields.');
-      }
     } catch (error) {
-      console.error('Error verifying ad account details:', error);
-      toast.error('Error verifying ad account details.');
+        console.error('Error verifying ad account details:', error);
+        toast.error('Error verifying ad account details.');
     }
-  };
+};
 
   const handleSaveChanges = async () => {
     const formData = new FormData();
