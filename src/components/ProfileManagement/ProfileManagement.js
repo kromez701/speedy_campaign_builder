@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 import styles from './ProfileManagement.module.css';
-import SetupAdAccountPopup from '../SetupAdAccountPopup/SetupAdAccountPopup'
+import SetupAdAccountPopup from '../SetupAdAccountPopup/SetupAdAccountPopup';
 
 const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const navigate = useNavigate();
@@ -21,6 +21,8 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [subscriptionEndDate, setSubscriptionEndDate] = useState('-- -- --');
   const [isActive, setIsActive] = useState(false);  
   const [runningPlan, setRunningPlan] = useState('No active plan');
+  const [showPopup, setShowPopup] = useState(false);  // State to control the visibility of the popup
+  const [accessToken, setAccessToken] = useState('');  // State to store the access token from Facebook login
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -127,31 +129,31 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       toast.error('Ad account settings can only be changed once.');
       return;
     }
-
-    const confirmSave = window.confirm(
-      'Ad account settings cannot be changed later. Are you sure you want to proceed?'
-    );
-
-    if (confirmSave) {
-      // Trigger Facebook login after confirmation
-      FB.login(response => {
-        if (response.authResponse) {
-          const accessToken = response.authResponse.accessToken;
-          verifyAndSaveAdAccount(accessToken);
-        } else {
-          toast.error('Facebook login failed or was cancelled.');
-        }
-      }, { scope: 'ads_management,ads_read,pages_show_list,business_management' });
-    }
-  };
   
-  const verifyAndSaveAdAccount = async (accessToken) => {
+    FB.login(response => {
+      if (response.authResponse) {
+        const accessToken = response.authResponse.accessToken;
+        setAccessToken(accessToken); // Save the access token to state
+        setShowPopup(true); // Show the popup when login is successful
+        console.log('Popup should be displayed:', showPopup);  // Add this line for debugging
+      } else {
+        toast.error('Facebook login failed or was cancelled.');
+      }
+    }, { scope: 'ads_management,ads_read,pages_show_list,business_management' });
+  };  
+
+  const handlePopupSubmit = (adAccount, page, pixel) => {
+    setShowPopup(false); // Close the popup after submission
+    verifyAndSaveAdAccount(accessToken, adAccount, page, pixel); // Adjust to use selected values
+  };
+
+  const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
     const { ad_account_id, pixel_id, facebook_page_id } = adAccountDetails;
   
     try {
-      const isAdAccountValid = await verifyField('https://localhost/auth/verify_ad_account', { ad_account_id, access_token: accessToken });
-      const isPixelValid = await verifyField('https://localhost/auth/verify_pixel_id', { pixel_id, access_token: accessToken });
-      const isPageValid = await verifyField('https://localhost/auth/verify_facebook_page_id', { facebook_page_id, access_token: accessToken });
+      const isAdAccountValid = await verifyField('https://localhost/auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
+      const isPixelValid = await verifyField('https://localhost/auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
+      const isPageValid = await verifyField('https://localhost/auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
   
       if (isAdAccountValid && isPixelValid && isPageValid) {
         try {
@@ -196,7 +198,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       console.error('Error verifying ad account details:', error);
       toast.error('Error verifying ad account details.');
     }
-  };  
+  };
 
   const handleSaveChanges = async () => {
     const formData = new FormData();
@@ -213,8 +215,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       console.error('Error saving profile', error);
     }
   };
-
-  
 
   const handleCancelSubscription = async () => {
     try {
@@ -336,38 +336,38 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             Ad account details cannot be changed later.
           </p>
           <input
-        type="text"
-        name="ad_account_id"
-        placeholder="Ad Account ID"
-        value={adAccountDetails.ad_account_id || ''}
-        onChange={handleAdAccountChange}
-        className={styles.profileInput}
-        required
-        disabled
-      />
-      <input
-        type="text"
-        name="pixel_id"
-        placeholder="Pixel ID"
-        value={adAccountDetails.pixel_id || ''}
-        className={styles.profileInput}
-        disabled
-      />
-      <input
-        type="text"
-        name="facebook_page_id"
-        placeholder="Facebook Page ID"
-        value={adAccountDetails.facebook_page_id || ''}
-        className={styles.profileInput}
-        disabled
-      />
-      <button
-        onClick={handleAdAccountSave}
-        className={`${styles.button} ${styles.primaryButton} ${styles.saveAdaccount}`}
-        disabled={isBound}
-      >
-        Set up ad account
-      </button>
+            type="text"
+            name="ad_account_id"
+            placeholder="Ad Account ID"
+            value={adAccountDetails.ad_account_id || ''}
+            onChange={handleAdAccountChange}
+            className={styles.profileInput}
+            required
+            disabled
+          />
+          <input
+            type="text"
+            name="pixel_id"
+            placeholder="Pixel ID"
+            value={adAccountDetails.pixel_id || ''}
+            className={styles.profileInput}
+            disabled
+          />
+          <input
+            type="text"
+            name="facebook_page_id"
+            placeholder="Facebook Page ID"
+            value={adAccountDetails.facebook_page_id || ''}
+            className={styles.profileInput}
+            disabled
+          />
+          <button
+            onClick={handleAdAccountSave}
+            className={`${styles.button} ${styles.primaryButton} ${styles.saveAdaccount}`}
+            disabled={isBound}
+          >
+            Set up ad account
+          </button>
         </div>
         <div className={styles.section}>
           <h3>Subscription Details</h3>
@@ -402,6 +402,15 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
           Logout
         </button>
       </div>
+
+      {/* Render the SetupAdAccountPopup when showPopup is true */}
+      {showPopup && (
+        <SetupAdAccountPopup
+          onClose={() => setShowPopup(false)}
+          onSubmit={handlePopupSubmit}
+          accessToken={accessToken}
+        />
+      )}
     </div>
   );
 };

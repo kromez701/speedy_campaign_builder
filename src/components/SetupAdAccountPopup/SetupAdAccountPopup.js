@@ -1,107 +1,246 @@
-
-/* global FB */
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import styles from './SetupAdAccountPopup.module.css';
 
 const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
-  const [step, setStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(1);
   const [adAccounts, setAdAccounts] = useState([]);
   const [pages, setPages] = useState([]);
   const [pixels, setPixels] = useState([]);
-  const [selectedAdAccount, setSelectedAdAccount] = useState(null);
-  const [selectedPage, setSelectedPage] = useState(null);
-  const [selectedPixel, setSelectedPixel] = useState(null);
+  const [selectedAdAccount, setSelectedAdAccount] = useState('');
+  const [selectedPage, setSelectedPage] = useState('');
+  const [selectedPixel, setSelectedPixel] = useState('');
+
+  // State for managing dropdown visibility
+  const [dropdownOpen, setDropdownOpen] = useState({
+    adAccount: false,
+    page: false,
+    pixel: false,
+  });
+
+  const popupRef = useRef(null);
 
   useEffect(() => {
-    if (step === 1) {
+    if (accessToken) {
       fetchAdAccounts();
-    } else if (step === 2) {
       fetchPages();
-    } else if (step === 3) {
+    }
+  }, [accessToken]);
+
+  useEffect(() => {
+    if (currentStep === 3 && selectedAdAccount) {
       fetchPixels();
     }
-  }, [step]);
+  }, [currentStep, selectedAdAccount]);
 
-  const fetchAdAccounts = () => {
-    FB.api('/me/adaccounts', 'GET', { access_token: accessToken }, (response) => {
-      if (response && !response.error) {
-        setAdAccounts(response.data);
-      } else {
-        console.error('Error fetching ad accounts:', response.error);
-      }
-    });
+  const fetchAdAccounts = async () => {
+    try {
+      const response = await fetch(`https://graph.facebook.com/v10.0/me/adaccounts?access_token=${accessToken}`);
+      const data = await response.json();
+      setAdAccounts(data.data || []);
+    } catch (error) {
+      console.error('Error fetching ad accounts:', error);
+    }
   };
 
-  const fetchPages = () => {
-    FB.api('/me/accounts', 'GET', { access_token: accessToken }, (response) => {
-      if (response && !response.error) {
-        setPages(response.data);
-      } else {
-        console.error('Error fetching pages:', response.error);
-      }
-    });
+  const fetchPages = async () => {
+    try {
+      const response = await fetch(`https://graph.facebook.com/v10.0/me/accounts?access_token=${accessToken}`);
+      const data = await response.json();
+      setPages(data.data || []);
+    } catch (error) {
+      console.error('Error fetching pages:', error);
+    }
   };
 
-  const fetchPixels = () => {
-    // Assuming adAccount ID is required to fetch pixels
-    if (selectedAdAccount) {
-      FB.api(`/${selectedAdAccount}/adspixels`, 'GET', { access_token: accessToken }, (response) => {
-        if (response && !response.error) {
-          setPixels(response.data);
-        } else {
-          console.error('Error fetching pixels:', response.error);
-        }
-      });
+  const fetchPixels = async () => {
+    try {
+      const response = await fetch(`https://graph.facebook.com/v10.0/${selectedAdAccount}/adspixels?access_token=${accessToken}`);
+      const data = await response.json();
+      setPixels(data.data || []);
+    } catch (error) {
+      console.error('Error fetching pixels:', error);
     }
   };
 
   const handleNext = () => {
-    if (step < 3) {
-      setStep(step + 1);
-    } else {
-      onSubmit(selectedAdAccount, selectedPage, selectedPixel);
+    if ((currentStep === 1 && selectedAdAccount) || 
+        (currentStep === 2 && selectedPage) || 
+        currentStep === 3) {
+      setCurrentStep((prevStep) => Math.min(prevStep + 1, 3));
+    }
+  };
+
+  const handlePrev = () => {
+    setCurrentStep((prevStep) => Math.max(prevStep - 1, 1));
+  };
+
+  const handleSubmit = () => {
+    onSubmit(selectedAdAccount, selectedPage, selectedPixel);
+  };
+
+  const handleClickOutside = (e) => {
+    if (popupRef.current && !popupRef.current.contains(e.target)) {
       onClose();
     }
   };
 
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  const toggleDropdown = (field) => {
+    setDropdownOpen((prev) => ({
+      ...prev,
+      [field]: !prev[field],
+    }));
+  };
+
+  const handleSelect = (field, id, name) => {
+    if (field === 'adAccount') setSelectedAdAccount(id);
+    if (field === 'page') setSelectedPage(id);
+    if (field === 'pixel') setSelectedPixel(id);
+
+    // Close dropdown after selection
+    setDropdownOpen((prev) => ({
+      ...prev,
+      [field]: false,
+    }));
+  };
+
   return (
-    <div className={styles.popupContainer}>
-      <div className={styles.popupContent}>
-        {step === 1 && (
-          <div>
-            <h3>Select Ad Account</h3>
-            {adAccounts.map((account) => (
-              <button key={account.id} onClick={() => setSelectedAdAccount(account.id)}>
-                {account.name}
-              </button>
-            ))}
+    <div className={styles.popupOverlay}>
+      <div className={styles.popupContent} ref={popupRef}>
+        <div className={styles.leftSide}>
+          <h3>“QuickCampaigns makes it super easy to create and manage ad campaigns. It's efficient, fast, and gets the job done without hassle.”</h3>
+        </div>
+        <div className={styles.rightSide}>
+          <div className={styles.stepIndicator}>
+            <div
+              className={`${currentStep === 1 ? styles.active : ''}`}
+              onClick={() => setCurrentStep(1)}
+            ></div>
+            <div
+              className={`${currentStep === 2 ? styles.active : ''}`}
+              onClick={() => setCurrentStep(2)}
+            ></div>
+            <div
+              className={`${currentStep === 3 ? styles.active : ''}`}
+              onClick={() => setCurrentStep(3)}
+            ></div>
           </div>
-        )}
-        {step === 2 && (
-          <div>
-            <h3>Select Page</h3>
-            {pages.map((page) => (
-              <button key={page.id} onClick={() => setSelectedPage(page.id)}>
-                {page.name}
+
+          {currentStep === 1 && (
+            <div className={`${styles.stepContent} ${styles.active}`}>
+              <h3>Which ad account will you be using?</h3>
+              <p>You'll be able to create and manage campaigns with this ad account.</p>
+              <div className={styles.dropdownContainer}>
+                <div className={styles.customDropdown}>
+                  <div
+                    className={styles.dropdownHeader}
+                    onClick={() => toggleDropdown('adAccount')}
+                  >
+                    {selectedAdAccount ? selectedAdAccount : 'Select an ad account'}
+                  </div>
+                  {dropdownOpen.adAccount && (
+                    <div className={styles.dropdownList}>
+                      {adAccounts.map((account) => (
+                        <div key={account.id} className={styles.dropdownItem}>
+                          <input
+                            type="checkbox"
+                            checked={selectedAdAccount === account.id}
+                            onChange={() => handleSelect('adAccount', account.id)}
+                          />
+                          <span>{account.id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 2 && (
+            <div className={`${styles.stepContent} ${styles.active}`}>
+              <h3>Select your Facebook Page</h3>
+              <p>Select the Facebook page that you want to link to this ad account. This will be used to create your ads.</p>
+              <div className={styles.dropdownContainer}>
+                <div className={styles.customDropdown}>
+                  <div
+                    className={styles.dropdownHeader}
+                    onClick={() => toggleDropdown('page')}
+                  >
+                    {selectedPage ? pages.find((page) => page.id === selectedPage).name : 'Select a page'}
+                  </div>
+                  {dropdownOpen.page && (
+                    <div className={styles.dropdownList}>
+                      {pages.map((page) => (
+                        <div key={page.id} className={styles.dropdownItem}>
+                          <input
+                            type="checkbox"
+                            checked={selectedPage === page.id}
+                            onChange={() => handleSelect('page', page.id, page.name)}
+                          />
+                          <span>{page.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {currentStep === 3 && (
+            <div className={`${styles.stepContent} ${styles.active}`}>
+              <h3>Select your Pixel</h3>
+              <p>Choose the Pixel that will be used to track the performance of your ad campaigns.</p>
+              <div className={styles.dropdownContainer}>
+                <div
+                  className={styles.customDropdown}
+                  onClick={() => toggleDropdown('pixel')}
+                >
+                  <div className={styles.dropdownHeader}>
+                    {selectedPixel ? selectedPixel : 'Select a pixel'}
+                  </div>
+                  {dropdownOpen.pixel && (
+                    <div className={styles.dropdownList}>
+                      {pixels.map((pixel) => (
+                        <div key={pixel.id} className={styles.dropdownItem}>
+                          <input
+                            type="checkbox"
+                            checked={selectedPixel === pixel.id}
+                            onChange={() => handleSelect('pixel', pixel.id)}
+                          />
+                          <span>{pixel.id}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className={styles.buttons}>
+            {currentStep > 1 && <button onClick={handlePrev}>Previous</button>}
+            {currentStep < 3 && (
+              <button
+                onClick={handleNext}
+                disabled={
+                  (!selectedAdAccount && currentStep === 1) ||
+                  (!selectedPage && currentStep === 2)
+                }
+              >
+                Next
               </button>
-            ))}
+            )}
+            {currentStep === 3 && <button onClick={handleSubmit}>Submit</button>}
           </div>
-        )}
-        {step === 3 && (
-          <div>
-            <h3>Select Pixel</h3>
-            {pixels.map((pixel) => (
-              <button key={pixel.id} onClick={() => setSelectedPixel(pixel.id)}>
-                {pixel.name}
-              </button>
-            ))}
-          </div>
-        )}
-        <button onClick={handleNext}>
-          {step < 3 ? 'Next' : 'Submit'}
-        </button>
-        <button onClick={onClose}>Close</button>
+        </div>
       </div>
     </div>
   );
