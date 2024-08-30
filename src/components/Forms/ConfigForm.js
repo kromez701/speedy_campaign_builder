@@ -160,7 +160,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch(`https://localhost/config/ad_account/${activeAccount.id}/config`, {
+        const response = await fetch(`https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`, {
           credentials: 'include' // Include credentials (cookies) in the request
         });
         const result = await response.json();

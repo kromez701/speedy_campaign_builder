@@ -19,7 +19,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     const fetchSubscriptionStatus = async () => {
       if (activeAccount) {
         try {
-          const response = await axios.get(`https://localhost/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+          const response = await axios.get(`https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
           setIsActiveSubscription(response.data.is_active);
         } catch (error) {
           console.error('Error fetching subscription status:', error);
@@ -35,7 +35,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   useEffect(() => {
     const fetchUserPlan = async () => {
       try {
-        const response = await axios.get('https://localhost/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
         setUserPlan(response.data.plan);
       } catch (error) {
         console.error('Error fetching user plan:', error);
@@ -50,7 +50,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     if (isActiveSubscription) {
       const fetchActiveAdAccountsCount = async () => {
         try {
-          const response = await axios.get('https://localhost/payment/active-ad-accounts', { withCredentials: true });
+          const response = await axios.get('https://backend.quickcampaigns.io/payment/active-ad-accounts', { withCredentials: true });
           setActiveAdAccountsCount(response.data.count);
         } catch (error) {
           console.error('Error fetching active ad accounts count:', error);
@@ -64,7 +64,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
 
   const handleSaveConfig = async () => {
     try {
-      const response = await fetch(`https://localhost/config/ad_account/${activeAccount.id}/config`, {
+      const response = await fetch(`https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

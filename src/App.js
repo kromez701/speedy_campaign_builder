@@ -24,7 +24,7 @@ const App = () => {
   useEffect(() => {
     const checkCurrentUser = async () => {
       try {
-        const response = await axios.get('https://localhost/auth/current_user', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/auth/current_user', { withCredentials: true });
         if (response.status === 200) {
           setUser(response.data.user);
         }
@@ -39,7 +39,7 @@ const App = () => {
 
   const handleAuthSuccess = async () => {
     try {
-      const response = await axios.get('https://localhost/auth/current_user', { withCredentials: true });
+      const response = await axios.get('https://backend.quickcampaigns.io/auth/current_user', { withCredentials: true });
       if (response.status === 200) {
         setUser(response.data.user);
         setAuthMode(null);
@@ -52,7 +52,7 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('https://localhost/auth/logout', {}, { withCredentials: true });
+      const response = await axios.post('https://backend.quickcampaigns.io/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
         setRedirectToMain(false);

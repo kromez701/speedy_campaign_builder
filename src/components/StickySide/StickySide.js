@@ -20,7 +20,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   const fetchAdAccountDetails = async (id) => {
     try {
-      const response = await axios.get(`https://localhost/auth/ad_account/${id}`, { withCredentials: true });
+      const response = await axios.get(`https://backend.quickcampaigns.io/auth/ad_account/${id}`, { withCredentials: true });
       setAdAccountDetails(response.data);
     } catch (error) {
       toast.error('Error fetching ad account details');  // Notify user of the error
@@ -31,10 +31,10 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {
-        const userPlanResponse = await axios.get('https://localhost/payment/user-subscription-status', { withCredentials: true });
+        const userPlanResponse = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
         setUserSubscriptionPlan(userPlanResponse.data.plan);
 
-        const adAccountsResponse = await axios.get('https://localhost/auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get('https://backend.quickcampaigns.io/auth/ad_accounts', { withCredentials: true });
 
         if (adAccountsResponse.data.ad_accounts.length > 0) {
           const activeAccount = adAccountsResponse.data.ad_accounts[0];
@@ -85,9 +85,9 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   const handleAddAdAccountClick = async () => {
     try {
-      const response = await axios.post('https://localhost/payment/add_ad_account', {}, { withCredentials: true });
+      const response = await axios.post('https://backend.quickcampaigns.io/payment/add_ad_account', {}, { withCredentials: true });
       if (response.status === 200) {
-        const newAdAccounts = await axios.get('https://localhost/auth/ad_accounts', { withCredentials: true });
+        const newAdAccounts = await axios.get('https://backend.quickcampaigns.io/auth/ad_accounts', { withCredentials: true });
         setAdAccounts(newAdAccounts.data.ad_accounts);
 
         const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
