@@ -56,18 +56,6 @@
   font-size: 0.9em;
 }
 
-.textareaField {
-  width: 100%;
-  max-width: 420px;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-  color: #333; /* Ensure consistent text color */
-}
-
 .manualOptions {
   display: flex;
   flex-direction: column; /* Stack placements vertically */
@@ -232,11 +220,6 @@
   padding: 8px 16px;
 }
 
-.manualOptions h4 {
-  margin-bottom: 8px;
-  font-size: 0px;
-}
-
 .manualOptions.disabled {
   opacity: 0.5;
 }
@@ -252,7 +235,7 @@
     font-size: 12px;
     padding: 8px 12px;
   }
-  
+
   .sectionHeader h3 {
     font-size: 14px;
     margin-bottom: 0px;
@@ -274,31 +257,6 @@
   }
 }
 
-.manualOptions {
-  display: flex;
-  flex-direction: column; /* Stack placements vertically */
-}
-
-@media (max-width: 768px) {
-  .manualOptions {
-    flex-direction: column; /* Keep placements in a single column on smaller screens */
-  }
-}
-
-@media (min-width: 769px) {
-  .manualOptions {
-    flex-direction: column; /* Still a single column on larger screens */
-  }
-}
-
-.sectionDivider2 {
-  border: 0;
-  border-top: 1px solid #ccc;
-  height: 0;
-  width: 100%;
-  margin: 16px 0;
-}
-
 .platformContainer {
   display: flex;
   justify-content: space-between;
@@ -316,29 +274,15 @@
   }
 }
 
-.manualOptions {
-  display: flex;
-  flex-direction: column; /* Stack placements vertically */
-}
-
-.platformContainer {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-
-@media (max-width: 768px) {
-  .platformContainer {
-    flex-direction: row; /* Ensure platforms are in a row on smaller screens */
-    flex-wrap: wrap; /* Allow wrapping if necessary */
-  }
-
-  .platformContainer .MuiFormControlLabel-root {
-    margin-right: 10px; /* Add some spacing between items in the row */
-  }
-}
-
 .platformContainer.disabled {
   opacity: 0.5;
   pointer-events: none;
+}
+
+.sectionDivider2 {
+  border: 0;
+  border-top: 1px solid #ccc;
+  height: 0;
+  width: 100%;
+  margin: 16px 0;
 }

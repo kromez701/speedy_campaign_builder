@@ -37,7 +37,7 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
 
   const fetchAdAccounts = async () => {
     try {
-      const response = await fetch(`https://graph.facebook.com/v10.0/me/adaccounts?access_token=${accessToken}`);
+      const response = await fetch(`https://graph.facebook.com/v10.0/me/adaccounts?fields=name,account_id&access_token=${accessToken}`);
       const data = await response.json();
       setAdAccounts(data.data || []);
     } catch (error) {
@@ -57,7 +57,7 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
 
   const fetchPixels = async () => {
     try {
-      const response = await fetch(`https://graph.facebook.com/v10.0/${selectedAdAccount}/adspixels?access_token=${accessToken}`);
+      const response = await fetch(`https://graph.facebook.com/v10.0/${selectedAdAccount}/adspixels?fields=name,id&access_token=${accessToken}`);
       const data = await response.json();
       setPixels(data.data || []);
     } catch (error) {
