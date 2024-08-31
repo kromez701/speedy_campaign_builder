@@ -414,6 +414,7 @@ const Main = ({ activeAccount }) => {
           onGoBack={() => handleShowForm('mainForm')}
           isNewCampaign={true}
           activeAccount={activeAccount}
+          objective={config.objective} // Pass selected objective
         />
       )}
 
@@ -426,6 +427,7 @@ const Main = ({ activeAccount }) => {
           isNewCampaign={false}
           activeAccount={activeAccount}
           campaignId={selectedCampaign}  // Pass the selected campaign ID
+          objective={config.objective} // Pass selected objective
         />
       )}
 

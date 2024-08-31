@@ -113,9 +113,6 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
       return newConfig;
     });
 
-    if (name === 'objective') {
-      setShowAppStoreUrl(value === 'OUTCOME_APP_PROMOTION');
-    }
     if (name === 'ad_set_bid_strategy' || name === 'campaign_bid_strategy') {
       setShowBidAmount(['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(value));
     }
@@ -188,38 +185,6 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
 
   return (
     <div className={styles.formContainer}>
-      <h3 className={styles.title}>Campaign Level</h3>
-      <label className={styles.labelText} htmlFor="objective">Objective:</label>
-      <select
-        id="objective"
-        name="objective"
-        value={config.objective}
-        onChange={handleChange}
-        className={styles.selectField}
-      >
-        <option value="OUTCOME_LEADS">Leads</option>
-        <option value="OUTCOME_SALES">Sales</option>
-        <option value="OUTCOME_ENGAGEMENT">Engagement</option>
-        <option value="OUTCOME_AWARENESS">Awareness</option>
-        <option value="OUTCOME_TRAFFIC">Traffic</option>
-        <option value="OUTCOME_APP_PROMOTION">App Promotion</option>
-      </select>
-
-      {showAppStoreUrl && (
-        <div>
-          <label className={styles.labelText} htmlFor="object_store_url">App Store URL:</label>
-          <input
-            type="text"
-            id="object_store_url"
-            name="object_store_url"
-            value={config.object_store_url}
-            onChange={handleChange}
-            className={styles.inputField}
-            required={showAppStoreUrl}
-          />
-        </div>
-      )}
-
       <label className={styles.labelText} htmlFor="campaign_budget_optimization">Campaign Budget Optimization:</label>
       <select
         id="campaign_budget_optimization"
@@ -275,9 +240,6 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         <option value="AUCTION">Auction</option>
         <option value="RESERVED">Reserved</option>
       </select>
-
-      <h3 className={styles.subtitle}>Ad Set Level</h3>
-
       {config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION' && (
         <>
           <label className={styles.labelText} htmlFor="ad_set_budget_optimization">Ad Set Budget Optimization:</label>

@@ -6,14 +6,18 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import styles from '../Forms/CampaignForm.module.css';
 
-const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount, campaignId: initialCampaignId }) => {
+const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount, campaignId: initialCampaignId, objective }) => {
   const [campaignName, setCampaignName] = useState('');
   const [campaignId, setCampaignId] = useState(initialCampaignId || '');
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [isActiveSubscription, setIsActiveSubscription] = useState(false);
   const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
   const [userPlan, setUserPlan] = useState('');
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState({
+    creativeUploading: true,
+    budgetSchedule: true,
+  });
+  const [uploadedFiles, setUploadedFiles] = useState([]);
 
   // Ref for file input
   const fileInputRef = useRef(null);
@@ -113,6 +117,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       return;
     }
 
+    if (uploadedFiles.length === 0) {
+      toast.error('Please upload at least one file.');
+      fileInputRef.current.scrollIntoView({ behavior: 'smooth' });
+      toggleSection('creativeUploading');
+      return;
+    }
+
     const formData = new FormData(event.target);
 
     if (isNewCampaign) {
@@ -120,6 +131,8 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     } else {
       formData.append('campaign_id', campaignId);  // No need for user input, it's set from Main
     }
+
+    formData.append('objective', objective);  // Append the objective
 
     for (const [key, value] of Object.entries(savedConfig)) {
       if (typeof value === 'object') {
@@ -136,6 +149,11 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     if (fileInputRef.current) {
       fileInputRef.current.click();  // Trigger the file input click
     }
+  };
+
+  const handleFileChange = (event) => {
+    const files = Array.from(event.target.files);
+    setUploadedFiles(files);
   };
 
   return (
@@ -157,26 +175,10 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       
       <div className={styles.formSectionsContainer}>
         <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">
-          {isNewCampaign && (
-            <>
-              <label htmlFor="campaignName">Campaign Name:</label>
-              <input
-                type="text"
-                id="campaignName"
-                name="campaignName"
-                placeholder='Enter Name'
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                required
-                className={styles.inputField}
-              />
-            </>
-          )}
-
           {/* Creative Uploading Section */}
           <div className={styles.sectionBox}>
             <div className={styles.sectionHeader} onClick={() => toggleSection('creativeUploading')}>
-              <h3>Creative Uploading</h3>
+              <h3>Creative Uploading {uploadedFiles.length > 0 && `(${uploadedFiles.length} files uploaded)`}</h3>
               <img
                 src="/assets/Vectorw.svg"
                 alt="Toggle Section"
@@ -199,6 +201,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
                   required 
                   className={styles.hiddenFileInput} 
                   ref={fileInputRef}  // Attach ref here
+                  onChange={handleFileChange}  // Handle file changes
                 />
               </div>
             )}
@@ -215,19 +218,36 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
                 className={`${styles.toggleIcon} ${expandedSections['budgetSchedule'] ? styles.expanded : ''}`}
               />
             </div>
-            <ConfigForm 
-              initialConfig={initialConfig} 
-              isNewCampaign={isNewCampaign} 
-              onSaveConfig={setSavedConfig} 
-              activeAccount={activeAccount} // Passing activeAccount here
-            />
+            {expandedSections['budgetSchedule'] && (
+              <ConfigForm 
+                initialConfig={initialConfig} 
+                isNewCampaign={isNewCampaign} 
+                onSaveConfig={setSavedConfig} 
+                activeAccount={activeAccount} // Passing activeAccount here
+              />
+            )}
+          </div>
+          {isNewCampaign && (
+            <>
+              <label htmlFor="campaignName">Campaign Name:</label>
+              <input
+                type="text"
+                id="campaignName"
+                name="campaignName"
+                placeholder='Enter Name'
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                required
+                className={styles.inputField}
+              />
+            </>
+          )}
+          <div className={styles.buttonContainer}>
+              <button type="submit" className={styles.createAdButton}>Create Ad</button>
+              <button type="button" className={styles.goBackButton} onClick={onGoBack}>Cancel</button>
+              <button type="button" onClick={handleSaveConfig} className={styles.createAdButton}>Save Config</button>
           </div>
         </form>
-      </div>
-      <div className={styles.buttonContainer}>
-            <button type="submit" className={styles.createAdButton}>Create Ad</button>
-            <button type="button" className={styles.goBackButton} onClick={onGoBack}>Cancel</button>
-            <button type="button" onClick={handleSaveConfig} className={styles.createAdButton}>Save Config</button>
       </div>
     </div>
   );
@@ -241,6 +261,7 @@ CampaignForm.propTypes = {
   onGoBack: PropTypes.func.isRequired,
   activeAccount: PropTypes.object.isRequired,
   campaignId: PropTypes.string,
+  objective: PropTypes.string.isRequired, // Include objective as a required prop
 };
 
 export default CampaignForm;

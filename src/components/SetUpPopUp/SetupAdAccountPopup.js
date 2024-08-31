@@ -7,8 +7,11 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
   const [pages, setPages] = useState([]);
   const [pixels, setPixels] = useState([]);
   const [selectedAdAccount, setSelectedAdAccount] = useState('');
+  const [selectedAdAccountName, setSelectedAdAccountName] = useState('');
   const [selectedPage, setSelectedPage] = useState('');
+  const [selectedPageName, setSelectedPageName] = useState('');
   const [selectedPixel, setSelectedPixel] = useState('');
+  const [selectedPixelName, setSelectedPixelName] = useState('');
 
   // State for managing dropdown visibility
   const [dropdownOpen, setDropdownOpen] = useState({
@@ -99,9 +102,18 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
   };
 
   const handleSelect = (field, id, name) => {
-    if (field === 'adAccount') setSelectedAdAccount(id);
-    if (field === 'page') setSelectedPage(id);
-    if (field === 'pixel') setSelectedPixel(id);
+    if (field === 'adAccount') {
+      setSelectedAdAccount(id);
+      setSelectedAdAccountName(name);
+    }
+    if (field === 'page') {
+      setSelectedPage(id);
+      setSelectedPageName(name);
+    }
+    if (field === 'pixel') {
+      setSelectedPixel(id);
+      setSelectedPixelName(name);
+    }
 
     setDropdownOpen((prev) => ({
       ...prev,
@@ -141,7 +153,7 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
                     className={styles.dropdownHeader}
                     onClick={() => toggleDropdown('adAccount')}
                   >
-                    {selectedAdAccount ? selectedAdAccount : 'Select an ad account'}
+                    {selectedAdAccountName ? selectedAdAccountName : 'Select an ad account'}
                   </div>
                   {dropdownOpen.adAccount && (
                     <div className={styles.dropdownList}>
@@ -149,14 +161,14 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
                         <div
                           key={account.id}
                           className={styles.dropdownItem}
-                          onClick={() => handleSelect('adAccount', account.id)}
+                          onClick={() => handleSelect('adAccount', account.id, account.name)}
                         >
                           <input
                             type="checkbox"
                             checked={selectedAdAccount === account.id}
-                            onChange={() => handleSelect('adAccount', account.id)}
+                            onChange={() => handleSelect('adAccount', account.id, account.name)}
                           />
-                          <span>{account.id}</span>
+                          <span>{account.name}</span>
                         </div>
                       ))}
                     </div>
@@ -176,7 +188,7 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
                     className={styles.dropdownHeader}
                     onClick={() => toggleDropdown('page')}
                   >
-                    {selectedPage ? pages.find((page) => page.id === selectedPage).name : 'Select a page'}
+                    {selectedPageName ? selectedPageName : 'Select a page'}
                   </div>
                   {dropdownOpen.page && (
                     <div className={styles.dropdownList}>
@@ -206,12 +218,9 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
               <h3>Select your Pixel</h3>
               <p>Choose the Pixel that will be used to track the performance of your ad campaigns.</p>
               <div className={styles.dropdownContainer}>
-                <div
-                  className={styles.customDropdown}
-                  onClick={() => toggleDropdown('pixel')}
-                >
+                <div className={styles.customDropdown} onClick={() => toggleDropdown('pixel')}>
                   <div className={styles.dropdownHeader}>
-                    {selectedPixel ? selectedPixel : 'Select a pixel'}
+                    {selectedPixelName ? selectedPixelName : 'Select a pixel'}
                   </div>
                   {dropdownOpen.pixel && (
                     <div className={styles.dropdownList}>
@@ -219,14 +228,14 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
                         <div
                           key={pixel.id}
                           className={styles.dropdownItem}
-                          onClick={() => handleSelect('pixel', pixel.id)}
+                          onClick={() => handleSelect('pixel', pixel.id, pixel.name)}
                         >
                           <input
                             type="checkbox"
                             checked={selectedPixel === pixel.id}
-                            onChange={() => handleSelect('pixel', pixel.id)}
+                            onChange={() => handleSelect('pixel', pixel.id, pixel.name)}
                           />
-                          <span>{pixel.id}</span>
+                          <span>{pixel.name}</span>
                         </div>
                       ))}
                     </div>
