@@ -13,7 +13,7 @@
   border-radius: 4px;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
-  color: #333;
+  color: #333; /* Ensure consistent text color */
 }
 
 .fieldsetContainer {
@@ -32,7 +32,7 @@
   margin-bottom: 5px;
   text-align: left;
   font-family: 'Poppins', sans-serif;
-  color: #333;
+  color: #333; /* Ensure consistent text color */
 }
 
 .title {
@@ -65,7 +65,7 @@
   border-radius: 4px;
   box-sizing: border-box;
   font-family: 'Poppins', sans-serif;
-  color: #333;
+  color: #333; /* Ensure consistent text color */
 }
 
 .manualOptions {
@@ -113,12 +113,12 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  margin-bottom: 30px; /* Add some space below the toggle */
+  margin-bottom: 30px;
   width: 100%;
 }
 
 .toggleButton {
-  flex: 0 0 auto; /* Ensure buttons don't stretch */
+  flex: 0 0 auto;
   padding: 10px 15px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -127,7 +127,7 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
   color: #5356FF;
-  margin-right: 0; /* Remove the margin between buttons */
+  margin-right: 0;
 }
 
 .toggleButton:first-child {
@@ -143,9 +143,9 @@
 .optimizationLabel {
   font-size: 14px;
   color: #050315B2;
-  margin-left: 20px; /* Add space between the buttons and the label */
-  margin-top: 10px; /* Ensure the label aligns nicely below the toggle buttons */
-  display: block; /* Force the label to be on its own line */
+  margin-left: 20px;
+  margin-top: 10px;
+  display: block;
 }
 
 .toggleButton.active {
@@ -154,7 +154,7 @@
 }
 
 .sectionBox {
-  padding: 0 15px; /* Padding inside each section box */
+  padding: 0 15px;
 }
 
 .sectionHeader {
@@ -186,21 +186,21 @@
 .sectionContent {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between; /* Space between columns */
+  justify-content: space-between;
   padding: 15px 0;
 }
 
 .sectionDivider {
   border-top: 1px solid #ccc;
-  margin-left: -15px; /* Negative margin to counteract the padding in .sectionBox */
+  margin-left: -15px;
   margin-right: -15px;
 }
 
 .column {
-  flex: 0 0 48%; /* Each column takes up 48% of the width */
+  flex: 0 0 48%;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px; /* Ensure there's spacing between rows */
+  margin-bottom: 20px;
 }
 
 .column label {
@@ -217,11 +217,12 @@
   font-size: 14px;
   border-radius: 5px;
   box-sizing: border-box;
+  color: #333; /* Ensure consistent text color */
 }
 
 @media (max-width: 768px) {
   .column {
-    flex: 0 0 100%; /* Switch to a single-column layout */
+    flex: 0 0 100%;
   }
 }
 
@@ -247,7 +248,8 @@
   }
 
   .optimizationLabel {
-    font-size: 14px; /* Reduce the label size for mobile */
-    margin-left: 10px; /* Adjust the margin for mobile */
+    font-size: 12px;
+    margin-left: 10px;
   }
 }
+

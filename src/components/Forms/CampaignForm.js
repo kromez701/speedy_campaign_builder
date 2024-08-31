@@ -167,13 +167,13 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       </div>
       <h2 className={styles.title}>Choose Your Launch Setting</h2>
       <p className={styles.subtitle}>Fill In The Required Fields To Generate And Launch Your Meta Ads</p>
-
+  
       <div className={styles.tutorialVideo}>
         <p>Tutorial video here</p>
       </div>
       
-      <div className={styles.formSectionsContainer}>
-        <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">
+      <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">
+        <div className={styles.formSectionsContainer}>
           {/* Creative Uploading Section */}
           <div className={styles.sectionBox}>
             <div className={styles.sectionHeader} onClick={() => toggleSection('creativeUploading')}>
@@ -206,37 +206,26 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
             )}
           </div>
           <hr className={styles.sectionDivider} />
-
+  
           <ConfigForm 
-                initialConfig={initialConfig} 
-                isNewCampaign={isNewCampaign} 
-                onSaveConfig={setSavedConfig} 
-                activeAccount={activeAccount} // Passing activeAccount here
-              />
-          {isNewCampaign && (
-            <>
-              <label htmlFor="campaignName">Campaign Name:</label>
-              <input
-                type="text"
-                id="campaignName"
-                name="campaignName"
-                placeholder='Enter Name'
-                value={campaignName}
-                onChange={(e) => setCampaignName(e.target.value)}
-                required
-                className={styles.inputField}
-              />
-            </>
-          )}
-          <div className={styles.buttonContainer}>
-              <button type="submit" className={styles.createAdButton}>Create Ad</button>
-              <button type="button" className={styles.goBackButton} onClick={onGoBack}>Cancel</button>
-              <button type="button" onClick={handleSaveConfig} className={styles.createAdButton}>Save Config</button>
-          </div>
-        </form>
-      </div>
+            initialConfig={initialConfig} 
+            isNewCampaign={isNewCampaign} 
+            onSaveConfig={setSavedConfig} 
+            activeAccount={activeAccount} 
+            campaignName={campaignName}  // Pass campaignName down
+            setCampaignName={setCampaignName}  // Pass setCampaignName down
+          />
+        </div>
+  
+        {/* Button container outside the formSectionsContainer */}
+        <div className={styles.buttonContainer}>
+          <button type="submit" className={styles.createAdButton}>Create Ad</button>
+          <button type="button" className={styles.goBackButton} onClick={onGoBack}>Cancel</button>
+          <button type="button" onClick={handleSaveConfig} className={styles.createAdButton}>Save Config</button>
+        </div>
+      </form>
     </div>
-  );
+  );  
 };
 
 CampaignForm.propTypes = {
