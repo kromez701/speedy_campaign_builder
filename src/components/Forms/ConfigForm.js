@@ -5,6 +5,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./ConfigForm.module.css";
+import Slider from "@mui/material/Slider";
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -27,10 +28,10 @@ const ConfigForm = ({
   initialConfig,
   isNewCampaign,
   activeAccount,
-  campaignName,  // Add campaignName prop
-  setCampaignName  // Add setCampaignName prop
+  campaignName,
+  setCampaignName,
 }) => {
-  const [isCBO, setIsCBO] = useState(false); // Set to false so that ABO is selected by default
+  const [isCBO, setIsCBO] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     budgetSchedule: true,
     assets: true,
@@ -81,7 +82,11 @@ const ConfigForm = ({
       messages: true,
       apps_sites: true,
     },
-    buying_type: initialConfig.buying_type || "AUCTION", // Ensure buying_type is always included
+    buying_type: initialConfig.buying_type || "AUCTION",
+    targeting_type: "Advantage",
+    location: "GB",
+    age_range: [18, 65],
+    gender: "All",
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(
@@ -149,7 +154,7 @@ const ConfigForm = ({
       if (name === "buying_type" && value === "RESERVED") {
         newConfig.campaign_budget_optimization = "AD_SET_BUDGET_OPTIMIZATION";
         newConfig.ad_set_bid_strategy = "";
-        setIsCBO(false); // Switch to ABO if buying_type is RESERVED
+        setIsCBO(false);
       }
 
       if (
@@ -159,7 +164,6 @@ const ConfigForm = ({
         newConfig.buying_type = "AUCTION";
       }
 
-      // Update showEndDate based on the new configuration
       if (
         name === "campaign_budget_optimization" ||
         name === "ad_set_budget_optimization"
@@ -185,7 +189,6 @@ const ConfigForm = ({
     }
   };
 
-  // Update showEndDate whenever CBO/ABO is toggled
   useEffect(() => {
     setShowEndDate(
       (isCBO && config.campaign_budget_optimization === "LIFETIME_BUDGET") ||
@@ -205,6 +208,13 @@ const ConfigForm = ({
         ...prevConfig.platforms,
         [name]: checked,
       },
+    }));
+  };
+
+  const handleSliderChange = (event, newValue) => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      age_range: newValue,
     }));
   };
 
@@ -551,13 +561,15 @@ const ConfigForm = ({
         {expandedSections["assets"] && (
           <div className={styles.sectionContent}>
             <div className={styles.column}>
-              <label htmlFor="performance_goal">Performance Goal:</label>
+              <label htmlFor="performance_goal" className={styles.labelText}>
+                Performance Goal:
+              </label>
               <select
                 id="performance_goal"
                 name="performance_goal"
                 value={config.performance_goal}
                 onChange={handleChange}
-                className={styles.select}
+                className={styles.selectField}
               >
                 <option value="">Select</option>
                 {/* Add your options here */}
@@ -565,13 +577,15 @@ const ConfigForm = ({
             </div>
 
             <div className={styles.column}>
-              <label htmlFor="facebook_page">Facebook Page:</label>
+              <label htmlFor="facebook_page" className={styles.labelText}>
+                Facebook Page:
+              </label>
               <select
                 id="facebook_page"
                 name="facebook_page"
                 value={config.facebook_page}
                 onChange={handleChange}
-                className={styles.select}
+                className={styles.selectField}
               >
                 <option value="">Select</option>
                 {/* Add your options here */}
@@ -579,7 +593,7 @@ const ConfigForm = ({
             </div>
 
             <div className={styles.column}>
-              <label htmlFor="instagram_account">
+              <label htmlFor="instagram_account" className={styles.labelText}>
                 Instagram Account (Optional):
               </label>
               <select
@@ -587,7 +601,7 @@ const ConfigForm = ({
                 name="instagram_account"
                 value={config.instagram_account}
                 onChange={handleChange}
-                className={styles.select}
+                className={styles.selectField}
               >
                 <option value="">Select</option>
                 {/* Add your options here */}
@@ -599,269 +613,560 @@ const ConfigForm = ({
       </div>
 
       <div className={styles.sectionBox}>
-  <div className={styles.sectionHeader} onClick={() => toggleSection('placements')}>
-    <h3>Placements</h3>
-    <img
-      src="/assets/Vectorw.svg"
-      alt="Toggle Section"
-      className={`${styles.toggleIcon} ${expandedSections['placements'] ? styles.expanded : ''}`}
-    />
-  </div>
-  {expandedSections['placements'] && (
-    <div className={styles.sectionContent}>
-      <div className={styles.placementToggle}>
-        <button
-          type="button"
-          className={`${styles.toggleButton} ${config.placement_type === 'Advantage' ? styles.active : ''}`}
-          onClick={() => handlePlacementTypeChange({ target: { value: 'Advantage' } })}
+        <div
+          className={styles.sectionHeader}
+          onClick={() => toggleSection("placements")}
         >
-          On
-        </button>
-        <button
-          type="button"
-          className={`${styles.toggleButton} ${styles.lastButton} ${config.placement_type === 'Manual' ? styles.active : ''}`}
-          onClick={() => handlePlacementTypeChange({ target: { value: 'Manual' } })}
-        >
-          Off
-        </button>
-        <span className={styles.optimizationLabel}>ADVANTAGE+ PLACEMENTS</span>
-      </div>
-
-      <div className={`${styles.manualOptions} ${config.placement_type === 'Advantage' ? styles.disabled : ''}`}>
-        <h4>Platforms</h4>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.facebook}
-              onChange={handlePlatformChange}
-              name="facebook"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Facebook"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.instagram}
-              onChange={handlePlatformChange}
-              name="instagram"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Instagram"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.audience_network}
-              onChange={handlePlatformChange}
-              name="audience_network"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Audience Network"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.messenger}
-              onChange={handlePlatformChange}
-              name="messenger"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Messenger"
-        />
-
-        <h4>Placements</h4>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.feeds}
-              onChange={handlePlacementChange}
-              name="feeds"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Feeds"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.stories}
-              onChange={handlePlacementChange}
-              name="stories"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Stories"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.in_stream}
-              onChange={handlePlacementChange}
-              name="in_stream"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="In-stream ads for videos and reels"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.search}
-              onChange={handlePlacementChange}
-              name="search"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Search results"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.messages}
-              onChange={handlePlacementChange}
-              name="messages"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Messages"
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.apps_sites}
-              onChange={handlePlacementChange}
-              name="apps_sites"
-              disabled={config.placement_type === 'Advantage'}
-              classes={{ root: styles.MuiCheckboxRoot }}
-            />
-          }
-          label="Apps and sites"
-        />
-      </div>
-    </div>
-  )}
-  <hr className={styles.sectionDivider} />
-</div>
-
-    {/* Targeting & Delivery Section */}
-<div className={styles.sectionBox}>
-        <div className={styles.sectionHeader} onClick={() => toggleSection('targetingDelivery')}>
-            <h3>Targeting & Delivery</h3>
-            <img
-                src="/assets/Vectorw.svg"
-                alt="Toggle Section"
-                className={`${styles.toggleIcon} ${expandedSections['targetingDelivery'] ? styles.expanded : ''}`}
-            />
+          <h3>Placements</h3>
+          <img
+            src="/assets/Vectorw.svg"
+            alt="Toggle Section"
+            className={`${styles.toggleIcon} ${
+              expandedSections["placements"] ? styles.expanded : ""
+            }`}
+          />
         </div>
-        {expandedSections['targetingDelivery'] && (
-            <div className={styles.sectionContent}>
-                <div className={styles.budgetOptimizationToggle}>
-                    <button
-                        type="button"
-                        className={`${styles.toggleButton} ${config.targeting_type === 'Advantage' ? styles.active : ''}`}
-                        onClick={() => handleTargetingTypeChange({ target: { value: 'Advantage' } })}
-                    >
-                        On
-                    </button>
-                    <button
-                        type="button"
-                        className={`${styles.toggleButton} ${styles.lastButton} ${config.targeting_type === 'Manual' ? styles.active : ''}`}
-                        onClick={() => handleTargetingTypeChange({ target: { value: 'Manual' } })}
-                    >
-                        Off
-                    </button>
-                    <span className={styles.optimizationLabel}>ADVANTAGE+ AUDIENCE</span>
-                </div>
-
-                {/* Location, Age Range, Gender */}
-                <div className={styles.column}>
-                    <label htmlFor="location" className={styles.labelText}>Location:</label>
-                    <select
-                        id="location"
-                        name="location"
-                        value={config.location}
-                        onChange={handleChange}
-                        className={styles.selectField}
-                    >
-                        <option value="US">United States</option>
-                        <option value="CA">Canada</option>
-                        {/* Add more options as needed */}
-                    </select>
-                </div>
-
-                <div className={styles.column}>
-                    <label htmlFor="age_range" className={styles.labelText}>Age Range:</label>
-                    <div className={styles.ageRangeContainer}>
-                        <select
-                            id="age_range_min"
-                            name="age_range_min"
-                            value={config.age_range_min}
-                            onChange={handleChange}
-                            className={styles.selectField}
-                        >
-                            {[...Array(48).keys()].map(age => (
-                                <option key={age + 18} value={age + 18}>{age + 18}</option>
-                            ))}
-                        </select>
-                        <span className={styles.ageRangeSeparator}>To</span>
-                        <select
-                            id="age_range_max"
-                            name="age_range_max"
-                            value={config.age_range_max}
-                            onChange={handleChange}
-                            className={styles.selectField}
-                        >
-                            {[...Array(48).keys()].map(age => (
-                                <option key={age + 18} value={age + 18}>{age + 18}</option>
-                            ))}
-                        </select>
-                    </div>
-                </div>
-
-                <div className={styles.column}>
-                    <label htmlFor="gender" className={styles.labelText}>Gender:</label>
-                    <select
-                        id="gender"
-                        name="gender"
-                        value={config.gender}
-                        onChange={handleChange}
-                        className={styles.selectField}
-                    >
-                        <option value="All">All</option>
-                        <option value="Male">Male</option>
-                        <option value="Female">Female</option>
-                    </select>
-                </div>
+        {expandedSections["placements"] && (
+          <div className={styles.sectionContent}>
+            <div className={styles.placementToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${
+                  config.placement_type === "Advantage" ? styles.active : ""
+                }`}
+                onClick={() =>
+                  handlePlacementTypeChange({ target: { value: "Advantage" } })
+                }
+              >
+                On
+              </button>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${styles.lastButton} ${
+                  config.placement_type === "Manual" ? styles.active : ""
+                }`}
+                onClick={() =>
+                  handlePlacementTypeChange({ target: { value: "Manual" } })
+                }
+              >
+                Off
+              </button>
+              <span className={styles.optimizationLabel}>
+                ADVANTAGE+ PLACEMENTS
+              </span>
             </div>
+
+            <div
+              className={`${styles.manualOptions} ${
+                config.placement_type === "Advantage" ? styles.disabled : ""
+              }`}
+            >
+              <h4>Platforms</h4>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.platforms.facebook}
+                    onChange={handlePlatformChange}
+                    name="facebook"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Facebook"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.platforms.instagram}
+                    onChange={handlePlatformChange}
+                    name="instagram"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Instagram"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.platforms.audience_network}
+                    onChange={handlePlatformChange}
+                    name="audience_network"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Audience Network"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.platforms.messenger}
+                    onChange={handlePlatformChange}
+                    name="messenger"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Messenger"
+              />
+
+              <h4>Placements</h4>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.feeds}
+                    onChange={handlePlacementChange}
+                    name="feeds"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Feeds"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.stories}
+                    onChange={handlePlacementChange}
+                    name="stories"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Stories"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.in_stream}
+                    onChange={handlePlacementChange}
+                    name="in_stream"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="In-stream ads for videos and reels"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.search}
+                    onChange={handlePlacementChange}
+                    name="search"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Search results"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.messages}
+                    onChange={handlePlacementChange}
+                    name="messages"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Messages"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={config.placements.apps_sites}
+                    onChange={handlePlacementChange}
+                    name="apps_sites"
+                    disabled={config.placement_type === "Advantage"}
+                    classes={{ root: styles.MuiCheckboxRoot }}
+                  />
+                }
+                label="Apps and sites"
+              />
+            </div>
+          </div>
         )}
         <hr className={styles.sectionDivider} />
-    </div>     
+      </div>
+
+      {/* Targeting & Delivery Section */}
+      <div className={styles.sectionBox}>
+        <div
+          className={styles.sectionHeader}
+          onClick={() => toggleSection("targetingDelivery")}
+        >
+          <h3>Targeting & Delivery</h3>
+          <img
+            src="/assets/Vectorw.svg"
+            alt="Toggle Section"
+            className={`${styles.toggleIcon} ${
+              expandedSections["targetingDelivery"] ? styles.expanded : ""
+            }`}
+          />
+        </div>
+        {expandedSections["targetingDelivery"] && (
+          <div className={styles.sectionContent}>
+            <div className={styles.budgetOptimizationToggle}>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${
+                  config.targeting_type === "Advantage" ? styles.active : ""
+                }`}
+                onClick={() =>
+                  setConfig((prevConfig) => ({
+                    ...prevConfig,
+                    targeting_type: "Advantage",
+                  }))
+                }
+              >
+                On
+              </button>
+              <button
+                type="button"
+                className={`${styles.toggleButton} ${styles.lastButton} ${
+                  config.targeting_type === "Manual" ? styles.active : ""
+                }`}
+                onClick={() =>
+                  setConfig((prevConfig) => ({
+                    ...prevConfig,
+                    targeting_type: "Manual",
+                  }))
+                }
+              >
+                Off
+              </button>
+              <span className={styles.optimizationLabel}>
+                ADVANTAGE+ AUDIENCE
+              </span>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="custom_audiences" className={styles.labelText}>
+                Custom Audiences (Optional):
+              </label>
+              <select
+                id="custom_audiences"
+                name="custom_audiences"
+                value={config.custom_audiences}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="">Select</option>
+                {/* Add custom audience options here */}
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="targeting_interests" className={styles.labelText}>
+                Targeting Interests (Optional):
+              </label>
+              <select
+                id="targeting_interests"
+                name="targeting_interests"
+                value={config.targeting_interests}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="">Select</option>
+                {/* Add targeting interests options here */}
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="location" className={styles.labelText}>
+                Locations:
+              </label>
+              <select
+                id="location"
+                name="location"
+                value={config.location}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="AF">Afghanistan</option>
+                <option value="AL">Albania</option>
+                <option value="DZ">Algeria</option>
+                <option value="AD">Andorra</option>
+                <option value="AO">Angola</option>
+                <option value="AG">Antigua and Barbuda</option>
+                <option value="AR">Argentina</option>
+                <option value="AM">Armenia</option>
+                <option value="AU">Australia</option>
+                <option value="AT">Austria</option>
+                <option value="AZ">Azerbaijan</option>
+                <option value="BS">Bahamas</option>
+                <option value="BH">Bahrain</option>
+                <option value="BD">Bangladesh</option>
+                <option value="BB">Barbados</option>
+                <option value="BY">Belarus</option>
+                <option value="BE">Belgium</option>
+                <option value="BZ">Belize</option>
+                <option value="BJ">Benin</option>
+                <option value="BT">Bhutan</option>
+                <option value="BO">Bolivia</option>
+                <option value="BA">Bosnia and Herzegovina</option>
+                <option value="BW">Botswana</option>
+                <option value="BR">Brazil</option>
+                <option value="BN">Brunei</option>
+                <option value="BG">Bulgaria</option>
+                <option value="BF">Burkina Faso</option>
+                <option value="BI">Burundi</option>
+                <option value="CV">Cabo Verde</option>
+                <option value="KH">Cambodia</option>
+                <option value="CM">Cameroon</option>
+                <option value="CA">Canada</option>
+                <option value="CF">Central African Republic</option>
+                <option value="TD">Chad</option>
+                <option value="CL">Chile</option>
+                <option value="CN">China</option>
+                <option value="CO">Colombia</option>
+                <option value="KM">Comoros</option>
+                <option value="CD">Congo (Democratic Republic)</option>
+                <option value="CG">Congo (Republic)</option>
+                <option value="CR">Costa Rica</option>
+                <option value="HR">Croatia</option>
+                <option value="CU">Cuba</option>
+                <option value="CY">Cyprus</option>
+                <option value="CZ">Czechia</option>
+                <option value="DK">Denmark</option>
+                <option value="DJ">Djibouti</option>
+                <option value="DM">Dominica</option>
+                <option value="DO">Dominican Republic</option>
+                <option value="EC">Ecuador</option>
+                <option value="EG">Egypt</option>
+                <option value="SV">El Salvador</option>
+                <option value="GQ">Equatorial Guinea</option>
+                <option value="ER">Eritrea</option>
+                <option value="EE">Estonia</option>
+                <option value="SZ">Eswatini</option>
+                <option value="ET">Ethiopia</option>
+                <option value="FJ">Fiji</option>
+                <option value="FI">Finland</option>
+                <option value="FR">France</option>
+                <option value="GA">Gabon</option>
+                <option value="GM">Gambia</option>
+                <option value="GE">Georgia</option>
+                <option value="DE">Germany</option>
+                <option value="GH">Ghana</option>
+                <option value="GR">Greece</option>
+                <option value="GD">Grenada</option>
+                <option value="GT">Guatemala</option>
+                <option value="GN">Guinea</option>
+                <option value="GW">Guinea-Bissau</option>
+                <option value="GY">Guyana</option>
+                <option value="HT">Haiti</option>
+                <option value="HN">Honduras</option>
+                <option value="HU">Hungary</option>
+                <option value="IS">Iceland</option>
+                <option value="IN">India</option>
+                <option value="ID">Indonesia</option>
+                <option value="IR">Iran</option>
+                <option value="IQ">Iraq</option>
+                <option value="IE">Ireland</option>
+                <option value="IL">Israel</option>
+                <option value="IT">Italy</option>
+                <option value="JM">Jamaica</option>
+                <option value="JP">Japan</option>
+                <option value="JO">Jordan</option>
+                <option value="KZ">Kazakhstan</option>
+                <option value="KE">Kenya</option>
+                <option value="KI">Kiribati</option>
+                <option value="KP">Korea (North)</option>
+                <option value="KR">Korea (South)</option>
+                <option value="KW">Kuwait</option>
+                <option value="KG">Kyrgyzstan</option>
+                <option value="LA">Laos</option>
+                <option value="LV">Latvia</option>
+                <option value="LB">Lebanon</option>
+                <option value="LS">Lesotho</option>
+                <option value="LR">Liberia</option>
+                <option value="LY">Libya</option>
+                <option value="LI">Liechtenstein</option>
+                <option value="LT">Lithuania</option>
+                <option value="LU">Luxembourg</option>
+                <option value="MG">Madagascar</option>
+                <option value="MW">Malawi</option>
+                <option value="MY">Malaysia</option>
+                <option value="MV">Maldives</option>
+                <option value="ML">Mali</option>
+                <option value="MT">Malta</option>
+                <option value="MH">Marshall Islands</option>
+                <option value="MR">Mauritania</option>
+                <option value="MU">Mauritius</option>
+                <option value="MX">Mexico</option>
+                <option value="FM">Micronesia</option>
+                <option value="MD">Moldova</option>
+                <option value="MC">Monaco</option>
+                <option value="MN">Mongolia</option>
+                <option value="ME">Montenegro</option>
+                <option value="MA">Morocco</option>
+                <option value="MZ">Mozambique</option>
+                <option value="MM">Myanmar</option>
+                <option value="NA">Namibia</option>
+                <option value="NR">Nauru</option>
+                <option value="NP">Nepal</option>
+                <option value="NL">Netherlands</option>
+                <option value="NZ">New Zealand</option>
+                <option value="NI">Nicaragua</option>
+                <option value="NE">Niger</option>
+                <option value="NG">Nigeria</option>
+                <option value="MK">North Macedonia</option>
+                <option value="NO">Norway</option>
+                <option value="OM">Oman</option>
+                <option value="PK">Pakistan</option>
+                <option value="PW">Palau</option>
+                <option value="PA">Panama</option>
+                <option value="PG">Papua New Guinea</option>
+                <option value="PY">Paraguay</option>
+                <option value="PE">Peru</option>
+                <option value="PH">Philippines</option>
+                <option value="PL">Poland</option>
+                <option value="PT">Portugal</option>
+                <option value="QA">Qatar</option>
+                <option value="RO">Romania</option>
+                <option value="RU">Russia</option>
+                <option value="RW">Rwanda</option>
+                <option value="KN">Saint Kitts and Nevis</option>
+                <option value="LC">Saint Lucia</option>
+                <option value="VC">Saint Vincent and the Grenadines</option>
+                <option value="WS">Samoa</option>
+                <option value="SM">San Marino</option>
+                <option value="ST">Sao Tome and Principe</option>
+                <option value="SA">Saudi Arabia</option>
+                <option value="SN">Senegal</option>
+                <option value="RS">Serbia</option>
+                <option value="SC">Seychelles</option>
+                <option value="SL">Sierra Leone</option>
+                <option value="SG">Singapore</option>
+                <option value="SK">Slovakia</option>
+                <option value="SI">Slovenia</option>
+                <option value="SB">Solomon Islands</option>
+                <option value="SO">Somalia</option>
+                <option value="ZA">South Africa</option>
+                <option value="SS">South Sudan</option>
+                <option value="ES">Spain</option>
+                <option value="LK">Sri Lanka</option>
+                <option value="SD">Sudan</option>
+                <option value="SR">Suriname</option>
+                <option value="SE">Sweden</option>
+                <option value="CH">Switzerland</option>
+                <option value="SY">Syria</option>
+                <option value="TW">Taiwan</option>
+                <option value="TJ">Tajikistan</option>
+                <option value="TZ">Tanzania</option>
+                <option value="TH">Thailand</option>
+                <option value="TL">Timor-Leste</option>
+                <option value="TG">Togo</option>
+                <option value="TO">Tonga</option>
+                <option value="TT">Trinidad and Tobago</option>
+                <option value="TN">Tunisia</option>
+                <option value="TR">Turkey</option>
+                <option value="TM">Turkmenistan</option>
+                <option value="TV">Tuvalu</option>
+                <option value="UG">Uganda</option>
+                <option value="UA">Ukraine</option>
+                <option value="AE">United Arab Emirates</option>
+                <option value="GB">United Kingdom</option>
+                <option value="US">United States</option>
+                <option value="UY">Uruguay</option>
+                <option value="UZ">Uzbekistan</option>
+                <option value="VU">Vanuatu</option>
+                <option value="VA">Vatican City</option>
+                <option value="VE">Venezuela</option>
+                <option value="VN">Vietnam</option>
+                <option value="YE">Yemen</option>
+                <option value="ZM">Zambia</option>
+                <option value="ZW">Zimbabwe</option>
+                <option value="PS">Palestine</option>
+                {/* Add location options here */}
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="gender" className={styles.labelText}>
+                Gender:
+              </label>
+              <select
+                id="gender"
+                name="gender"
+                value={config.gender}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="All">All</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="age_range" className={styles.labelText}>
+                Age Range ({config.age_range[0]} - {config.age_range[1]} Years)
+              </label>
+              <Slider
+                value={config.age_range}
+                onChange={handleSliderChange}
+                min={18}
+                max={65}
+                sx={{
+                  color: "#6A00FF",
+                  height: 8,
+                  "& .MuiSlider-thumb": {
+                    height: 22,
+                    width: 22,
+                    "&:focus, &:hover, &.Mui-active": {
+                      boxShadow: "inherit",
+                    },
+                  },
+                  "& .MuiSlider-track": {
+                    height: 8,
+                    borderRadius: 4,
+                  },
+                  "& .MuiSlider-rail": {
+                    height: 8,
+                    borderRadius: 4,
+                  },
+                }}
+              />
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="attribution_setting" className={styles.labelText}>
+                Attribution Setting:
+              </label>
+              <select
+                id="attribution_setting"
+                name="attribution_setting"
+                value={config.attribution_setting}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="">Select</option>
+                {/* Add attribution settings options here */}
+              </select>
+            </div>
+          </div>
+        )}
+        <hr className={styles.sectionDivider} />
+      </div>
 
       {/* Campaign & Tracking Section */}
       <div className={styles.sectionBox}>
-        <div className={styles.sectionHeader} onClick={() => toggleSection('campaignTracking')}>
+        <div
+          className={styles.sectionHeader}
+          onClick={() => toggleSection("campaignTracking")}
+        >
           <h3>Campaign & Tracking</h3>
           <img
             src="/assets/Vectorw.svg"
             alt="Toggle Section"
-            className={`${styles.toggleIcon} ${expandedSections['campaignTracking'] ? styles.expanded : ''}`}
+            className={`${styles.toggleIcon} ${
+              expandedSections["campaignTracking"] ? styles.expanded : ""
+            }`}
           />
         </div>
-        {expandedSections['campaignTracking'] && (
+        {expandedSections["campaignTracking"] && (
           <div className={styles.sectionContent}>
             <div className={styles.column}>
               <label className={styles.labelText} htmlFor="ad_format">
@@ -874,13 +1179,18 @@ const ConfigForm = ({
                 onChange={handleChange}
                 className={styles.selectField}
               >
-                <option value="Single image or video">Single image or video</option>
+                <option value="Single image or video">
+                  Single image or video
+                </option>
                 <option value="Carousel">Carousel</option>
               </select>
             </div>
 
             <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="ad_creative_primary_text">
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_primary_text"
+              >
                 Primary Text:
               </label>
               <textarea
@@ -894,7 +1204,10 @@ const ConfigForm = ({
             </div>
 
             <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="ad_creative_headline">
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_headline"
+              >
                 Headline:
               </label>
               <textarea
@@ -908,7 +1221,10 @@ const ConfigForm = ({
             </div>
 
             <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="ad_creative_description">
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_description"
+              >
                 Description:
               </label>
               <textarea
@@ -983,12 +1299,181 @@ const ConfigForm = ({
 
             {isNewCampaign && (
               <div className={styles.column}>
-                <label className={styles.labelText} htmlFor="campaignName">Campaign Name:</label>
+                <label className={styles.labelText} htmlFor="campaignName">
+                  Campaign Name:
+                </label>
                 <input
                   type="text"
                   id="campaignName"
                   name="campaignName"
-                  placeholder='Enter Name'
+                  placeholder="Enter Name"
+                  value={campaignName}
+                  onChange={(e) => setCampaignName(e.target.value)}
+                  required
+                  className={styles.inputField}
+                />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Campaign & Tracking Section */}
+      <div className={styles.sectionBox}>
+        <div
+          className={styles.sectionHeader}
+          onClick={() => toggleSection("campaignTracking")}
+        >
+          <h3>Campaign & Tracking</h3>
+          <img
+            src="/assets/Vectorw.svg"
+            alt="Toggle Section"
+            className={`${styles.toggleIcon} ${
+              expandedSections["campaignTracking"] ? styles.expanded : ""
+            }`}
+          />
+        </div>
+        {expandedSections["campaignTracking"] && (
+          <div className={styles.sectionContent}>
+            <div className={styles.column}>
+              <label className={styles.labelText} htmlFor="ad_format">
+                Ad Format:
+              </label>
+              <select
+                id="ad_format"
+                name="ad_format"
+                value={config.ad_format}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="Single image or video">
+                  Single image or video
+                </option>
+                <option value="Carousel">Carousel</option>
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_primary_text"
+              >
+                Primary Text:
+              </label>
+              <textarea
+                id="ad_creative_primary_text"
+                name="ad_creative_primary_text"
+                value={config.ad_creative_primary_text}
+                onChange={handleChange}
+                rows="4"
+                className={styles.textareaField}
+              />
+            </div>
+
+            <div className={styles.column}>
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_headline"
+              >
+                Headline:
+              </label>
+              <textarea
+                id="ad_creative_headline"
+                name="ad_creative_headline"
+                value={config.ad_creative_headline}
+                onChange={handleChange}
+                rows="4"
+                className={styles.textareaField}
+              />
+            </div>
+
+            <div className={styles.column}>
+              <label
+                className={styles.labelText}
+                htmlFor="ad_creative_description"
+              >
+                Description:
+              </label>
+              <textarea
+                id="ad_creative_description"
+                name="ad_creative_description"
+                value={config.ad_creative_description}
+                onChange={handleChange}
+                rows="4"
+                className={styles.textareaField}
+              />
+            </div>
+
+            <div className={styles.column}>
+              <label className={styles.labelText} htmlFor="call_to_action">
+                Call to Action:
+              </label>
+              <select
+                id="call_to_action"
+                name="call_to_action"
+                value={config.call_to_action}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="SHOP_NOW">Shop Now</option>
+                <option value="LEARN_MORE">Learn More</option>
+                <option value="SIGN_UP">Sign Up</option>
+                <option value="SUBSCRIBE">Subscribe</option>
+                <option value="CONTACT_US">Contact Us</option>
+                <option value="GET_OFFER">Get Offer</option>
+                <option value="GET_QUOTE">Get Quote</option>
+                <option value="DOWNLOAD">Download</option>
+                <option value="ORDER_NOW">Order Now</option>
+                <option value="BOOK_NOW">Book Now</option>
+                <option value="WATCH_MORE">Watch More</option>
+                <option value="APPLY_NOW">Apply Now</option>
+                <option value="BUY_TICKETS">Buy Tickets</option>
+                <option value="GET_SHOWTIMES">Get Showtimes</option>
+                <option value="LISTEN_NOW">Listen Now</option>
+                <option value="PLAY_GAME">Play Game</option>
+                <option value="REQUEST_TIME">Request Time</option>
+                <option value="SEE_MENU">See Menu</option>
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label className={styles.labelText} htmlFor="destination_url">
+                Destination URL:
+              </label>
+              <input
+                type="text"
+                id="destination_url"
+                name="destination_url"
+                value={config.destination_url}
+                onChange={handleChange}
+                className={styles.inputField}
+              />
+            </div>
+
+            <div className={styles.column}>
+              <label className={styles.labelText} htmlFor="url_parameters">
+                URL Parameters:
+              </label>
+              <input
+                type="text"
+                id="url_parameters"
+                name="url_parameters"
+                value={config.url_parameters}
+                onChange={handleChange}
+                className={styles.inputField}
+              />
+            </div>
+
+            {isNewCampaign && (
+              <div className={styles.column}>
+                <label className={styles.labelText} htmlFor="campaignName">
+                  Campaign Name:
+                </label>
+                <input
+                  type="text"
+                  id="campaignName"
+                  name="campaignName"
+                  placeholder="Enter Name"
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
                   required
@@ -1008,6 +1493,8 @@ ConfigForm.propTypes = {
   initialConfig: PropTypes.object.isRequired,
   isNewCampaign: PropTypes.bool.isRequired,
   activeAccount: PropTypes.object.isRequired,
+  campaignName: PropTypes.string.isRequired,
+  setCampaignName: PropTypes.func.isRequired,
 };
 
 export default ConfigForm;
