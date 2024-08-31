@@ -15,7 +15,6 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   const [userPlan, setUserPlan] = useState('');
   const [expandedSections, setExpandedSections] = useState({
     creativeUploading: true,
-    budgetSchedule: true,
   });
   const [uploadedFiles, setUploadedFiles] = useState([]);
 
@@ -208,25 +207,12 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
           </div>
           <hr className={styles.sectionDivider} />
 
-          {/* Budget & Schedule Section */}
-          <div className={styles.sectionBox}>
-            <div className={styles.sectionHeader} onClick={() => toggleSection('budgetSchedule')}>
-              <h3>Budget & Schedule</h3>
-              <img
-                src="/assets/Vectorw.svg"
-                alt="Toggle Section"
-                className={`${styles.toggleIcon} ${expandedSections['budgetSchedule'] ? styles.expanded : ''}`}
-              />
-            </div>
-            {expandedSections['budgetSchedule'] && (
-              <ConfigForm 
+          <ConfigForm 
                 initialConfig={initialConfig} 
                 isNewCampaign={isNewCampaign} 
                 onSaveConfig={setSavedConfig} 
                 activeAccount={activeAccount} // Passing activeAccount here
               />
-            )}
-          </div>
           {isNewCampaign && (
             <>
               <label htmlFor="campaignName">Campaign Name:</label>

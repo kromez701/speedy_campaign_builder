@@ -23,6 +23,10 @@ const getDefaultEndTime = () => {
 };
 
 const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount }) => {
+  const [isCBO, setIsCBO] = useState(false); // Set to false so that ABO is selected by default
+  const [expandedSections, setExpandedSections] = useState({
+    budgetSchedule: true,
+  });
   const [config, setConfig] = useState({
     app_events: getDefaultStartTime(),
     ad_creative_primary_text: '',
@@ -34,8 +38,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     display_link: initialConfig.display_link || '',
     destination_url: initialConfig.destination_url || '',
     campaign_budget_optimization: isNewCampaign
-      ? initialConfig.campaign_budget_optimization || 'AD_SET_BUDGET_OPTIMIZATION'
-      : 'AD_SET_BUDGET_OPTIMIZATION',
+      ? initialConfig.campaign_budget_optimization || 'DAILY_BUDGET'
+      : 'DAILY_BUDGET',
     ad_set_budget_optimization: initialConfig.ad_set_budget_optimization || 'DAILY_BUDGET',
     ad_set_budget_value: initialConfig.ad_set_budget_value || initialConfig.budget_value || '50.00',
     ad_set_bid_strategy: initialConfig.ad_set_bid_strategy || 'LOWEST_COST_WITHOUT_CAP',
@@ -60,6 +64,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
       messages: true,
       apps_sites: true,
     },
+    buying_type: initialConfig.buying_type || 'AUCTION', // Ensure buying_type is always included
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(initialConfig.objective === 'OUTCOME_APP_PROMOTION');
@@ -83,15 +88,18 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   }, [isNewCampaign]);
 
   useEffect(() => {
-    const shouldShowEndDate = (config.campaign_budget_optimization !== 'AD_SET_BUDGET_OPTIMIZATION' && config.campaign_budget_optimization === 'LIFETIME_BUDGET') ||
-                              (config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION' && config.ad_set_budget_optimization === 'LIFETIME_BUDGET');
     setShowBidAmount(
       ['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(config.campaign_bid_strategy) ||
       ['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(config.ad_set_bid_strategy)
     );
-    setShowEndDate(shouldShowEndDate);
+  
+    setShowEndDate(
+      config.ad_set_budget_optimization === 'LIFETIME_BUDGET' || 
+      config.campaign_budget_optimization === 'LIFETIME_BUDGET'
+    );
+  
     setShowPredictionId(config.buying_type === 'RESERVED');
-  }, [config.campaign_bid_strategy, config.ad_set_bid_strategy, config.ad_set_budget_optimization, config.campaign_budget_optimization, config.buying_type]);
+  }, [config.campaign_bid_strategy, config.ad_set_bid_strategy, config.ad_set_budget_optimization, config.campaign_budget_optimization, config.buying_type]);  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -100,31 +108,44 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         ...prevConfig,
         [name]: value,
       };
-
+  
       if (name === 'buying_type' && value === 'RESERVED') {
         newConfig.campaign_budget_optimization = 'AD_SET_BUDGET_OPTIMIZATION';
         newConfig.ad_set_bid_strategy = '';
+        setIsCBO(false); // Switch to ABO if buying_type is RESERVED
       }
-
+  
       if (name === 'campaign_budget_optimization' && value !== 'AD_SET_BUDGET_OPTIMIZATION') {
         newConfig.buying_type = 'AUCTION';
       }
-
+  
+      // Update showEndDate based on the new configuration
+      if (name === 'campaign_budget_optimization' || name === 'ad_set_budget_optimization') {
+        const shouldShowEndDate =
+          (newConfig.campaign_budget_optimization === 'LIFETIME_BUDGET' && isCBO) ||
+          (newConfig.ad_set_budget_optimization === 'LIFETIME_BUDGET' && !isCBO);
+        setShowEndDate(shouldShowEndDate);
+      }
+  
       return newConfig;
     });
-
+  
     if (name === 'ad_set_bid_strategy' || name === 'campaign_bid_strategy') {
       setShowBidAmount(['COST_CAP', 'LOWEST_COST_WITH_BID_CAP'].includes(value));
-    }
-    if (name === 'ad_set_budget_optimization' || name === 'campaign_budget_optimization') {
-      const shouldShowEndDate = (name === 'campaign_budget_optimization' && value === 'LIFETIME_BUDGET') ||
-                                (name === 'ad_set_budget_optimization' && value === 'LIFETIME_BUDGET' && config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION');
-      setShowEndDate(shouldShowEndDate);
     }
     if (name === 'buying_type') {
       setShowPredictionId(value === 'RESERVED');
     }
   };
+  
+  // Update showEndDate whenever CBO/ABO is toggled
+  useEffect(() => {
+    setShowEndDate(
+      (isCBO && config.campaign_budget_optimization === 'LIFETIME_BUDGET') ||
+      (!isCBO && config.ad_set_budget_optimization === 'LIFETIME_BUDGET')
+    );
+  }, [isCBO, config.campaign_budget_optimization, config.ad_set_budget_optimization]);
+  
 
   const handlePlatformChange = (e) => {
     const { name, checked } = e.target;
@@ -134,6 +155,13 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         ...prevConfig.platforms,
         [name]: checked,
       },
+    }));
+  };
+
+  const toggleSection = (section) => {
+    setExpandedSections(prevState => ({
+      ...prevState,
+      [section]: !prevState[section]
     }));
   };
 
@@ -185,87 +213,136 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
 
   return (
     <div className={styles.formContainer}>
-      <label className={styles.labelText} htmlFor="campaign_budget_optimization">Campaign Budget Optimization:</label>
-      <select
-        id="campaign_budget_optimization"
-        name="campaign_budget_optimization"
-        value={config.campaign_budget_optimization}
-        onChange={handleChange}
-        className={styles.selectField}
-      >
-        <option value="DAILY_BUDGET">Daily Budget</option>
-        <option value="LIFETIME_BUDGET">Lifetime Budget</option>
-        <option value="AD_SET_BUDGET_OPTIMIZATION">Ad Set Budget Optimization</option>
-      </select>
+      <div className={styles.sectionBox}>
+  <div className={styles.sectionHeader} onClick={() => toggleSection('budgetSchedule')}>
+    <h3>Budget & Schedule</h3>
+    <img
+      src="/assets/Vectorw.svg"
+      alt="Toggle Section"
+      className={`${styles.toggleIcon} ${expandedSections['budgetSchedule'] ? styles.expanded : ''}`}
+    />
+  </div>
+  {expandedSections['budgetSchedule'] && (
+    <div className={styles.sectionContent}>
+      <div className={styles.budgetOptimizationToggle}>
+        <button
+          type="button"
+          className={`${styles.toggleButton} ${!isCBO ? styles.active : ''}`}
+          onClick={() => setIsCBO(false)}
+        >
+          ABO
+        </button>
+        <button
+          type="button"
+          className={`${styles.toggleButton} ${styles.lastButton} ${isCBO ? styles.active : ''}`}
+          onClick={() => setIsCBO(true)}
+        >
+          CBO
+        </button>
+        <span className={styles.optimizationLabel}>BUDGET OPTIMIZATION</span>
+      </div>
 
-      {config.campaign_budget_optimization !== 'AD_SET_BUDGET_OPTIMIZATION' && (
-        <div>
-          <label className={styles.labelText} htmlFor="campaign_budget_value">Campaign Budget Value:</label>
-          <input
-            type="number"
-            id="campaign_budget_value"
-            name="campaign_budget_value"
-            value={config.campaign_budget_value}
-            onChange={handleChange}
-            className={styles.inputField}
-          />
-        </div>
-      )}
-
-      {config.campaign_budget_optimization !== 'AD_SET_BUDGET_OPTIMIZATION' && (
-        <div>
-          <label className={styles.labelText} htmlFor="campaign_bid_strategy">Campaign Bid Strategy:</label>
-          <select
-            id="campaign_bid_strategy"
-            name="campaign_bid_strategy"
-            value={config.campaign_bid_strategy}
-            onChange={handleChange}
-            className={styles.selectField}
-          >
-            <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
-            <option value="COST_CAP">Cost Cap</option>
-            <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
-          </select>
-        </div>
-      )}
-
-      <label className={styles.labelText} htmlFor="buying_type">Buying Type:</label>
-      <select
-        id="buying_type"
-        name="buying_type"
-        value={config.buying_type}
-        onChange={handleChange}
-        className={styles.selectField}
-      >
-        <option value="AUCTION">Auction</option>
-        <option value="RESERVED">Reserved</option>
-      </select>
-      {config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION' && (
+      {isCBO ? (
         <>
-          <label className={styles.labelText} htmlFor="ad_set_budget_optimization">Ad Set Budget Optimization:</label>
-          <select
-            id="ad_set_budget_optimization"
-            name="ad_set_budget_optimization"
-            value={config.ad_set_budget_optimization}
-            onChange={handleChange}
-            className={styles.selectField}
-          >
-            <option value="DAILY_BUDGET">Daily Budget</option>
-            <option value="LIFETIME_BUDGET">Lifetime Budget</option>
-          </select>
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="campaign_budget_optimization">Campaign Budget Optimization:</label>
+            <select
+              id="campaign_budget_optimization"
+              name="campaign_budget_optimization"
+              value={config.campaign_budget_optimization}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              <option value="DAILY_BUDGET">Daily Budget</option>
+              <option value="LIFETIME_BUDGET">Lifetime Budget</option>
+            </select>
+          </div>
 
-          <label className={styles.labelText} htmlFor="ad_set_budget_value">Ad Set Budget Value:</label>
-          <input
-            type="number"
-            id="ad_set_budget_value"
-            name="ad_set_budget_value"
-            value={config.ad_set_budget_value}
-            onChange={handleChange}
-            className={styles.inputField}
-          />
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="buying_type">Buying Type:</label>
+            <select
+              id="buying_type"
+              name="buying_type"
+              value={config.buying_type}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              <option value="AUCTION">Auction</option>
+              <option value="RESERVED">Reserved</option>
+            </select>
+          </div>
+
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="campaign_budget_value">Campaign Budget Value:</label>
+            <input
+              type="number"
+              id="campaign_budget_value"
+              name="campaign_budget_value"
+              value={config.campaign_budget_value}
+              onChange={handleChange}
+              className={styles.inputField}
+            />
+          </div>
+
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="campaign_bid_strategy">Campaign Bid Strategy:</label>
+            <select
+              id="campaign_bid_strategy"
+              name="campaign_bid_strategy"
+              value={config.campaign_bid_strategy}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
+              <option value="COST_CAP">Cost Cap</option>
+              <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
+            </select>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="ad_set_budget_optimization">Ad Set Budget Optimization:</label>
+            <select
+              id="ad_set_budget_optimization"
+              name="ad_set_budget_optimization"
+              value={config.ad_set_budget_optimization}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              <option value="DAILY_BUDGET">Daily Budget</option>
+              <option value="LIFETIME_BUDGET">Lifetime Budget</option>
+            </select>
+          </div>
+
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="ad_set_budget_value">Ad Set Budget Value:</label>
+            <input
+              type="number"
+              id="ad_set_budget_value"
+              name="ad_set_budget_value"
+              value={config.ad_set_budget_value}
+              onChange={handleChange}
+              className={styles.inputField}
+            />
+          </div>
+
+          <div className={styles.column}>
+            <label className={styles.labelText} htmlFor="buying_type">Buying Type:</label>
+            <select
+              id="buying_type"
+              name="buying_type"
+              value={config.buying_type}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              <option value="AUCTION">Auction</option>
+              <option value="RESERVED">Reserved</option>
+            </select>
+          </div>
 
           {showPredictionId && (
-            <div>
+            <div className={styles.column}>
               <label className={styles.labelText} htmlFor="prediction_id">Prediction ID:</label>
               <input
                 type="text"
@@ -279,7 +356,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
           )}
 
           {config.buying_type !== 'RESERVED' && (
-            <>
+            <div className={styles.column}>
               <label className={styles.labelText} htmlFor="ad_set_bid_strategy">Ad Set Bid Strategy:</label>
               <select
                 id="ad_set_bid_strategy"
@@ -292,13 +369,13 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 <option value="COST_CAP">Cost Cap</option>
                 <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
               </select>
-            </>
+            </div>
           )}
         </>
       )}
 
       {showEndDate && (
-        <div>
+        <div className={styles.column}>
           <label className={styles.labelText} htmlFor="ad_set_end_time">Ad Set End Time:</label>
           <input
             type="datetime-local"
@@ -312,7 +389,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
       )}
 
       {showBidAmount && (
-        <div>
+        <div className={styles.column}>
           <label className={styles.labelText} htmlFor="bid_amount">Bid Amount:</label>
           <input
             type="number"
@@ -324,6 +401,79 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
           />
         </div>
       )}
+
+      <div className={styles.column}>
+        <label className={styles.labelText} htmlFor="app_events">Schedule:</label>
+        <input
+          type="datetime-local"
+          id="app_events"
+          name="app_events"
+          value={config.app_events}
+          onChange={handleChange}
+          className={styles.inputField}
+        />
+      </div>
+    </div>
+  )}
+  <hr className={styles.sectionDivider} />
+</div>
+
+      {/* Assets Section */}
+      <div className={styles.sectionBox}>
+        <div className={styles.sectionHeader} onClick={() => toggleSection('assets')}>
+          <h3>Assets</h3>
+          <img
+            src="/assets/Vectorw.svg"
+            alt="Toggle Section"
+            className={`${styles.toggleIcon} ${expandedSections['assets'] ? styles.expanded : ''}`}
+          />
+        </div>
+        {expandedSections['assets'] && (
+          <div className={styles.sectionContent}>
+            <div className={styles.column}>
+              <label htmlFor="performance_goal">Performance Goal:</label>
+              <select
+                id="performance_goal"
+                name="performance_goal"
+                value={config.performance_goal}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="">Select</option>
+                {/* Add your options here */}
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="facebook_page">Facebook Page:</label>
+              <select
+                id="facebook_page"
+                name="facebook_page"
+                value={config.facebook_page}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="">Select</option>
+                {/* Add your options here */}
+              </select>
+            </div>
+
+            <div className={styles.column}>
+              <label htmlFor="instagram_account">Instagram Account (Optional):</label>
+              <select
+                id="instagram_account"
+                name="instagram_account"
+                value={config.instagram_account}
+                onChange={handleChange}
+                className={styles.select}
+              >
+                <option value="">Select</option>
+                {/* Add your options here */}
+              </select>
+            </div>
+          </div>
+        )}
+      </div>
 
       <label className={styles.labelText} htmlFor="location">Location:</label>
       <select
@@ -505,16 +655,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
           />
         </div>
       )}
+      <hr className={styles.sectionDivider} />
 
-      <label className={styles.labelText} htmlFor="app_events">Schedule:</label>
-      <input
-        type="datetime-local"
-        id="app_events"
-        name="app_events"
-        value={config.app_events}
-        onChange={handleChange}
-        className={styles.inputField}
-      />
 
       <h3 className={styles.subtitle}>Ad Level</h3>
       <label className={styles.labelText} htmlFor="ad_format">Ad Format:</label>

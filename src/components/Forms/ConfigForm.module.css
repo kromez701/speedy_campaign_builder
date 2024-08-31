@@ -1,6 +1,5 @@
-/* ConfigForm.module.css */
 .formContainer {
-  margin: 20px;
+  margin: 0;
 }
 
 .inputField,
@@ -34,20 +33,6 @@
   text-align: left;
   font-family: 'Poppins', sans-serif;
   color: #333;
-}
-
-.saveConfigButton,
-.goBackButton {
-  padding: 10px 20px;
-  margin-right: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.saveConfigButton {
-  background-color: #4CAF50;
-  color: white;
 }
 
 .title {
@@ -122,4 +107,147 @@
   cursor: pointer;
   transition: background-color 0.3s;
   font-weight: 600;
+}
+
+.budgetOptimizationToggle {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 30px; /* Add some space below the toggle */
+  width: 100%;
+}
+
+.toggleButton {
+  flex: 0 0 auto; /* Ensure buttons don't stretch */
+  padding: 10px 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  color: #5356FF;
+  margin-right: 0; /* Remove the margin between buttons */
+}
+
+.toggleButton:first-child {
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+}
+
+.lastButton {
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.optimizationLabel {
+  font-size: 14px;
+  color: #050315B2;
+  margin-left: 20px; /* Add space between the buttons and the label */
+  margin-top: 10px; /* Ensure the label aligns nicely below the toggle buttons */
+  display: block; /* Force the label to be on its own line */
+}
+
+.toggleButton.active {
+  background-color: #5356FF;
+  color: #fff;
+}
+
+.sectionBox {
+  padding: 0 15px; /* Padding inside each section box */
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.sectionHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  color:#1E1E1E;
+  margin-bottom: 10px;
+}
+
+.toggleIcon {
+  width: 10px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+.toggleIcon.expanded {
+  transform: rotate(180deg);
+}
+
+.sectionContent {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between; /* Space between columns */
+  padding: 15px 0;
+}
+
+.sectionDivider {
+  border-top: 1px solid #ccc;
+  margin-left: -15px; /* Negative margin to counteract the padding in .sectionBox */
+  margin-right: -15px;
+}
+
+.column {
+  flex: 0 0 48%; /* Each column takes up 48% of the width */
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px; /* Ensure there's spacing between rows */
+}
+
+.column label {
+  font-size: 14px;
+  color: #1E1E1E;
+  margin-bottom: 5px;
+  text-align: left;
+}
+
+.column input,
+.column select {
+  width: 100%;
+  padding: 10px;
+  font-size: 14px;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .column {
+    flex: 0 0 100%; /* Switch to a single-column layout */
+  }
+}
+
+@media (max-width: 520px) {
+  .toggleButton {
+    font-size: 12px;
+    padding: 8px 12px;
+  }
+  
+  .sectionHeader h3 {
+    font-size: 14px;
+    margin-bottom: 0px;
+  }
+
+  .column label {
+    font-size: 12px;
+  }
+
+  .column input,
+  .column select {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .optimizationLabel {
+    font-size: 14px; /* Reduce the label size for mobile */
+    margin-left: 10px; /* Adjust the margin for mobile */
+  }
 }
