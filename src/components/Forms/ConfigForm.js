@@ -1,18 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import ScopedGlobalStyle from './ConfigFormStyles';
 import { toast } from 'react-toastify';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import 'react-toastify/dist/ReactToastify.css';
-import '../ToastifyOverrides.css';
+import styles from './ConfigForm.module.css';
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
   startTime.setUTCDate(startTime.getUTCDate() + 1);
   startTime.setUTCHours(4, 0, 0, 0);
   const isoString = startTime.toISOString();
-  return isoString.slice(0, 19); // Ensure it is in correct format for datetime-local input with seconds
+  return isoString.slice(0, 19);
 };
 
 const getDefaultEndTime = () => {
@@ -20,21 +19,23 @@ const getDefaultEndTime = () => {
   endTime.setUTCDate(endTime.getUTCDate() + 2);
   endTime.setUTCHours(4, 0, 0, 0);
   const isoString = endTime.toISOString();
-  return isoString.slice(0, 19); // Ensure it is in correct format for datetime-local input with seconds
+  return isoString.slice(0, 19);
 };
 
 const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount }) => {
   const [config, setConfig] = useState({
     app_events: getDefaultStartTime(),
-    ad_creative_primary_text: "",
-    ad_creative_headline: "",
-    ad_creative_description: "",
-    call_to_action: "SHOP_NOW",
+    ad_creative_primary_text: '',
+    ad_creative_headline: '',
+    ad_creative_description: '',
+    call_to_action: 'SHOP_NOW',
     link: '',
     url_parameters: '',
     display_link: initialConfig.display_link || '',
     destination_url: initialConfig.destination_url || '',
-    campaign_budget_optimization: isNewCampaign ? (initialConfig.campaign_budget_optimization || 'AD_SET_BUDGET_OPTIMIZATION') : 'AD_SET_BUDGET_OPTIMIZATION',
+    campaign_budget_optimization: isNewCampaign
+      ? initialConfig.campaign_budget_optimization || 'AD_SET_BUDGET_OPTIMIZATION'
+      : 'AD_SET_BUDGET_OPTIMIZATION',
     ad_set_budget_optimization: initialConfig.ad_set_budget_optimization || 'DAILY_BUDGET',
     ad_set_budget_value: initialConfig.ad_set_budget_value || initialConfig.budget_value || '50.00',
     ad_set_bid_strategy: initialConfig.ad_set_bid_strategy || 'LOWEST_COST_WITHOUT_CAP',
@@ -59,7 +60,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
       messages: true,
       apps_sites: true,
     },
-  });  
+  });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(initialConfig.objective === 'OUTCOME_APP_PROMOTION');
   const [showBidAmount, setShowBidAmount] = useState(
@@ -160,8 +161,8 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        const response = await fetch(`https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`, {
-          credentials: 'include' // Include credentials (cookies) in the request
+        const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
+          credentials: 'include' 
         });
         const result = await response.json();
 
@@ -181,21 +182,20 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
     fetchConfig();
   }, [activeAccount.id]);
 
-  // Pass the config and handleChange back to the parent component
   useEffect(() => {
     onSaveConfig(config);
   }, [config, onSaveConfig]);
 
   return (
-    <div className="form-container2">
-      <ScopedGlobalStyle />
-      <h3>Campaign Level</h3>
-      <label htmlFor="objective">Objective:</label>
+    <div className={styles.formContainer}>
+      <h3 className={styles.title}>Campaign Level</h3>
+      <label className={styles.labelText} htmlFor="objective">Objective:</label>
       <select
         id="objective"
         name="objective"
         value={config.objective}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="OUTCOME_LEADS">Leads</option>
         <option value="OUTCOME_SALES">Sales</option>
@@ -207,24 +207,26 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
 
       {showAppStoreUrl && (
         <div>
-          <label htmlFor="object_store_url">App Store URL:</label>
+          <label className={styles.labelText} htmlFor="object_store_url">App Store URL:</label>
           <input
             type="text"
             id="object_store_url"
             name="object_store_url"
             value={config.object_store_url}
             onChange={handleChange}
+            className={styles.inputField}
             required={showAppStoreUrl}
           />
         </div>
       )}
 
-      <label htmlFor="campaign_budget_optimization">Campaign Budget Optimization:</label>
+      <label className={styles.labelText} htmlFor="campaign_budget_optimization">Campaign Budget Optimization:</label>
       <select
         id="campaign_budget_optimization"
         name="campaign_budget_optimization"
         value={config.campaign_budget_optimization}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="DAILY_BUDGET">Daily Budget</option>
         <option value="LIFETIME_BUDGET">Lifetime Budget</option>
@@ -233,25 +235,27 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
 
       {config.campaign_budget_optimization !== 'AD_SET_BUDGET_OPTIMIZATION' && (
         <div>
-          <label htmlFor="campaign_budget_value">Campaign Budget Value:</label>
+          <label className={styles.labelText} htmlFor="campaign_budget_value">Campaign Budget Value:</label>
           <input
             type="number"
             id="campaign_budget_value"
             name="campaign_budget_value"
             value={config.campaign_budget_value}
             onChange={handleChange}
+            className={styles.inputField}
           />
         </div>
       )}
 
       {config.campaign_budget_optimization !== 'AD_SET_BUDGET_OPTIMIZATION' && (
         <div>
-          <label htmlFor="campaign_bid_strategy">Campaign Bid Strategy:</label>
+          <label className={styles.labelText} htmlFor="campaign_bid_strategy">Campaign Bid Strategy:</label>
           <select
             id="campaign_bid_strategy"
             name="campaign_bid_strategy"
             value={config.campaign_bid_strategy}
             onChange={handleChange}
+            className={styles.selectField}
           >
             <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
             <option value="COST_CAP">Cost Cap</option>
@@ -260,321 +264,136 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         </div>
       )}
 
-      <label htmlFor="buying_type">Buying Type:</label>
+      <label className={styles.labelText} htmlFor="buying_type">Buying Type:</label>
       <select
         id="buying_type"
         name="buying_type"
         value={config.buying_type}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="AUCTION">Auction</option>
         <option value="RESERVED">Reserved</option>
       </select>
 
-      <h3>Ad Set Level</h3>
+      <h3 className={styles.subtitle}>Ad Set Level</h3>
 
       {config.campaign_budget_optimization === 'AD_SET_BUDGET_OPTIMIZATION' && (
         <>
-          <label htmlFor="ad_set_budget_optimization">Ad Set Budget Optimization:</label>
+          <label className={styles.labelText} htmlFor="ad_set_budget_optimization">Ad Set Budget Optimization:</label>
           <select
             id="ad_set_budget_optimization"
             name="ad_set_budget_optimization"
             value={config.ad_set_budget_optimization}
             onChange={handleChange}
+            className={styles.selectField}
           >
             <option value="DAILY_BUDGET">Daily Budget</option>
             <option value="LIFETIME_BUDGET">Lifetime Budget</option>
           </select>
 
-          <label htmlFor="ad_set_budget_value">Ad Set Budget Value:</label>
+          <label className={styles.labelText} htmlFor="ad_set_budget_value">Ad Set Budget Value:</label>
           <input
             type="number"
             id="ad_set_budget_value"
             name="ad_set_budget_value"
             value={config.ad_set_budget_value}
             onChange={handleChange}
+            className={styles.inputField}
           />
 
           {showPredictionId && (
             <div>
-              <label htmlFor="prediction_id">Prediction ID:</label>
+              <label className={styles.labelText} htmlFor="prediction_id">Prediction ID:</label>
               <input
                 type="text"
                 id="prediction_id"
                 name="prediction_id"
                 value={config.prediction_id}
                 onChange={handleChange}
+                className={styles.inputField}
               />
             </div>
           )}
 
           {config.buying_type !== 'RESERVED' && (
-            <label htmlFor="ad_set_bid_strategy">Ad Set Bid Strategy:</label>
-          )}
-          {config.buying_type !== 'RESERVED' && (
-            <select
-              id="ad_set_bid_strategy"
-              name="ad_set_bid_strategy"
-              value={config.ad_set_bid_strategy}
-              onChange={handleChange}
-            >
-              <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
-              <option value="COST_CAP">Cost Cap</option>
-              <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
-            </select>
+            <>
+              <label className={styles.labelText} htmlFor="ad_set_bid_strategy">Ad Set Bid Strategy:</label>
+              <select
+                id="ad_set_bid_strategy"
+                name="ad_set_bid_strategy"
+                value={config.ad_set_bid_strategy}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                <option value="LOWEST_COST_WITHOUT_CAP">Lowest Cost</option>
+                <option value="COST_CAP">Cost Cap</option>
+                <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
+              </select>
+            </>
           )}
         </>
       )}
 
       {showEndDate && (
         <div>
-          <label htmlFor="ad_set_end_time">Ad Set End Time:</label>
+          <label className={styles.labelText} htmlFor="ad_set_end_time">Ad Set End Time:</label>
           <input
             type="datetime-local"
             id="ad_set_end_time"
             name="ad_set_end_time"
             value={config.ad_set_end_time}
             onChange={handleChange}
+            className={styles.inputField}
           />
         </div>
       )}
 
       {showBidAmount && (
         <div>
-          <label htmlFor="bid_amount">Bid Amount:</label>
+          <label className={styles.labelText} htmlFor="bid_amount">Bid Amount:</label>
           <input
             type="number"
             id="bid_amount"
             name="bid_amount"
             value={config.bid_amount}
             onChange={handleChange}
+            className={styles.inputField}
           />
         </div>
       )}
 
-      <label htmlFor="location">Location:</label>
+      <label className={styles.labelText} htmlFor="location">Location:</label>
       <select
         id="location"
         name="location"
         value={config.location}
         onChange={handleChange}
+        className={styles.selectField}
       >
-        <option value="AF">Afghanistan</option>
-        <option value="AL">Albania</option>
-        <option value="DZ">Algeria</option>
-        <option value="AD">Andorra</option>
-        <option value="AO">Angola</option>
-        <option value="AG">Antigua and Barbuda</option>
-        <option value="AR">Argentina</option>
-        <option value="AM">Armenia</option>
-        <option value="AU">Australia</option>
-        <option value="AT">Austria</option>
-        <option value="AZ">Azerbaijan</option>
-        <option value="BS">Bahamas</option>
-        <option value="BH">Bahrain</option>
-        <option value="BD">Bangladesh</option>
-        <option value="BB">Barbados</option>
-        <option value="BY">Belarus</option>
-        <option value="BE">Belgium</option>
-        <option value="BZ">Belize</option>
-        <option value="BJ">Benin</option>
-        <option value="BT">Bhutan</option>
-        <option value="BO">Bolivia</option>
-        <option value="BA">Bosnia and Herzegovina</option>
-        <option value="BW">Botswana</option>
-        <option value="BR">Brazil</option>
-        <option value="BN">Brunei</option>
-        <option value="BG">Bulgaria</option>
-        <option value="BF">Burkina Faso</option>
-        <option value="BI">Burundi</option>
-        <option value="CV">Cabo Verde</option>
-        <option value="KH">Cambodia</option>
-        <option value="CM">Cameroon</option>
-        <option value="CA">Canada</option>
-        <option value="CF">Central African Republic</option>
-        <option value="TD">Chad</option>
-        <option value="CL">Chile</option>
-        <option value="CN">China</option>
-        <option value="CO">Colombia</option>
-        <option value="KM">Comoros</option>
-        <option value="CD">Congo (Democratic Republic)</option>
-        <option value="CG">Congo (Republic)</option>
-        <option value="CR">Costa Rica</option>
-        <option value="HR">Croatia</option>
-        <option value="CU">Cuba</option>
-        <option value="CY">Cyprus</option>
-        <option value="CZ">Czechia</option>
-        <option value="DK">Denmark</option>
-        <option value="DJ">Djibouti</option>
-        <option value="DM">Dominica</option>
-        <option value="DO">Dominican Republic</option>
-        <option value="EC">Ecuador</option>
-        <option value="EG">Egypt</option>
-        <option value="SV">El Salvador</option>
-        <option value="GQ">Equatorial Guinea</option>
-        <option value="ER">Eritrea</option>
-        <option value="EE">Estonia</option>
-        <option value="SZ">Eswatini</option>
-        <option value="ET">Ethiopia</option>
-        <option value="FJ">Fiji</option>
-        <option value="FI">Finland</option>
-        <option value="FR">France</option>
-        <option value="GA">Gabon</option>
-        <option value="GM">Gambia</option>
-        <option value="GE">Georgia</option>
-        <option value="DE">Germany</option>
-        <option value="GH">Ghana</option>
-        <option value="GR">Greece</option>
-        <option value="GD">Grenada</option>
-        <option value="GT">Guatemala</option>
-        <option value="GN">Guinea</option>
-        <option value="GW">Guinea-Bissau</option>
-        <option value="GY">Guyana</option>
-        <option value="HT">Haiti</option>
-        <option value="HN">Honduras</option>
-        <option value="HU">Hungary</option>
-        <option value="IS">Iceland</option>
-        <option value="IN">India</option>
-        <option value="ID">Indonesia</option>
-        <option value="IR">Iran</option>
-        <option value="IQ">Iraq</option>
-        <option value="IE">Ireland</option>
-        <option value="IL">Israel</option>
-        <option value="IT">Italy</option>
-        <option value="JM">Jamaica</option>
-        <option value="JP">Japan</option>
-        <option value="JO">Jordan</option>
-        <option value="KZ">Kazakhstan</option>
-        <option value="KE">Kenya</option>
-        <option value="KI">Kiribati</option>
-        <option value="KP">Korea (North)</option>
-        <option value="KR">Korea (South)</option>
-        <option value="KW">Kuwait</option>
-        <option value="KG">Kyrgyzstan</option>
-        <option value="LA">Laos</option>
-        <option value="LV">Latvia</option>
-        <option value="LB">Lebanon</option>
-        <option value="LS">Lesotho</option>
-        <option value="LR">Liberia</option>
-        <option value="LY">Libya</option>
-        <option value="LI">Liechtenstein</option>
-        <option value="LT">Lithuania</option>
-        <option value="LU">Luxembourg</option>
-        <option value="MG">Madagascar</option>
-        <option value="MW">Malawi</option>
-        <option value="MY">Malaysia</option>
-        <option value="MV">Maldives</option>
-        <option value="ML">Mali</option>
-        <option value="MT">Malta</option>
-        <option value="MH">Marshall Islands</option>
-        <option value="MR">Mauritania</option>
-        <option value="MU">Mauritius</option>
-        <option value="MX">Mexico</option>
-        <option value="FM">Micronesia</option>
-        <option value="MD">Moldova</option>
-        <option value="MC">Monaco</option>
-        <option value="MN">Mongolia</option>
-        <option value="ME">Montenegro</option>
-        <option value="MA">Morocco</option>
-        <option value="MZ">Mozambique</option>
-        <option value="MM">Myanmar</option>
-        <option value="NA">Namibia</option>
-        <option value="NR">Nauru</option>
-        <option value="NP">Nepal</option>
-        <option value="NL">Netherlands</option>
-        <option value="NZ">New Zealand</option>
-        <option value="NI">Nicaragua</option>
-        <option value="NE">Niger</option>
-        <option value="NG">Nigeria</option>
-        <option value="MK">North Macedonia</option>
-        <option value="NO">Norway</option>
-        <option value="OM">Oman</option>
-        <option value="PK">Pakistan</option>
-        <option value="PW">Palau</option>
-        <option value="PA">Panama</option>
-        <option value="PG">Papua New Guinea</option>
-        <option value="PY">Paraguay</option>
-        <option value="PE">Peru</option>
-        <option value="PH">Philippines</option>
-        <option value="PL">Poland</option>
-        <option value="PT">Portugal</option>
-        <option value="QA">Qatar</option>
-        <option value="RO">Romania</option>
-        <option value="RU">Russia</option>
-        <option value="RW">Rwanda</option>
-        <option value="KN">Saint Kitts and Nevis</option>
-        <option value="LC">Saint Lucia</option>
-        <option value="VC">Saint Vincent and the Grenadines</option>
-        <option value="WS">Samoa</option>
-        <option value="SM">San Marino</option>
-        <option value="ST">Sao Tome and Principe</option>
-        <option value="SA">Saudi Arabia</option>
-        <option value="SN">Senegal</option>
-        <option value="RS">Serbia</option>
-        <option value="SC">Seychelles</option>
-        <option value="SL">Sierra Leone</option>
-        <option value="SG">Singapore</option>
-        <option value="SK">Slovakia</option>
-        <option value="SI">Slovenia</option>
-        <option value="SB">Solomon Islands</option>
-        <option value="SO">Somalia</option>
-        <option value="ZA">South Africa</option>
-        <option value="SS">South Sudan</option>
-        <option value="ES">Spain</option>
-        <option value="LK">Sri Lanka</option>
-        <option value="SD">Sudan</option>
-        <option value="SR">Suriname</option>
-        <option value="SE">Sweden</option>
-        <option value="CH">Switzerland</option>
-        <option value="SY">Syria</option>
-        <option value="TW">Taiwan</option>
-        <option value="TJ">Tajikistan</option>
-        <option value="TZ">Tanzania</option>
-        <option value="TH">Thailand</option>
-        <option value="TL">Timor-Leste</option>
-        <option value="TG">Togo</option>
-        <option value="TO">Tonga</option>
-        <option value="TT">Trinidad and Tobago</option>
-        <option value="TN">Tunisia</option>
-        <option value="TR">Turkey</option>
-        <option value="TM">Turkmenistan</option>
-        <option value="TV">Tuvalu</option>
-        <option value="UG">Uganda</option>
-        <option value="UA">Ukraine</option>
-        <option value="AE">United Arab Emirates</option>
-        <option value="GB">United Kingdom</option>
-        <option value="US">United States</option>
-        <option value="UY">Uruguay</option>
-        <option value="UZ">Uzbekistan</option>
-        <option value="VU">Vanuatu</option>
-        <option value="VA">Vatican City</option>
-        <option value="VE">Venezuela</option>
-        <option value="VN">Vietnam</option>
-        <option value="YE">Yemen</option>
-        <option value="ZM">Zambia</option>
-        <option value="ZW">Zimbabwe</option>
-        <option value="PS">Palestine</option>
         {/* Add location options here */}
       </select>
 
-      <label htmlFor="age_range">Age Range:</label>
-      <div className="age-range-container">
+      <label className={styles.labelText} htmlFor="age_range">Age Range:</label>
+      <div className={styles.ageRangeContainer}>
         <select
           id="age_range_min"
           name="age_range_min"
           value={config.age_range_min}
           onChange={handleChange}
+          className={styles.selectField}
         >
           {[...Array(48).keys()].map(age => (
             <option key={age + 18} value={age + 18}>{age + 18}</option>
           ))}
         </select>
-        <span className="age-range-separator">To</span>
+        <span className={styles.ageRangeSeparator}>To</span>
         <select
           id="age_range_max"
           name="age_range_max"
           value={config.age_range_max}
           onChange={handleChange}
+          className={styles.selectField}
         >
           {[...Array(48).keys()].map(age => (
             <option key={age + 18} value={age + 18}>{age + 18}</option>
@@ -582,38 +401,41 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         </select>
       </div>
 
-      <label htmlFor="gender">Gender:</label>
+      <label className={styles.labelText} htmlFor="gender">Gender:</label>
       <select
         id="gender"
         name="gender"
         value={config.gender}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="All">All</option>
         <option value="Male">Male</option>
         <option value="Female">Female</option>
       </select>
 
-      <label htmlFor="placement_type">Placement Type:</label>
+      <label className={styles.labelText} htmlFor="placement_type">Placement Type:</label>
       <select
         id="placement_type"
         name="placement_type"
         value={config.placement_type}
         onChange={handlePlacementTypeChange}
+        className={styles.selectField}
       >
         <option value="Advantage">Advantage+ placements</option>
         <option value="Manual">Manual</option>
       </select>
 
       {config.placement_type === 'Manual' && (
-        <div className="manual-options">
-          <h4>Platforms</h4>
+        <div className={styles.manualOptions}>
+          <h4 className={styles.optionHeading}>Platforms</h4>
           <FormControlLabel
             control={
               <Checkbox
                 checked={config.platforms.facebook}
                 onChange={handlePlatformChange}
                 name="facebook"
+                className={styles.checkbox}
               />
             }
             label="Facebook"
@@ -624,6 +446,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.platforms.instagram}
                 onChange={handlePlatformChange}
                 name="instagram"
+                className={styles.checkbox}
               />
             }
             label="Instagram"
@@ -634,6 +457,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.platforms.audience_network}
                 onChange={handlePlatformChange}
                 name="audience_network"
+                className={styles.checkbox}
               />
             }
             label="Audience Network"
@@ -644,18 +468,20 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.platforms.messenger}
                 onChange={handlePlatformChange}
                 name="messenger"
+                className={styles.checkbox}
               />
             }
             label="Messenger"
           />
 
-          <h4>Placements</h4>
+          <h4 className={styles.optionHeading}>Placements</h4>
           <FormControlLabel
             control={
               <Checkbox
                 checked={config.placements.feeds}
                 onChange={handlePlacementChange}
                 name="feeds"
+                className={styles.checkbox}
               />
             }
             label="Feeds"
@@ -666,6 +492,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.placements.stories}
                 onChange={handlePlacementChange}
                 name="stories"
+                className={styles.checkbox}
               />
             }
             label="Stories"
@@ -676,6 +503,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.placements.in_stream}
                 onChange={handlePlacementChange}
                 name="in_stream"
+                className={styles.checkbox}
               />
             }
             label="In-stream ads for videos and reels"
@@ -686,6 +514,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.placements.search}
                 onChange={handlePlacementChange}
                 name="search"
+                className={styles.checkbox}
               />
             }
             label="Search results"
@@ -696,6 +525,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.placements.messages}
                 onChange={handlePlacementChange}
                 name="messages"
+                className={styles.checkbox}
               />
             }
             label="Messages"
@@ -706,6 +536,7 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
                 checked={config.placements.apps_sites}
                 onChange={handlePlacementChange}
                 name="apps_sites"
+                className={styles.checkbox}
               />
             }
             label="Apps and sites"
@@ -713,56 +544,62 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         </div>
       )}
 
-      <label htmlFor="app_events">Schedule:</label>
+      <label className={styles.labelText} htmlFor="app_events">Schedule:</label>
       <input
         type="datetime-local"
         id="app_events"
         name="app_events"
         value={config.app_events}
         onChange={handleChange}
+        className={styles.inputField}
       />
 
-      <h3>Ad Level</h3>
-      <label htmlFor="ad_format">Ad Format:</label>
+      <h3 className={styles.subtitle}>Ad Level</h3>
+      <label className={styles.labelText} htmlFor="ad_format">Ad Format:</label>
       <select
         id="ad_format"
         name="ad_format"
         value={config.ad_format}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="Single image or video">Single image or video</option>
         <option value="Carousel">Carousel</option>
       </select>
-      <label htmlFor="ad_creative_primary_text">Primary Text:</label>
+      <label className={styles.labelText} htmlFor="ad_creative_primary_text">Primary Text:</label>
       <textarea
         id="ad_creative_primary_text"
         name="ad_creative_primary_text"
         value={config.ad_creative_primary_text}
         onChange={handleChange}
         rows="4"
+        className={styles.textareaField}
       />
-      <label htmlFor="ad_creative_headline">Headline:</label>
+      <label className={styles.labelText} htmlFor="ad_creative_headline">Headline:</label>
       <textarea
         id="ad_creative_headline"
         name="ad_creative_headline"
         value={config.ad_creative_headline}
         onChange={handleChange}
         rows="4"
+        className={styles.textareaField}
       />
-      <label htmlFor="ad_creative_description">Description:</label>
+      <label className={styles.labelText} htmlFor="ad_creative_description">Description:</label>
       <textarea
         id="ad_creative_description"
         name="ad_creative_description"
         value={config.ad_creative_description}
         onChange={handleChange}
         rows="4"
+        className={styles.textareaField}
       />
-      <label htmlFor="call_to_action">Call to Action:</label>
+      <label className={styles.labelText} htmlFor="call_to_action">Call to Action:</label>
       <select
         id="call_to_action"
         name="call_to_action"
         value={config.call_to_action}
         onChange={handleChange}
+        className={styles.selectField}
       >
         <option value="SHOP_NOW">Shop Now</option>
         <option value="LEARN_MORE">Learn More</option>
@@ -783,21 +620,23 @@ const ConfigForm = ({ onSaveConfig, initialConfig, isNewCampaign, activeAccount 
         <option value="REQUEST_TIME">Request Time</option>
         <option value="SEE_MENU">See Menu</option>
       </select>
-      <label htmlFor="destination_url">Destination URL:</label>
+      <label className={styles.labelText} htmlFor="destination_url">Destination URL:</label>
       <input
         type="text"
         id="destination_url"
         name="destination_url"
         value={config.destination_url}
         onChange={handleChange}
+        className={styles.inputField}
       />
-      <label htmlFor="url_parameters">URL Parameters:</label>
+      <label className={styles.labelText} htmlFor="url_parameters">URL Parameters:</label>
       <input
         type="text"
         id="url_parameters"
         name="url_parameters"
         value={config.url_parameters}
         onChange={handleChange}
+        className={styles.inputField}
       />
     </div>
   );
@@ -807,7 +646,7 @@ ConfigForm.propTypes = {
   onSaveConfig: PropTypes.func.isRequired,
   initialConfig: PropTypes.object.isRequired,
   isNewCampaign: PropTypes.bool.isRequired,
-  activeAccount: PropTypes.object.isRequired, // Pass activeAccount as prop
+  activeAccount: PropTypes.object.isRequired,
 };
 
 export default ConfigForm;

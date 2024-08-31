@@ -4,12 +4,12 @@ import CampaignForm from '../Forms/CampaignForm';
 import ConfigForm from '../Forms/ConfigForm';
 import ProgressBar from '../ProgressBar/ProgressBar';
 import SuccessScreen from '../SuccessScreen';
-import ScopedGlobalStyle from './MainStyles';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../ToastifyOverrides.css';
+import styles from '../Main/MainStyles.module.css';
+import axios from 'axios';
 
-const socket = io('https://fbbackend.quickcampaigns.io');
+const socket = io('http://localhost:5001');
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -30,6 +30,68 @@ const Main = ({ activeAccount }) => {
   const [previousForm, setPreviousForm] = useState('mainForm');
   const [progress, setProgress] = useState(0);
   const [stepVisible, setStepVisible] = useState(false);
+  const [selectedObjective, setSelectedObjective] = useState('website');
+  const [campaignType, setCampaignType] = useState('new');
+  const [existingCampaigns, setExistingCampaigns] = useState([]);
+  const [selectedCampaign, setSelectedCampaign] = useState('');
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleObjectiveSelect = (objective) => {
+    setSelectedObjective(objective);
+
+    const objectiveMap = {
+      website: 'OUTCOME_SALES',
+      lead: 'OUTCOME_LEADS',
+      traffic: 'OUTCOME_TRAFFIC',
+    };
+
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      objective: objectiveMap[objective],
+    }));
+  };
+
+  const handleCampaignTypeSelect = async (type) => {
+    setCampaignType(type);
+  
+    if (type === 'existing' && activeAccount) {
+      try {
+        const response = await fetch(
+          `https://graph.facebook.com/v17.0/${activeAccount.ad_account_id}/campaigns?fields=id,name,status&access_token=${activeAccount.access_token}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+  
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Campaigns Data:', data.data);
+          if (data.data && data.data.length > 0) {
+            setExistingCampaigns(data.data); // Populate campaigns if data is available
+          } else {
+            toast.info('No campaigns available for this ad account.');
+            setExistingCampaigns([]); // Clear any previous campaigns
+          }
+        } else {
+          toast.warning('Please connect an Ad account first');
+          setExistingCampaigns([]); // Clear any previous campaigns
+        }
+      } catch (error) {
+        console.error('Error fetching existing campaigns from Facebook:', error);
+        toast.warning('Error fetching existing campaigns, Please ensure an Ad account is connected.');
+        setExistingCampaigns([]); // Clear any previous campaigns
+      }
+    }
+  };  
+
+  const handleCampaignSelect = (event) => {
+    setSelectedCampaign(event.target.value);
+    setDropdownOpen(false);
+  };
+
   const [step, setStep] = useState('');
   const [config, setConfig] = useState({
     objective: 'OUTCOME_SALES',
@@ -71,6 +133,7 @@ const Main = ({ activeAccount }) => {
       messages: true,
     },
   });
+
   const [taskId, setTaskId] = useState(null);
   const [uploadController, setUploadController] = useState(null);
   const [showHeader, setShowHeader] = useState(true);
@@ -130,10 +193,23 @@ const Main = ({ activeAccount }) => {
   }, [taskId]);
 
   const handleShowForm = (formId) => {
-    setPreviousForm(formId === 'configForm' ? previousForm : formId);
-    setFormId(formId);
+    if (campaignType === 'existing' && formId === 'next' && !selectedCampaign) {
+      toast.warning('Please select an existing campaign before proceeding.');
+      return;
+    }
+  
+    if (formId === 'configForm') {
+      setPreviousForm(formId);
+    } else {
+      setPreviousForm(formId);
+      setFormId(
+        campaignType === 'new' && formId === 'next' ? 'newCampaignForm' :
+        campaignType === 'existing' && formId === 'next' ? 'existingCampaignForm' :
+        formId
+      );
+    }
     setShowHeader(formId === 'mainForm');
-  };
+  };  
 
   const handleEditConfig = () => {
     setPreviousForm(formId);
@@ -157,7 +233,7 @@ const Main = ({ activeAccount }) => {
     }
 
     if (taskId) {
-      fetch('https://fbbackend.quickcampaigns.io/cancel_task', {
+      fetch('http://localhost:5001/cancel_task', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ task_id: taskId }),
@@ -178,15 +254,14 @@ const Main = ({ activeAccount }) => {
     const taskId = `task-${Math.random().toString(36).substr(2, 9)}`;
     setTaskId(taskId);
     formData.append('task_id', taskId);
-  
+
     console.log('activeAccount:', activeAccount);
-  
+
     if (!activeAccount || !activeAccount.ad_account_id) {
       toast.error('Ad account details are missing.');
       return;
     }
-  
-    // Use activeAccount's Facebook settings
+
     const adAccountConfig = {
       ad_account_id: activeAccount.ad_account_id,
       pixel_id: activeAccount.pixel_id,
@@ -195,13 +270,11 @@ const Main = ({ activeAccount }) => {
       app_secret: activeAccount.app_secret,
       access_token: activeAccount.access_token,
     };
-    
-    // Append adAccountConfig to formData
+
     Object.entries(adAccountConfig).forEach(([key, value]) => {
       formData.append(key, value);
     });
-    
-    // Debug: Log all the formData entries before submission
+
     console.log("Final formData entries before submission:");
     for (const pair of formData.entries()) {
       console.log(`${pair[0]}: ${pair[1]}`);
@@ -209,11 +282,11 @@ const Main = ({ activeAccount }) => {
 
     const controller = new AbortController();
     setUploadController(controller);
-  
+
     setProgress(0);
     setStepVisible(false);
-  
-    fetch('https://fbbackend.quickcampaigns.io/create_campaign', {
+
+    fetch('http://localhost:5001/create_campaign', {
       method: 'POST',
       body: formData,
       signal: controller.signal,
@@ -233,20 +306,106 @@ const Main = ({ activeAccount }) => {
         }
         setFormId('mainForm');
       });
-  
+
     handleShowForm('progress');
-};
+  };
 
   return (
-    <div className="container">
-      <ScopedGlobalStyle />
-      {showHeader && <h1>Facebook Ads Manager</h1>}
+    <div className={styles.container}>
       {formId === 'mainForm' && (
-        <div className="form-container">
-          <button className="option-button" onClick={() => handleShowForm('newCampaignForm')}>Create New Campaign</button>
-          <button className="option-button" onClick={() => handleShowForm('existingCampaignForm')}>Use Existing Campaign</button>
+        <div className={styles.formContainer}>
+          <h2 className={styles.heading}>Choose Campaign Objective</h2>
+          <div className={styles.objectiveContainer}>
+            <div
+              className={`${styles.objective} ${selectedObjective === 'website' ? styles.selected : ''}`}
+              onClick={() => handleObjectiveSelect('website')}
+            >
+              <div className={styles.icon}><img src="/assets/Website-Ad--Streamline-Atlas.png" alt="Website Conversions" /></div>
+              <div className={styles.content}>
+                <h3>Website Conversions</h3>
+                <p>Send people to your website and track conversions using the FB Pixel.</p>
+              </div>
+            </div>
+            <div
+              className={`${styles.objective} ${selectedObjective === 'lead' ? styles.selected : ''}`}
+              onClick={() => handleObjectiveSelect('lead')}
+            >
+              <div className={styles.icon}><img src="/assets/Device-Tablet-Search--Streamline-Tabler.png" alt="Lead Form Campaign" /></div>
+              <div className={styles.content}>
+                <h3>Lead Form Campaign</h3>
+                <p>Capture leads using instant forms from your ad account.</p>
+              </div>
+            </div>
+            <div
+              className={`${styles.objective} ${selectedObjective === 'traffic' ? styles.selected : ''}`}
+              onClick={() => handleObjectiveSelect('traffic')}
+            >
+              <div className={styles.icon}><img src="/assets/Click--Streamline-Tabler.png" alt="Traffic Campaign" /></div>
+              <div className={styles.content}>
+                <h3>Traffic Campaign</h3>
+                <p>Drive more visitors to your website through targeted traffic campaigns.</p>
+              </div>
+            </div>
+          </div>
+
+          <h2 className={styles.heading}>Configure Your Campaign</h2>
+          <div className={styles.campaignTypeContainer}>
+            <button
+              className={`${styles.campaignTypeButton} ${campaignType === 'new' ? styles.selected : ''}`}
+              onClick={() => handleCampaignTypeSelect('new')}
+            >
+              <img className={styles.buttonIcon} src="/assets/Component 2.png" alt="New Campaign" />
+              New Campaign
+            </button>
+            <button
+              className={`${styles.campaignTypeButton} ${campaignType === 'existing' ? styles.selected : ''}`}
+              onClick={() => handleCampaignTypeSelect('existing')}
+            >
+              <img className={styles.buttonIcon} src="/assets/Component 2 (1).png" alt="Existing Campaign" />
+              Existing Campaign
+            </button>
+          </div>
+
+          {campaignType === 'existing' && existingCampaigns.length > 0 && (
+            <div className={styles.dropdownContainer}>
+              <label htmlFor="campaignSelect"></label>
+              <div className={styles.customDropdown}>
+                <div
+                  className={styles.dropdownHeader}
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                >
+                  {selectedCampaign
+                    ? existingCampaigns.find((campaign) => campaign.id === selectedCampaign).name
+                    : 'Select a campaign'}
+                </div>
+                {dropdownOpen && (
+                  <div className={styles.dropdownList}>
+                    {existingCampaigns.map((campaign) => (
+                      <div
+                        key={campaign.id}
+                        className={styles.dropdownItem}
+                        onClick={() => handleCampaignSelect({ target: { value: campaign.id } })}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedCampaign === campaign.id}
+                          onChange={() => handleCampaignSelect({ target: { value: campaign.id } })}
+                        />
+                        <span>{campaign.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          <button className={styles.nextButton} onClick={() => handleShowForm('next')}>
+            Next
+          </button>
         </div>
       )}
+
       {formId === 'newCampaignForm' && (
         <CampaignForm
           formId="newCampaign"
@@ -254,9 +413,10 @@ const Main = ({ activeAccount }) => {
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
           isNewCampaign={true}
-          activeAccount={activeAccount}  // Pass activeAccount here
+          activeAccount={activeAccount}
         />
       )}
+
       {formId === 'existingCampaignForm' && (
         <CampaignForm
           formId="existingCampaign"
@@ -264,23 +424,25 @@ const Main = ({ activeAccount }) => {
           onEditConfig={handleEditConfig}
           onGoBack={() => handleShowForm('mainForm')}
           isNewCampaign={false}
-          activeAccount={activeAccount}  // Pass activeAccount here
+          activeAccount={activeAccount}
+          campaignId={selectedCampaign}  // Pass the selected campaign ID
         />
       )}
 
       {formId === 'configForm' && (
         <ConfigForm
-          activeAccount={activeAccount}  // Pass activeAccount here
+          activeAccount={activeAccount}
           initialConfig={config}
           onSaveConfig={handleSaveConfig}
           onCancel={handleCancelConfig}
           isNewCampaign={previousForm === 'newCampaignForm'}
         />
       )}
+
       {formId === 'progress' && (
-        <div className="progress-container">
+        <div className={styles.progressContainer}>
           <ProgressBar progress={progress} step={step} stepVisible={stepVisible} />
-          <button className="cancel-button" onClick={handleCancel}>Cancel</button>
+          <button className={styles.cancelButton} onClick={handleCancel}>Cancel</button>
         </div>
       )}
       {formId === 'successScreen' && (

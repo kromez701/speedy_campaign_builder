@@ -1,16 +1,19 @@
+// ProgressBar.js
 import React from 'react';
 import PropTypes from 'prop-types';
-import './ProgressBar.css';
+import styles from './ProgressBar.module.css';
 
 const ProgressBar = ({ progress, step, stepVisible }) => {
   return (
-    <div className="progress-container">
-      <div className="progress-bar">
-        <div className="progress-bar-fill" style={{ width: `${progress}%` }}>
-          {`${progress.toFixed(2)}%`} {/* Always show the percentage */}
+    <div className={styles.container}>
+      <div className={styles.progressContainer}>
+        <div className={styles.progressBar}>
+          <div className={styles.progressBarFill} style={{ width: `${progress}%` }}>
+            {`${progress.toFixed(2)}%`}
+          </div>
         </div>
+        {stepVisible && <div className={styles.progressBarStep}>{step}</div>}
       </div>
-      {stepVisible && <div className="progress-bar-step">{step}</div>} {/* Conditionally render the step */}
     </div>
   );
 };
@@ -18,7 +21,7 @@ const ProgressBar = ({ progress, step, stepVisible }) => {
 ProgressBar.propTypes = {
   progress: PropTypes.number.isRequired,
   step: PropTypes.string.isRequired,
-  stepVisible: PropTypes.bool.isRequired, // Add stepVisible prop type
+  stepVisible: PropTypes.bool.isRequired,
 };
 
 export default ProgressBar;

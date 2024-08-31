@@ -59,7 +59,7 @@
         console.log('ID Token: ' + id_token);
     
         // Send the ID token to your backend
-        fetch('https://backend.quickcampaigns.io/auth/google', {
+        fetch('http://localhost:5000/auth/google', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

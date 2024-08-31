@@ -1,0 +1,125 @@
+/* ConfigForm.module.css */
+.formContainer {
+  margin: 20px;
+}
+
+.inputField,
+.textareaField,
+.selectField {
+  width: 100%;
+  max-width: 500px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+.fieldsetContainer {
+  margin-bottom: 20px;
+  padding: 20px;
+  border: 1px solid #ccc;
+}
+
+.legendText {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.labelText {
+  display: block;
+  margin-bottom: 5px;
+  text-align: left;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+.saveConfigButton,
+.goBackButton {
+  padding: 10px 20px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.saveConfigButton {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.title {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 40px;
+  margin-top: 20px;
+}
+
+.ageRangeContainer {
+  display: flex;
+  align-items: center;
+}
+
+.ageRangeSeparator {
+  margin: 0 10px;
+  font-size: 0.9em;
+}
+
+.textareaField {
+  width: 100%;
+  max-width: 420px;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+  color: #333;
+}
+
+.manualOptions {
+  display: flex;
+  flex-direction: column;
+}
+
+.optionContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.checkbox {
+  margin-right: 10px;
+}
+
+.optionHeading {
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 10px;
+}
+
+.MuiCheckbox-root {
+  color: #5356FF;
+}
+
+.MuiCheckbox-root.Mui-checked {
+  color: #5356FF !important;
+}
+
+.button {
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  margin: 10px 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-weight: 600;
+}

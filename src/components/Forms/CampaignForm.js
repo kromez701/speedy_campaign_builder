@@ -1,25 +1,34 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import ConfigForm from './ConfigForm';
-import ScopedGlobalStyle from './CampaignFormStyles';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import '../ToastifyOverrides.css';
+import styles from '../Forms/CampaignForm.module.css';
 
-const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount }) => {
+const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onGoBack, activeAccount, campaignId: initialCampaignId }) => {
   const [campaignName, setCampaignName] = useState('');
-  const [campaignId, setCampaignId] = useState('');
+  const [campaignId, setCampaignId] = useState(initialCampaignId || '');
   const [savedConfig, setSavedConfig] = useState(initialConfig);
   const [isActiveSubscription, setIsActiveSubscription] = useState(false);
   const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
   const [userPlan, setUserPlan] = useState('');
+  const [expandedSections, setExpandedSections] = useState({});
+
+  // Ref for file input
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (!isNewCampaign && initialCampaignId) {
+      setCampaignId(initialCampaignId);
+    }
+  }, [initialCampaignId, isNewCampaign]);
 
   useEffect(() => {
     const fetchSubscriptionStatus = async () => {
       if (activeAccount) {
         try {
-          const response = await axios.get(`https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+          const response = await axios.get(`http://localhost:5000/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
           setIsActiveSubscription(response.data.is_active);
         } catch (error) {
           console.error('Error fetching subscription status:', error);
@@ -35,7 +44,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
   useEffect(() => {
     const fetchUserPlan = async () => {
       try {
-        const response = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
         setUserPlan(response.data.plan);
       } catch (error) {
         console.error('Error fetching user plan:', error);
@@ -50,7 +59,7 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     if (isActiveSubscription) {
       const fetchActiveAdAccountsCount = async () => {
         try {
-          const response = await axios.get('https://backend.quickcampaigns.io/payment/active-ad-accounts', { withCredentials: true });
+          const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
           setActiveAdAccountsCount(response.data.count);
         } catch (error) {
           console.error('Error fetching active ad accounts count:', error);
@@ -62,9 +71,16 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
     }
   }, [isActiveSubscription]);
 
+  const toggleSection = (section) => {
+    setExpandedSections(prevState => ({
+      ...prevState,
+      [section]: !prevState[section]
+    }));
+  };
+
   const handleSaveConfig = async () => {
     try {
-      const response = await fetch(`https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`, {
+      const response = await fetch(`http://localhost:5000/config/ad_account/${activeAccount.id}/config`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -76,7 +92,6 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       const result = await response.json();
       if (response.ok) {
         toast.success(result.message);
-        // You can remove the call to onSaveConfig here since we are saving the config directly
       } else {
         toast.error(result.message);
       }
@@ -100,10 +115,10 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
 
     const formData = new FormData(event.target);
 
-    if (formId === 'newCampaign') {
+    if (isNewCampaign) {
       formData.append('campaign_name', campaignName);
     } else {
-      formData.append('campaign_id', campaignId);
+      formData.append('campaign_id', campaignId);  // No need for user input, it's set from Main
     }
 
     for (const [key, value] of Object.entries(savedConfig)) {
@@ -114,66 +129,106 @@ const CampaignForm = ({ formId, onSubmit, initialConfig = {}, isNewCampaign, onG
       }
     }
         
-    onSubmit(formData, formId === 'newCampaign');
+    onSubmit(formData, isNewCampaign);
+  };
+
+  const handleFileUploadClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();  // Trigger the file input click
+    }
   };
 
   return (
-    <div className="form-container2">
-      <ScopedGlobalStyle />
-      <div className="header">
+    <div className={styles.formContainer}>
+      <div className={styles.header}>
         <img
           src="/assets/Vector4.png"
           alt="Go Back"
-          className="go-back-icon"
+          className={styles.goBackIcon}
           onClick={onGoBack}
         />
-        <h2>{formId === 'newCampaign' ? 'Create New Campaign' : 'Use Existing Campaign'}</h2>
       </div>
-      <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">
-        {formId === 'newCampaign' ? (
-          <>
-            <label htmlFor="campaignName">Campaign Name:</label>
-            <input
-              type="text"
-              id="campaignName"
-              name="campaignName"
-              placeholder='Enter Name'
-              value={campaignName}
-              onChange={(e) => setCampaignName(e.target.value)}
-              required
+      <h2 className={styles.title}>Choose Your Launch Setting</h2>
+      <p className={styles.subtitle}>Fill In The Required Fields To Generate And Launch Your Meta Ads</p>
+
+      <div className={styles.tutorialVideo}>
+        <p>Tutorial video here</p>
+      </div>
+      
+      <div className={styles.formSectionsContainer}>
+        <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">
+          {isNewCampaign && (
+            <>
+              <label htmlFor="campaignName">Campaign Name:</label>
+              <input
+                type="text"
+                id="campaignName"
+                name="campaignName"
+                placeholder='Enter Name'
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                required
+                className={styles.inputField}
+              />
+            </>
+          )}
+
+          {/* Creative Uploading Section */}
+          <div className={styles.sectionBox}>
+            <div className={styles.sectionHeader} onClick={() => toggleSection('creativeUploading')}>
+              <h3>Creative Uploading</h3>
+              <img
+                src="/assets/Vectorw.svg"
+                alt="Toggle Section"
+                className={`${styles.toggleIcon} ${expandedSections['creativeUploading'] ? styles.expanded : ''}`}
+              />
+            </div>
+            {expandedSections['creativeUploading'] && (
+              <div className={styles.sectionContent}>
+                <div className={styles.uploadBox} onClick={handleFileUploadClick}>
+                  <img src="/assets/Vector6.png" alt="Upload Icon" className={styles.uploadIcon} />
+                  <p>Click to upload or drag and drop</p>
+                </div>
+                <input 
+                  type="file" 
+                  id="uploadFolders" 
+                  name="uploadFolders" 
+                  webkitdirectory="true" 
+                  directory="true" 
+                  multiple 
+                  required 
+                  className={styles.hiddenFileInput} 
+                  ref={fileInputRef}  // Attach ref here
+                />
+              </div>
+            )}
+          </div>
+          <hr className={styles.sectionDivider} />
+
+          {/* Budget & Schedule Section */}
+          <div className={styles.sectionBox}>
+            <div className={styles.sectionHeader} onClick={() => toggleSection('budgetSchedule')}>
+              <h3>Budget & Schedule</h3>
+              <img
+                src="/assets/Vectorw.svg"
+                alt="Toggle Section"
+                className={`${styles.toggleIcon} ${expandedSections['budgetSchedule'] ? styles.expanded : ''}`}
+              />
+            </div>
+            <ConfigForm 
+              initialConfig={initialConfig} 
+              isNewCampaign={isNewCampaign} 
+              onSaveConfig={setSavedConfig} 
+              activeAccount={activeAccount} // Passing activeAccount here
             />
-          </>
-        ) : (
-          <>
-            <label htmlFor="campaignId">Campaign ID:</label>
-            <input
-              type="text"
-              id="campaignId"
-              name="campaignId"
-              placeholder='Enter Id'
-              value={campaignId}
-              onChange={(e) => setCampaignId(e.target.value)}
-              required
-            />
-          </>
-        )}
-
-        <label htmlFor="uploadFolders">Upload Folders:</label>
-        <input type="file" id="uploadFolders" name="uploadFolders" webkitdirectory="true" directory="true" multiple required />
-
-        <ConfigForm 
-          initialConfig={initialConfig} 
-          isNewCampaign={isNewCampaign} 
-          onSaveConfig={setSavedConfig} 
-          activeAccount={activeAccount} // Passing activeAccount here
-        />
-
-        <div className='button-container2'>
-          <button type="submit" className="create-ad-button">Create Ad</button>
-          <button type="button" className="go-back-button" onClick={onGoBack}>Cancel</button>
-          <button type="button" onClick={handleSaveConfig} className="create-ad-button">Save Config</button>
-        </div>
-      </form>
+          </div>
+        </form>
+      </div>
+      <div className={styles.buttonContainer}>
+            <button type="submit" className={styles.createAdButton}>Create Ad</button>
+            <button type="button" className={styles.goBackButton} onClick={onGoBack}>Cancel</button>
+            <button type="button" onClick={handleSaveConfig} className={styles.createAdButton}>Save Config</button>
+      </div>
     </div>
   );
 };
@@ -185,6 +240,7 @@ CampaignForm.propTypes = {
   isNewCampaign: PropTypes.bool.isRequired,
   onGoBack: PropTypes.func.isRequired,
   activeAccount: PropTypes.object.isRequired,
+  campaignId: PropTypes.string,
 };
 
 export default CampaignForm;

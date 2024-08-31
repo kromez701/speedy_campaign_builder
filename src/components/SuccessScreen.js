@@ -1,13 +1,16 @@
+// SuccessScreen.js
 import React from 'react';
 import PropTypes from 'prop-types';
-import './SuccessScreen.css'
+import styles from './SuccessScreen.module.css';
 
 const SuccessScreen = ({ onGoBack }) => {
   return (
-    <div className="form-container">
-      <h2>Success!</h2>
-      <p>Your ad campaign has been successfully created.</p>
-      <button className="success-go-back-button" onClick={onGoBack}>Go Back</button>
+    <div className={styles.container}>
+      <div className={styles.formContainer}>
+        <h2 className={styles.heading}>Success!</h2>
+        <p>Your ad campaign has been successfully created.</p>
+        <button className={styles.successGoBackButton} onClick={onGoBack}>Go Back</button>
+      </div>
     </div>
   );
 };
