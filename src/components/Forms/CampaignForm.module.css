@@ -1,8 +1,9 @@
+/* General Container Styles */
 .formContainer {
   text-align: center;
   font-family: 'Poppins', sans-serif;
-  width: 80%;
-  max-width: 600px; 
+  width: 100%; /* Make the container width 100% */
+  max-width: 600px; /* Max width remains 600px */
   margin: 20px auto; 
   padding: 20px;
   background-color: #fff;
@@ -11,8 +12,19 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  box-sizing: border-box; /* Ensure padding is included in the width */
 }
 
+/* Parent Container Styling */
+.parentContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0; /* Ensure no extra padding */
+  margin: 0; /* Ensure no extra margins */
+}
+
+/* Header Styles */
 .header {
   display: flex;
   align-items: center;
@@ -28,6 +40,7 @@
   margin-bottom: 10px;
 }
 
+/* Title and Subtitle Styles */
 .title {
   font-size: 24px;
   font-weight: 500;
@@ -42,6 +55,7 @@
   width: 100%;
 }
 
+/* Tutorial Video Styling */
 .tutorialVideo {
   width: 80%;
   height: 250px;
@@ -57,16 +71,17 @@
   margin-bottom: 40px;
 }
 
+/* Form Sections Container */
 .formSectionsContainer {
-  border: 1px solid #ccc; /* Border around the entire form sections container */
-  border-radius: 8px; /* Rounded corners */
-  background-color: #fff; /* Ensure background is white */
-  margin-left: 10px;
-  margin-right: 10px;
+  border: 1px solid #ccc; 
+  border-radius: 8px;
+  background-color: #fff;
+  margin: 0 auto; /* Center container */
   width: 100%;
+  box-sizing: border-box; /* Include padding/border in width calculations */
 }
 
-
+/* Section Box Styles */
 .sectionBox {
   padding: 0 15px; /* Padding inside each section box */
 }
@@ -106,6 +121,7 @@
   margin: 0;
 }
 
+/* Upload Box Styling */
 .uploadBox {
   width: 100%;
   height: 200px;
@@ -130,7 +146,7 @@
 
 .uploadBox p {
   color: #050315B2;
-  margin-top: 100px; /* Adjust this to move the text down below the icon */
+  margin-top: 100px; 
   margin-bottom: 35px;
 }
 
@@ -138,9 +154,10 @@
   display: none;
 }
 
+/* Input Field Styling */
 .inputField {
-  width: 420px;
-  max-width: 100%;
+  width: 100%; /* Ensure input fields are 100% width */
+  max-width: 420px; /* Maximum width of 420px */
   padding: 8px;
   margin-bottom: 10px;
   border: 1px solid #ccc;
@@ -149,6 +166,7 @@
   box-sizing: border-box;
 }
 
+/* Button Container Styling */
 .buttonContainer {
   display: flex;
   justify-content: flex-start;
@@ -185,16 +203,22 @@
   background-color: #0e0933;
 }
 
+/* Responsive Styling */
 @media (max-width: 520px) {
+  .formContainer {
+    width: 100%; /* Ensure it fits within the parent container */
+    padding: 15px; /* Adjust padding for smaller screens */
+  }
+
   .header h2 {
     font-size: 20px;
   }
 
-  .submitButton,
-  .goBackButton {
-    width: 100%;
+  .inputField {
+    width: 100%; /* Make input fields full width */
   }
 }
+
 @media (max-width: 768px) {
   .column {
     flex: 0 0 100%; /* Switch to a single-column layout */
@@ -222,3 +246,10 @@
   }
 }
 
+@media (max-width: 520px) {
+  .createAdButton, .goBackButton {
+    font-size: 11px; /* Adjust font size for smaller screens */
+    padding: 4px 12px; /* Adjust padding for smaller screens */
+    height: 36px; /* Adjust height for smaller screens */
+  }
+}

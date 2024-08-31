@@ -263,7 +263,7 @@ const CampaignForm = ({
         {/* Button container outside the formSectionsContainer */}
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.createAdButton}>
-            Create Ad
+            Launch Ad
           </button>
           <button
             type="button"

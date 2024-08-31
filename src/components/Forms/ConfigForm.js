@@ -612,183 +612,280 @@ const ConfigForm = ({
         <hr className={styles.sectionDivider} />
       </div>
 
-      <div className={styles.sectionBox}>
-        <div
-          className={styles.sectionHeader}
-          onClick={() => toggleSection("placements")}
+{/* Placements Section */}
+<div className={styles.sectionBox}>
+  <div className={styles.sectionHeader} onClick={() => toggleSection("placements")}>
+    <h3>Placements</h3>
+    <img
+      src="/assets/Vectorw.svg"
+      alt="Toggle Section"
+      className={`${styles.toggleIcon} ${expandedSections["placements"] ? styles.expanded : ""}`}
+    />
+  </div>
+  {expandedSections["placements"] && (
+    <div className={styles.sectionContent}>
+      <div className={styles.placementToggle}>
+        <button
+          type="button"
+          className={`${styles.toggleButton} ${config.placement_type === "advantage_plus" ? styles.active : ""}`}
+          onClick={() => handlePlacementTypeChange({ target: { value: "advantage_plus" } })}
         >
-          <h3>Placements</h3>
-          <img
-            src="/assets/Vectorw.svg"
-            alt="Toggle Section"
-            className={`${styles.toggleIcon} ${
-              expandedSections["placements"] ? styles.expanded : ""
-            }`}
-          />
-        </div>
-        {expandedSections["placements"] && (
-          <div className={styles.sectionContent}>
-            <div className={styles.placementToggle}>
-              <button
-                type="button"
-                className={`${styles.toggleButton} ${
-                  config.placement_type === "Advantage" ? styles.active : ""
-                }`}
-                onClick={() =>
-                  handlePlacementTypeChange({ target: { value: "Advantage" } })
-                }
-              >
-                On
-              </button>
-              <button
-                type="button"
-                className={`${styles.toggleButton} ${styles.lastButton} ${
-                  config.placement_type === "Manual" ? styles.active : ""
-                }`}
-                onClick={() =>
-                  handlePlacementTypeChange({ target: { value: "Manual" } })
-                }
-              >
-                Off
-              </button>
-              <span className={styles.optimizationLabel}>
-                ADVANTAGE+ PLACEMENTS
-              </span>
-            </div>
-
-            <div
-              className={`${styles.manualOptions} ${
-                config.placement_type === "Advantage" ? styles.disabled : ""
-              }`}
-            >
-              <h4>Platforms</h4>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.platforms.facebook}
-                    onChange={handlePlatformChange}
-                    name="facebook"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Facebook"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.platforms.instagram}
-                    onChange={handlePlatformChange}
-                    name="instagram"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Instagram"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.platforms.audience_network}
-                    onChange={handlePlatformChange}
-                    name="audience_network"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Audience Network"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.platforms.messenger}
-                    onChange={handlePlatformChange}
-                    name="messenger"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Messenger"
-              />
-
-              <h4>Placements</h4>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.feeds}
-                    onChange={handlePlacementChange}
-                    name="feeds"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Feeds"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.stories}
-                    onChange={handlePlacementChange}
-                    name="stories"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Stories"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.in_stream}
-                    onChange={handlePlacementChange}
-                    name="in_stream"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="In-stream ads for videos and reels"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.search}
-                    onChange={handlePlacementChange}
-                    name="search"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Search results"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.messages}
-                    onChange={handlePlacementChange}
-                    name="messages"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Messages"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={config.placements.apps_sites}
-                    onChange={handlePlacementChange}
-                    name="apps_sites"
-                    disabled={config.placement_type === "Advantage"}
-                    classes={{ root: styles.MuiCheckboxRoot }}
-                  />
-                }
-                label="Apps and sites"
-              />
-            </div>
-          </div>
-        )}
-        <hr className={styles.sectionDivider} />
+          On
+        </button>
+        <button
+          type="button"
+          className={`${styles.toggleButton} ${styles.lastButton} ${config.placement_type === "Manual" ? styles.active : ""}`}
+          onClick={() => handlePlacementTypeChange({ target: { value: "Manual" } })}
+        >
+          Off
+        </button>
+        <span className={styles.optimizationLabel}>
+          ADVANTAGE+ PLACEMENTS
+        </span>
       </div>
+      <div className={`${styles.platformContainer} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.platforms.facebook}
+              onChange={handlePlatformChange}
+              name="facebook"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Facebook"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.platforms.instagram}
+              onChange={handlePlatformChange}
+              name="instagram"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Instagram"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.platforms.audience_network}
+              onChange={handlePlatformChange}
+              name="audience_network"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Audience Network"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.platforms.messenger}
+              onChange={handlePlatformChange}
+              name="messenger"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Messenger"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+      </div>
+
+      {/* Horizontal Rule */}
+      <hr className={styles.sectionDivider2} />
+
+      {/* Placements Column */}
+      <div className={`${styles.manualOptions} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.feeds}
+              onChange={handlePlacementChange}
+              name="feeds"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Feeds"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.stories}
+              onChange={handlePlacementChange}
+              name="stories"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Stories"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.in_stream}
+              onChange={handlePlacementChange}
+              name="in_stream"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="In-stream ads for videos and reels"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.search}
+              onChange={handlePlacementChange}
+              name="search"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Search results"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.messages}
+              onChange={handlePlacementChange}
+              name="messages"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Messages"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={config.placements.apps_sites}
+              onChange={handlePlacementChange}
+              name="apps_sites"
+              disabled={config.placement_type === "advantage_plus"}
+              sx={{
+                '&.Mui-checked': {
+                  '& .MuiSvgIcon-root': {
+                    color: '#5356FF',
+                  },
+                },
+              }}
+            />
+          }
+          label="Apps and sites"
+          sx={{
+            '& .MuiFormControlLabel-label': {
+              color: '#1E1E1E', // Set the label color here
+            },
+          }}
+        />
+      </div>
+    </div>
+  )}
+  <hr className={styles.sectionDivider} />
+</div>
 
       {/* Targeting & Delivery Section */}
       <div className={styles.sectionBox}>
@@ -1149,173 +1246,6 @@ const ConfigForm = ({
           </div>
         )}
         <hr className={styles.sectionDivider} />
-      </div>
-
-      {/* Campaign & Tracking Section */}
-      <div className={styles.sectionBox}>
-        <div
-          className={styles.sectionHeader}
-          onClick={() => toggleSection("campaignTracking")}
-        >
-          <h3>Campaign & Tracking</h3>
-          <img
-            src="/assets/Vectorw.svg"
-            alt="Toggle Section"
-            className={`${styles.toggleIcon} ${
-              expandedSections["campaignTracking"] ? styles.expanded : ""
-            }`}
-          />
-        </div>
-        {expandedSections["campaignTracking"] && (
-          <div className={styles.sectionContent}>
-            <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="ad_format">
-                Ad Format:
-              </label>
-              <select
-                id="ad_format"
-                name="ad_format"
-                value={config.ad_format}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="Single image or video">
-                  Single image or video
-                </option>
-                <option value="Carousel">Carousel</option>
-              </select>
-            </div>
-
-            <div className={styles.column}>
-              <label
-                className={styles.labelText}
-                htmlFor="ad_creative_primary_text"
-              >
-                Primary Text:
-              </label>
-              <textarea
-                id="ad_creative_primary_text"
-                name="ad_creative_primary_text"
-                value={config.ad_creative_primary_text}
-                onChange={handleChange}
-                rows="4"
-                className={styles.textareaField}
-              />
-            </div>
-
-            <div className={styles.column}>
-              <label
-                className={styles.labelText}
-                htmlFor="ad_creative_headline"
-              >
-                Headline:
-              </label>
-              <textarea
-                id="ad_creative_headline"
-                name="ad_creative_headline"
-                value={config.ad_creative_headline}
-                onChange={handleChange}
-                rows="4"
-                className={styles.textareaField}
-              />
-            </div>
-
-            <div className={styles.column}>
-              <label
-                className={styles.labelText}
-                htmlFor="ad_creative_description"
-              >
-                Description:
-              </label>
-              <textarea
-                id="ad_creative_description"
-                name="ad_creative_description"
-                value={config.ad_creative_description}
-                onChange={handleChange}
-                rows="4"
-                className={styles.textareaField}
-              />
-            </div>
-
-            <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="call_to_action">
-                Call to Action:
-              </label>
-              <select
-                id="call_to_action"
-                name="call_to_action"
-                value={config.call_to_action}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="SHOP_NOW">Shop Now</option>
-                <option value="LEARN_MORE">Learn More</option>
-                <option value="SIGN_UP">Sign Up</option>
-                <option value="SUBSCRIBE">Subscribe</option>
-                <option value="CONTACT_US">Contact Us</option>
-                <option value="GET_OFFER">Get Offer</option>
-                <option value="GET_QUOTE">Get Quote</option>
-                <option value="DOWNLOAD">Download</option>
-                <option value="ORDER_NOW">Order Now</option>
-                <option value="BOOK_NOW">Book Now</option>
-                <option value="WATCH_MORE">Watch More</option>
-                <option value="APPLY_NOW">Apply Now</option>
-                <option value="BUY_TICKETS">Buy Tickets</option>
-                <option value="GET_SHOWTIMES">Get Showtimes</option>
-                <option value="LISTEN_NOW">Listen Now</option>
-                <option value="PLAY_GAME">Play Game</option>
-                <option value="REQUEST_TIME">Request Time</option>
-                <option value="SEE_MENU">See Menu</option>
-              </select>
-            </div>
-
-            <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="destination_url">
-                Destination URL:
-              </label>
-              <input
-                type="text"
-                id="destination_url"
-                name="destination_url"
-                value={config.destination_url}
-                onChange={handleChange}
-                className={styles.inputField}
-              />
-            </div>
-
-            <div className={styles.column}>
-              <label className={styles.labelText} htmlFor="url_parameters">
-                URL Parameters:
-              </label>
-              <input
-                type="text"
-                id="url_parameters"
-                name="url_parameters"
-                value={config.url_parameters}
-                onChange={handleChange}
-                className={styles.inputField}
-              />
-            </div>
-
-            {isNewCampaign && (
-              <div className={styles.column}>
-                <label className={styles.labelText} htmlFor="campaignName">
-                  Campaign Name:
-                </label>
-                <input
-                  type="text"
-                  id="campaignName"
-                  name="campaignName"
-                  placeholder="Enter Name"
-                  value={campaignName}
-                  onChange={(e) => setCampaignName(e.target.value)}
-                  required
-                  className={styles.inputField}
-                />
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Campaign & Tracking Section */}
