@@ -1448,7 +1448,7 @@ const ConfigForm = ({
 
             <div className={styles.column}>
               <label className={styles.labelText} htmlFor="url_parameters">
-                URL Parameters:
+                UTM Parameters:
               </label>
               <input
                 type="text"
