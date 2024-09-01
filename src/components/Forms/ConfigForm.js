@@ -7,20 +7,61 @@ import "react-toastify/dist/ReactToastify.css";
 import styles from "./ConfigForm.module.css";
 import Slider from "@mui/material/Slider";
 
+// Performance goals array
+const optimizationGoals = [
+  "APP_INSTALLS",
+  "BRAND_AWARENESS",
+  "CLICKS",
+  "ENGAGED_USERS",
+  "EVENT_RESPONSES",
+  "IMPRESSIONS",
+  "LEAD_GENERATION",
+  "LINK_CLICKS",
+  "NONE",
+  "OFFER_CLAIMS",
+  "OFFSITE_CONVERSIONS",
+  "PAGE_ENGAGEMENT",
+  "PAGE_LIKES",
+  "POST_ENGAGEMENT",
+  "QUALITY_LEAD",
+  "REACH",
+  "REPLIES",
+  "SOCIAL_IMPRESSIONS",
+  "THRUPLAY",
+  "TWO_SECOND_CONTINUOUS_VIDEO_VIEWS",
+  "VALUE",
+  "VISIT_INSTAGRAM_PROFILE",
+  "VISIT_INSTAGRAM_SHOP"
+];
+
+const eventTypes = [
+  "AD_IMPRESSION", "RATE", "TUTORIAL_COMPLETION", "CONTACT",
+  "CUSTOMIZE_PRODUCT", "DONATE", "FIND_LOCATION", "SCHEDULE",
+  "START_TRIAL", "SUBMIT_APPLICATION", "SUBSCRIBE", "ADD_TO_CART",
+  "ADD_TO_WISHLIST", "INITIATED_CHECKOUT", "ADD_PAYMENT_INFO", "PURCHASE",
+  "LEAD", "COMPLETE_REGISTRATION", "CONTENT_VIEW", "SEARCH",
+  "SERVICE_BOOKING_REQUEST", "MESSAGING_CONVERSATION_STARTED_7D",
+  "LEVEL_ACHIEVED", "ACHIEVEMENT_UNLOCKED", "SPENT_CREDITS",
+  "LISTING_INTERACTION", "D2_RETENTION", "D7_RETENTION", "OTHER"
+];
+
+// Function to capitalize and format the goal for UI display
+const formatGoalForUI = (goal) => {
+  return goal.toLowerCase().replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+};
+
 const getDefaultStartTime = () => {
   const startTime = new Date();
   startTime.setUTCDate(startTime.getUTCDate() + 1);
   startTime.setUTCHours(4, 0, 0, 0);
-  const isoString = startTime.toISOString();
-  return isoString.slice(0, 19);
+  return startTime.toISOString().slice(0, 19);
 };
 
 const getDefaultEndTime = () => {
   const endTime = new Date();
   endTime.setUTCDate(endTime.getUTCDate() + 2);
   endTime.setUTCHours(4, 0, 0, 0);
-  const isoString = endTime.toISOString();
-  return isoString.slice(0, 19);
+  return endTime.toISOString().slice(0, 19);
 };
 
 const ConfigForm = ({
@@ -67,6 +108,7 @@ const ConfigForm = ({
     ad_format: initialConfig.ad_format || "Single image or video",
     ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(),
     prediction_id: initialConfig.prediction_id || "",
+    performance_goal: initialConfig.performance_goal || "OFFSITE_CONVERSIONS", // Set default performance goal
     placement_type: initialConfig.placement_type || "advantage_plus",
     platforms: {
       facebook: true,
@@ -87,6 +129,7 @@ const ConfigForm = ({
     location: "GB",
     age_range: [18, 65],
     gender: "All",
+    event_type: initialConfig.event_type || "PURCHASE", // Default event type
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(
@@ -142,7 +185,7 @@ const ConfigForm = ({
     config.campaign_budget_optimization,
     config.buying_type,
   ]);
-
+  
   const handleChange = (e) => {
     const { name, value } = e.target;
     setConfig((prevConfig) => {
@@ -217,6 +260,8 @@ const ConfigForm = ({
       age_range: newValue,
     }));
   };
+
+  const blurClass = config.targeting_type === "Manual" ? styles.blurredField : "";
 
   const handleTargetingTypeChange = (e) => {
     setConfig((prevConfig) => ({
@@ -571,11 +616,32 @@ const ConfigForm = ({
                 onChange={handleChange}
                 className={styles.selectField}
               >
-                <option value="">Select</option>
-                {/* Add your options here */}
+                {optimizationGoals.map((goal) => (
+                  <option key={goal} value={goal}>
+                    {formatGoalForUI(goal)}
+                  </option>
+                ))}
               </select>
             </div>
 
+            <div className={styles.column}>
+              <label htmlFor="event_type" className={styles.labelText}>
+                Event Type:
+              </label>
+              <select
+                id="event_type"
+                name="event_type"
+                value={config.event_type}
+                onChange={handleChange}
+                className={styles.selectField}
+              >
+                {eventTypes.map((event) => (
+                  <option key={event} value={event}>
+                    {formatGoalForUI(event)}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className={styles.column}>
               <label htmlFor="facebook_page" className={styles.labelText}>
                 Facebook Page:
@@ -938,7 +1004,7 @@ const ConfigForm = ({
               </span>
             </div>
 
-            <div className={styles.column}>
+            <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
               <label htmlFor="custom_audiences" className={styles.labelText}>
                 Custom Audiences (Optional):
               </label>
@@ -954,7 +1020,8 @@ const ConfigForm = ({
               </select>
             </div>
 
-            <div className={styles.column}>
+            <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
+
               <label htmlFor="targeting_interests" className={styles.labelText}>
                 Targeting Interests (Optional):
               </label>
@@ -969,8 +1036,7 @@ const ConfigForm = ({
                 {/* Add targeting interests options here */}
               </select>
             </div>
-
-            <div className={styles.column}>
+            <div className={`${styles.column} `}>
               <label htmlFor="location" className={styles.labelText}>
                 Locations:
               </label>
@@ -1180,7 +1246,7 @@ const ConfigForm = ({
               </select>
             </div>
 
-            <div className={styles.column}>
+            <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
               <label htmlFor="gender" className={styles.labelText}>
                 Gender:
               </label>
@@ -1197,7 +1263,7 @@ const ConfigForm = ({
               </select>
             </div>
 
-            <div className={styles.column}>
+            <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
               <label htmlFor="age_range" className={styles.labelText}>
                 Age Range ({config.age_range[0]} - {config.age_range[1]} Years)
               </label>
@@ -1228,7 +1294,7 @@ const ConfigForm = ({
               />
             </div>
 
-            <div className={styles.column}>
+            <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
               <label htmlFor="attribution_setting" className={styles.labelText}>
                 Attribution Setting:
               </label>
