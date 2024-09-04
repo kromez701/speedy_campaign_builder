@@ -7,7 +7,7 @@ import "react-toastify/dist/ReactToastify.css";
 import styles from "./ConfigForm.module.css";
 import Slider from "@mui/material/Slider";
 import axios from 'axios';
-import Select from 'react-select'; // New import for multi-select dropdown
+import Select from 'react-select'; // Import for multi-select dropdown
 
 const eventTypes = [
   "AD_IMPRESSION", "RATE", "TUTORIAL_COMPLETION", "CONTACT",
@@ -18,6 +18,13 @@ const eventTypes = [
   "SERVICE_BOOKING_REQUEST", "MESSAGING_CONVERSATION_STARTED_7D",
   "LEVEL_ACHIEVED", "ACHIEVEMENT_UNLOCKED", "SPENT_CREDITS",
   "LISTING_INTERACTION", "D2_RETENTION", "D7_RETENTION", "OTHER"
+];
+
+const attributionSettings = [
+  { label: "1-day click", value: "1d_click" },
+  { label: "7-day click", value: "7d_click" },
+  { label: "1-day view", value: "1d_view" },
+  { label: "7-day view", value: "7d_view" }
 ];
 
 // Function to capitalize and format the goal for UI display
@@ -61,6 +68,7 @@ const ConfigForm = ({
     targetingDelivery: true,
     campaignTracking: true,
   });
+
   const [config, setConfig] = useState({
     app_events: getDefaultStartTime(),
     ad_creative_primary_text: "",
@@ -116,6 +124,7 @@ const ConfigForm = ({
     isCBO: initialConfig.isCBO || false, // Adding isCBO to config
     custom_audiences: initialConfig.custom_audiences || [], // Add custom audiences to config
     interests: initialConfig.interests || [], // Add interests to config
+    attribution_setting: initialConfig.attribution_setting || "7d_click", // Default attribution setting
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(
@@ -272,15 +281,28 @@ const ConfigForm = ({
     }));
   };  
 
+  // Debounce logic for search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 100); // 500ms debounce delay
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
 
   const fetchInterests = async () => {
-    if (!activeAccount) return;
+    if (!activeAccount || debouncedSearchQuery.trim() === "") return;
 
     const requestBody = {
       app_id: activeAccount.app_id,
       app_secret: activeAccount.app_secret,
       access_token: activeAccount.access_token,
       ad_account_id: activeAccount.ad_account_id,
+      query: { q: debouncedSearchQuery, limit: 10 },
     };
 
     try {
@@ -299,13 +321,13 @@ const ConfigForm = ({
     }
   };
 
-  // Fetch data on mount
   useEffect(() => {
-    if (activeAccount && activeAccount.is_bound) {
-      fetchCustomAudiences();
-      fetchInterests();
-    }
-  }, [activeAccount]);
+    fetchInterests();
+  }, [debouncedSearchQuery]); // Trigger API call when search query changes
+
+  const handleInterestSearchChange = (inputValue) => {
+    setSearchQuery(inputValue);
+  };
 
   const handleInterestChange = (selectedOptions) => {
     setSelectedInterests(selectedOptions || []); // Update selected interests
@@ -459,6 +481,14 @@ const ConfigForm = ({
     }));
   };
 
+  const handleAttributionChange = (e) => {
+    const { value } = e.target;
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      attribution_setting: value,
+    }));
+  };
+  
   const handlePlacementTypeChange = (e) => {
     setConfig((prevConfig) => ({
       ...prevConfig,
@@ -1242,13 +1272,47 @@ const ConfigForm = ({
         <Select
           id="targeting_interests"
           isMulti
-          options={interests}
+          onInputChange={handleInterestSearchChange} // Update search query when typing
+          options={interests} // Filtered interests based on query
           value={selectedInterests}
           onChange={handleInterestChange}
-          placeholder="Select targeting interests"
-          className={`${styles.selectField} ${styles.customAudienceSelect}`}
+          placeholder="Search interests..."
+          className={`${styles.selectField} ${styles.interestsSelect}`} // Custom class
+          classNamePrefix="custom-select" // Prefix for easy styling
+          styles={{
+            control: (provided) => ({
+              ...provided,
+              minHeight: "36px",
+              fontSize: "14px",
+              borderColor: "#aaa",
+              boxShadow: "none",
+              color: "#333",
+              "&:hover": {
+                borderColor: "#aaa",
+              },
+            }),
+            multiValue: (provided) => ({
+              ...provided,
+              backgroundColor: "#f0f0f0",
+              fontSize: "12px",
+            }),
+            multiValueLabel: (provided) => ({
+              ...provided,
+              color: "#333",
+            }),
+            menu: (provided) => ({
+              ...provided,
+              zIndex: 9999,
+            }),
+            placeholder: (provided) => ({
+              ...provided,
+              fontSize: "14px",
+              color: "#888",
+            }),
+          }}
         />
             </div>
+
             <div className={styles.column}>
               <label htmlFor="location" className={styles.labelText}>
                 Locations:
@@ -1347,19 +1411,22 @@ const ConfigForm = ({
             </div>
 
             <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
-              <label htmlFor="attribution_setting" className={styles.labelText}>
-                Attribution Setting:
-              </label>
-              <select
-                id="attribution_setting"
-                name="attribution_setting"
-                value={config.attribution_setting}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="">Select</option>
-                {/* Add attribution settings options here */}
-              </select>
+            <label htmlFor="attribution_setting" className={styles.labelText}>
+              Attribution Setting:
+            </label>
+            <select
+              id="attribution_setting"
+              name="attribution_setting"
+              value={config.attribution_setting}
+              onChange={handleAttributionChange}
+              className={styles.selectField}
+            >
+              {attributionSettings.map((setting) => (
+                <option key={setting.value} value={setting.value}>
+                  {setting.label}
+                </option>
+              ))}
+            </select>
             </div>
           </div>
         )}
