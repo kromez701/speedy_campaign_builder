@@ -276,8 +276,6 @@ const Main = ({ activeAccount }) => {
 
     const adAccountConfig = {
       ad_account_id: activeAccount.ad_account_id,
-      pixel_id: activeAccount.pixel_id,
-      facebook_page_id: activeAccount.facebook_page_id,
       app_id: activeAccount.app_id,
       app_secret: activeAccount.app_secret,
       access_token: activeAccount.access_token,

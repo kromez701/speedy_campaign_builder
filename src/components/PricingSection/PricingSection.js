@@ -16,12 +16,12 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://localhost//payment/user-subscription-status', { withCredentials: true });
         setCurrentPlan(response.data.plan);
         setHasUsedFreeTrial(response.data.has_used_free_trial);
 
         // Fetch ad accounts and set the first one as selected
-        const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get('https://localhost//auth/ad_accounts', { withCredentials: true });
         setAdAccounts(adAccountsResponse.data.ad_accounts);
 
         if (adAccountsResponse.data.ad_accounts.length > 0) {
@@ -47,7 +47,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   
     try {
       // Fetch the current subscription status for the selected ad account
-      const adAccountResponse = await axios.get(`http://localhost:5000/payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
+      const adAccountResponse = await axios.get(`https://localhost//payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
       const { plan: adAccountPlan, is_active: adAccountIsActive } = adAccountResponse.data;
   
       if (plan === 'Professional' && adAccountPlan === 'Professional' && adAccountIsActive) {
@@ -76,13 +76,13 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       }
 
       // Proceed with subscription
-      const response = await axios.post('http://localhost:5000/payment/create-checkout-session', 
+      const response = await axios.post('https://localhost//payment/create-checkout-session', 
         { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
         { withCredentials: true }
       );
   
       if (response.data.sessionId) {
-        const stripe = window.Stripe('pk_live_51Ld9QOJd93BCcOTa5xS2wKbsPgFyhhgNJsYFQckPbd1YzeHiWdiB4seDmZmDOQvp8WE3FjCkDuSwhfes0wgUcxDA00SYWlIP2K');
+        const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
         toast.success('Subscription successful! Thank you for subscription.');

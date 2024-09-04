@@ -41,7 +41,7 @@ const CampaignForm = ({
       if (activeAccount) {
         try {
           const response = await axios.get(
-            `http://localhost:5000/payment/subscription-status/${activeAccount.id}`,
+            `https://localhost//payment/subscription-status/${activeAccount.id}`,
             { withCredentials: true }
           );
           setIsActiveSubscription(response.data.is_active);
@@ -60,7 +60,7 @@ const CampaignForm = ({
     const fetchUserPlan = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/payment/user-subscription-status",
+          "https://localhost//payment/user-subscription-status",
           { withCredentials: true }
         );
         setUserPlan(response.data.plan);
@@ -78,7 +78,7 @@ const CampaignForm = ({
       const fetchActiveAdAccountsCount = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/payment/active-ad-accounts",
+            "https://localhost//payment/active-ad-accounts",
             { withCredentials: true }
           );
           setActiveAdAccountsCount(response.data.count);
@@ -102,7 +102,7 @@ const CampaignForm = ({
   const handleSaveConfig = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
+        `https://localhost//config/ad_account/${activeAccount.id}/config`,
         {
           method: "POST",
           headers: {
@@ -141,9 +141,15 @@ const CampaignForm = ({
       return;
     }
 
+    // Ensure file input exists before scrolling into view
     if (uploadedFiles.length === 0) {
       toast.error("Please upload at least one file.");
-      fileInputRef.current.scrollIntoView({ behavior: "smooth" });
+      
+      // Check if the fileInputRef is defined and not null
+      if (fileInputRef.current) {
+        fileInputRef.current.scrollIntoView({ behavior: "smooth" });
+      }
+      
       toggleSection("creativeUploading");
       return;
     }

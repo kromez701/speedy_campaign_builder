@@ -35,14 +35,14 @@ const Landing = () => {
 const handleSubscribe = async (plan) => {
   try {
     console.log("Creating anonymous checkout session...");
-    const response = await axios.post('http://localhost:5000/payment/create-anonymous-checkout-session', 
+    const response = await axios.post('https://localhost//payment/create-anonymous-checkout-session', 
       { plan }, 
       { withCredentials: true }
     );
 
     if (response.data.sessionId) {
       console.log("Stripe session created, redirecting to checkout...");
-      const stripe = window.Stripe('pk_live_51Ld9QOJd93BCcOTa5xS2wKbsPgFyhhgNJsYFQckPbd1YzeHiWdiB4seDmZmDOQvp8WE3FjCkDuSwhfes0wgUcxDA00SYWlIP2K');
+      const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
       stripe.redirectToCheckout({ sessionId: response.data.sessionId });
     } else {
       console.error('Failed to create checkout session.');

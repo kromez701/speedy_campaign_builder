@@ -71,15 +71,16 @@
   margin-bottom: 40px;
 }
 
-/* Form Sections Container */
 .formSectionsContainer {
   border: 1px solid #ccc; 
   border-radius: 8px;
   background-color: #fff;
   margin: 0 auto; /* Center container */
-  width: 100%;
+  width: 100%; /* Full width of the parent container */
+  max-width: 600px; /* Define a maximum width to prevent overflow */
   box-sizing: border-box; /* Include padding/border in width calculations */
 }
+
 
 /* Section Box Styles */
 .sectionBox {
@@ -252,4 +253,11 @@
     padding: 4px 12px; /* Adjust padding for smaller screens */
     height: 36px; /* Adjust height for smaller screens */
   }
+}
+
+@media (min-width: 630px) {
+  .formSectionsContainer {
+    min-width: 550px;
+  }
+  
 }

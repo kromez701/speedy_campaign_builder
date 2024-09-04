@@ -27,7 +27,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
+        const response = await axios.get('https://localhost//auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { username, email, profile_picture } = response.data.user;
           setFullName(username);
@@ -45,7 +45,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchUserSubscriptionStatus = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://localhost//payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
           setSubscriptionPlan(plan);
@@ -66,7 +66,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     const fetchSubscriptionDetails = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:5000/payment/subscription-status/${activeAccount.id}`, 
+          `https://localhost//payment/subscription-status/${activeAccount.id}`, 
           { withCredentials: true }
         );
   
@@ -92,8 +92,17 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const fetchAdAccountDetails = async (adAccountId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/auth/ad_account/${adAccountId}`, { withCredentials: true });
-      setAdAccountDetails(response.data);
+      const response = await axios.get(`https://localhost//auth/ad_account/${adAccountId}`, { withCredentials: true });
+      const adAccountData = response.data;
+      setAdAccountDetails(adAccountData);
+
+      if (adAccountData.is_bound) {
+        // Name is now stored in the backend, so directly use it
+        setAdAccountDetails({
+          ...adAccountData,
+          ad_account_name: adAccountData.name,  // Use the stored name
+        });
+      }
     } catch (error) {
       toast.error('Error fetching ad account details');
       console.error('Error fetching ad account details', error);
@@ -135,7 +144,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         const accessToken = response.authResponse.accessToken;
         setAccessToken(accessToken); // Save the access token to state
         setShowPopup(true); // Show the popup when login is successful
-        console.log('Popup should be displayed:', showPopup);  // Add this line for debugging
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
@@ -143,30 +151,23 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   };  
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
-    console.log('Popup submitted with the following values:');
-    console.log('Ad Account:', adAccount);
-    console.log('Page:', page);
-    console.log('Pixel:', pixel);
-
     setShowPopup(false); // Close the popup after submission
     verifyAndSaveAdAccount(accessToken, adAccount, page, pixel); // Adjust to use selected values
-};
+  };
 
 
   const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
-    console.log('Before updating, adAccountDetails:', adAccountDetails);
-
     const { ad_account_id, pixel_id, facebook_page_id } = adAccountDetails;
   
     try {
-        const isAdAccountValid = await verifyField('http://localhost:5000/auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
-        const isPixelValid = await verifyField('http://localhost:5000/auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
-        const isPageValid = await verifyField('http://localhost:5000/auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
+        const isAdAccountValid = await verifyField('https://localhost//auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
+        // const isPixelValid = await verifyField('https://localhost//auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
+        // const isPageValid = await verifyField('https://localhost//auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
 
-        if (isAdAccountValid && isPixelValid && isPageValid) {
+        if (isAdAccountValid) {
             try {
                 const exchangeResponse = await axios.post(
-                    `http://localhost:5000/config/ad_account/${activeAccount.id}/exchange-token`,
+                    `https://localhost//config/ad_account/${activeAccount.id}/exchange-token`,
                     { access_token: accessToken },
                     { withCredentials: true }
                 );
@@ -175,17 +176,15 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
                     const updatedAdAccountDetails = {
                         ...adAccountDetails,
                         ad_account_id: adAccount,
-                        facebook_page_id: page,
-                        pixel_id: pixel,
+                        facebook_page_id: '',
+                        pixel_id: '',
                         access_token: exchangeResponse.data.long_lived_token,
                         app_id: '1153977715716035',  // Add the app ID
                         app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
                     };
 
-                    console.log('After updating, updatedAdAccountDetails:', updatedAdAccountDetails);
-
                     const saveResponse = await axios.post(
-                        'http://localhost:5000/auth/ad_account',
+                        'https://localhost//auth/ad_account',
                         { id: activeAccount.id, ...updatedAdAccountDetails },
                         { withCredentials: true }
                     );
@@ -219,7 +218,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
 
     try {
-      const response = await axios.post('http://localhost:5000/auth/profile', formData, { withCredentials: true });
+      const response = await axios.post('https://localhost//auth/profile', formData, { withCredentials: true });
       if (response.status === 200) {
         toast.success('Profile updated successfully');
       }
@@ -231,7 +230,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleCancelSubscription = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/payment/active-ad-accounts', { withCredentials: true });
+      const response = await axios.get('https://localhost//payment/active-ad-accounts', { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
 
       const confirmCancel = window.confirm(
@@ -241,7 +240,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       );
 
       if (confirmCancel) {
-        const cancelResponse = await axios.post('http://localhost:5000/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        const cancelResponse = await axios.post('https://localhost//payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
           toast.success(cancelResponse.data.message);
@@ -259,13 +258,13 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleRenewSubscription = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/payment/renew-subscription', 
+      const response = await axios.post('https://localhost//payment/renew-subscription', 
         { ad_account_id: activeAccount.id, plan: subscriptionPlan },
         { withCredentials: true }
       );
 
       if (response.data.sessionId) {
-        const stripe = window.Stripe('pk_live_51Ld9QOJd93BCcOTa5xS2wKbsPgFyhhgNJsYFQckPbd1YzeHiWdiB4seDmZmDOQvp8WE3FjCkDuSwhfes0wgUcxDA00SYWlIP2K');
+        const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {
         toast.error('Failed to create checkout session');
@@ -346,19 +345,19 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
         <div className={styles.section}>
           <h3>Ad Account Settings</h3>
           <p className={styles.infoText}>
-            Ad account details cannot be changed later.
+            Ad account cannot be changed later.
           </p>
           <input
             type="text"
             name="ad_account_id"
-            placeholder="Ad Account ID"
-            value={adAccountDetails.ad_account_id || ''}
+            placeholder="Ad Account"
+            value={adAccountDetails.ad_account_name || adAccountDetails.ad_account_id || ''}
             onChange={handleAdAccountChange}
             className={styles.profileInput}
             required
             disabled
           />
-          <input
+          {/* <input
             type="text"
             name="pixel_id"
             placeholder="Pixel ID"
@@ -373,7 +372,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             value={adAccountDetails.facebook_page_id || ''}
             className={styles.profileInput}
             disabled
-          />
+          /> */}
           <button
             onClick={handleAdAccountSave}
             className={`${styles.button} ${styles.primaryButton} ${styles.saveAdaccount}`}

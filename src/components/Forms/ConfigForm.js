@@ -6,33 +6,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "./ConfigForm.module.css";
 import Slider from "@mui/material/Slider";
-
-// Performance goals array
-const optimizationGoals = [
-  "APP_INSTALLS",
-  "BRAND_AWARENESS",
-  "CLICKS",
-  "ENGAGED_USERS",
-  "EVENT_RESPONSES",
-  "IMPRESSIONS",
-  "LEAD_GENERATION",
-  "LINK_CLICKS",
-  "NONE",
-  "OFFER_CLAIMS",
-  "OFFSITE_CONVERSIONS",
-  "PAGE_ENGAGEMENT",
-  "PAGE_LIKES",
-  "POST_ENGAGEMENT",
-  "QUALITY_LEAD",
-  "REACH",
-  "REPLIES",
-  "SOCIAL_IMPRESSIONS",
-  "THRUPLAY",
-  "TWO_SECOND_CONTINUOUS_VIDEO_VIEWS",
-  "VALUE",
-  "VISIT_INSTAGRAM_PROFILE",
-  "VISIT_INSTAGRAM_SHOP"
-];
+import axios from 'axios';
+import Select from 'react-select'; // New import for multi-select dropdown
 
 const eventTypes = [
   "AD_IMPRESSION", "RATE", "TUTORIAL_COMPLETION", "CONTACT",
@@ -73,6 +48,12 @@ const ConfigForm = ({
   setCampaignName,
 }) => {
   const [isCBO, setIsCBO] = useState(false);
+  const [countries, setCountries] = useState([]); // State to store countries
+  const [selectedCountries, setSelectedCountries] = useState([]); // Multi-select state for selected countries
+  const [customAudiences, setCustomAudiences] = useState([]); // State to store custom audiences
+  const [interests, setInterests] = useState([]); // State to store fetched interests
+  const [selectedInterests, setSelectedInterests] = useState([]); // State to store selected interests
+
   const [expandedSections, setExpandedSections] = useState({
     budgetSchedule: true,
     assets: true,
@@ -108,7 +89,6 @@ const ConfigForm = ({
     ad_format: initialConfig.ad_format || "Single image or video",
     ad_set_end_time: initialConfig.ad_set_end_time || getDefaultEndTime(),
     prediction_id: initialConfig.prediction_id || "",
-    performance_goal: initialConfig.performance_goal || "OFFSITE_CONVERSIONS", // Set default performance goal
     placement_type: initialConfig.placement_type || "advantage_plus",
     platforms: {
       facebook: true,
@@ -126,10 +106,16 @@ const ConfigForm = ({
     },
     buying_type: initialConfig.buying_type || "AUCTION",
     targeting_type: "Advantage",
-    location: "GB",
+    location: [],
     age_range: [18, 65],
     gender: "All",
     event_type: initialConfig.event_type || "PURCHASE", // Default event type
+    pixel_id: initialConfig.pixel_id || "", // New pixel field
+    facebook_page_id: initialConfig.facebook_page_id || "", // New Facebook Page field
+    instagram_account: initialConfig.instagram_account || "", // New Instagram account field
+    isCBO: initialConfig.isCBO || false, // Adding isCBO to config
+    custom_audiences: initialConfig.custom_audiences || [], // Add custom audiences to config
+    interests: initialConfig.interests || [], // Add interests to config
   });
 
   const [showAppStoreUrl, setShowAppStoreUrl] = useState(
@@ -152,6 +138,182 @@ const ConfigForm = ({
   const [showPredictionId, setShowPredictionId] = useState(
     config.buying_type === "RESERVED"
   );
+
+  const [pages, setPages] = useState([]);
+  const [pixels, setPixels] = useState([]);
+
+  const fetchPages = async () => {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v10.0/me/accounts?access_token=${activeAccount.access_token}`
+      );
+      const data = await response.json();
+      setPages(data.data || []); // Set the fetched pages into state
+    } catch (error) {
+      toast.error("Error fetching Facebook pages");
+    }
+  };
+
+  
+  const fetchPixels = async () => {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v10.0/${activeAccount.ad_account_id}/adspixels?fields=name,id&access_token=${activeAccount.access_token}`
+      );
+      const data = await response.json();
+      setPixels(data.data || []); // Set the fetched pixels into state
+    } catch (error) {
+      toast.error("Error fetching Pixels");
+    }
+  };
+  
+  useEffect(() => {
+    if (activeAccount) {
+      fetchPages();
+      fetchPixels();
+    }
+  }, [activeAccount]);
+  
+  const fetchCountries = async () => {
+    if (!activeAccount) return;
+  
+    const requestBody = {
+      ad_account_id: activeAccount.ad_account_id,
+      app_id: activeAccount.app_id,
+      app_secret: activeAccount.app_secret,
+      access_token: activeAccount.access_token,
+      query: {
+        q: "", // Add query here if needed
+        limit: 1000,
+      },
+    };
+  
+    try {
+      const response = await axios.post(
+        "https://localhost//targeting/get_countries", 
+        requestBody, 
+        { withCredentials: true } // Sends credentials with the request
+      );
+  
+      if (response.status === 200) {
+        const formattedCountries = response.data.map(country => ({
+          label: country.name,  // This will be displayed in the dropdown
+          value: country.country_code,  // This will be the value passed to your state
+        }));
+        setCountries(formattedCountries); // Update countries state with the formatted data
+
+        const gbOption = formattedCountries.find(country => country.value === "GB");
+        if (gbOption) {
+          setSelectedCountries([gbOption]); // Select GB by default
+          setConfig((prevConfig) => ({
+            ...prevConfig,
+            location: ["GB"], // Set GB as the default in the config state
+          }));
+
+       }
+    } else {
+        toast.error('Error fetching countries');
+      }      
+    } catch (error) {
+      toast.error('Error fetching countries');
+      console.error('Error fetching countries', error);
+    }
+  };
+  
+  // Fetch countries when activeAccount is available
+  useEffect(() => {
+    if (activeAccount && activeAccount.is_bound) {
+      fetchCountries();
+    }
+  }, [activeAccount]);
+
+  const fetchCustomAudiences = async () => {
+    if (!activeAccount) return;
+
+    const requestBody = {
+      app_id: activeAccount.app_id,
+      app_secret: activeAccount.app_secret,
+      access_token: activeAccount.access_token,
+      ad_account_id: activeAccount.ad_account_id,
+    };
+
+    try {
+      const response = await axios.post(
+        "https://localhost/targeting/custom_audiences", 
+        requestBody, 
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        setCustomAudiences(response.data);
+      } else {
+        toast.error('Error fetching custom audiences');
+      }
+    } catch (error) {
+      toast.error('Error fetching custom audiences');
+      console.error('Error fetching custom audiences', error);
+    }
+  };
+
+  useEffect(() => {
+    if (activeAccount && activeAccount.is_bound) {
+      fetchPages();
+      fetchPixels();
+      fetchCountries();
+      fetchCustomAudiences();
+    }
+  }, [activeAccount]);
+
+
+  const handleCustomAudienceChange = (selectedOptions) => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      custom_audiences: selectedOptions || [], // Store selected audiences
+    }));
+  };  
+
+
+  const fetchInterests = async () => {
+    if (!activeAccount) return;
+
+    const requestBody = {
+      app_id: activeAccount.app_id,
+      app_secret: activeAccount.app_secret,
+      access_token: activeAccount.access_token,
+      ad_account_id: activeAccount.ad_account_id,
+    };
+
+    try {
+      const response = await axios.post("https://localhost/targeting/interests", requestBody, { withCredentials: true });
+      if (response.status === 200) {
+        const formattedInterests = response.data.map(interest => ({
+          label: interest.name,
+          value: interest.id,
+        }));
+        setInterests(formattedInterests); // Set fetched interests into state
+      } else {
+        toast.error('Error fetching interests');
+      }
+    } catch (error) {
+      toast.error('Error fetching interests');
+    }
+  };
+
+  // Fetch data on mount
+  useEffect(() => {
+    if (activeAccount && activeAccount.is_bound) {
+      fetchCustomAudiences();
+      fetchInterests();
+    }
+  }, [activeAccount]);
+
+  const handleInterestChange = (selectedOptions) => {
+    setSelectedInterests(selectedOptions || []); // Update selected interests
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      interests: selectedOptions || [], // Store selected interests in config
+    }));
+  };
 
   useEffect(() => {
     setConfig((prevConfig) => ({
@@ -193,7 +355,7 @@ const ConfigForm = ({
         ...prevConfig,
         [name]: value,
       };
-
+      
       if (name === "buying_type" && value === "RESERVED") {
         newConfig.campaign_budget_optimization = "AD_SET_BUDGET_OPTIMIZATION";
         newConfig.ad_set_bid_strategy = "";
@@ -288,6 +450,15 @@ const ConfigForm = ({
     }));
   };
 
+  const handleCountryChange = (selectedOptions) => {
+    setSelectedCountries(selectedOptions || []); // Update selected countries
+    const selectedCountryCodes = selectedOptions.map(option => option.value);
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      location: selectedCountryCodes, // Store selected countries' codes in the config
+    }));
+  };
+
   const handlePlacementTypeChange = (e) => {
     setConfig((prevConfig) => ({
       ...prevConfig,
@@ -299,7 +470,7 @@ const ConfigForm = ({
     const fetchConfig = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
+          `https://localhost//config/ad_account/${activeAccount.id}/config`,
           {
             credentials: "include",
           }
@@ -344,29 +515,35 @@ const ConfigForm = ({
         </div>
         {expandedSections["budgetSchedule"] && (
           <div className={styles.sectionContent}>
-            <div className={styles.budgetOptimizationToggle}>
-              <button
-                type="button"
-                className={`${styles.toggleButton} ${
-                  !isCBO ? styles.active : ""
-                }`}
-                onClick={() => setIsCBO(false)}
-              >
-                ABO
-              </button>
-              <button
-                type="button"
-                className={`${styles.toggleButton} ${styles.lastButton} ${
-                  isCBO ? styles.active : ""
-                }`}
-                onClick={() => setIsCBO(true)}
-              >
-                CBO
-              </button>
-              <span className={styles.optimizationLabel}>
-                BUDGET OPTIMIZATION
-              </span>
-            </div>
+  <div className={styles.budgetOptimizationToggle}>
+    <button
+      type="button"
+      className={`${styles.toggleButton} ${!isCBO ? styles.active : ""}`}
+      onClick={() => {
+        setIsCBO(false);
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          isCBO: false, // Update config when switching to ABO
+        }));
+      }}
+    >
+      ABO
+    </button>
+    <button
+      type="button"
+      className={`${styles.toggleButton} ${styles.lastButton} ${isCBO ? styles.active : ""}`}
+      onClick={() => {
+        setIsCBO(true);
+        setConfig((prevConfig) => ({
+          ...prevConfig,
+          isCBO: true, // Update config when switching to CBO
+        }));
+      }}
+    >
+      CBO
+    </button>
+    <span className={styles.optimizationLabel}>BUDGET OPTIMIZATION</span>
+  </div>
 
             {isCBO ? (
               <>
@@ -606,25 +783,6 @@ const ConfigForm = ({
         {expandedSections["assets"] && (
           <div className={styles.sectionContent}>
             <div className={styles.column}>
-              <label htmlFor="performance_goal" className={styles.labelText}>
-                Performance Goal:
-              </label>
-              <select
-                id="performance_goal"
-                name="performance_goal"
-                value={config.performance_goal}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                {optimizationGoals.map((goal) => (
-                  <option key={goal} value={goal}>
-                    {formatGoalForUI(goal)}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className={styles.column}>
               <label htmlFor="event_type" className={styles.labelText}>
                 Event Type:
               </label>
@@ -643,36 +801,61 @@ const ConfigForm = ({
               </select>
             </div>
             <div className={styles.column}>
-              <label htmlFor="facebook_page" className={styles.labelText}>
-                Facebook Page:
+              <label htmlFor="pixel_id" className={styles.labelText}>
+                Pixel ID:
               </label>
               <select
-                id="facebook_page"
-                name="facebook_page"
-                value={config.facebook_page}
+                id="pixel_id"
+                name="pixel_id"
+                value={config.pixel_id}
                 onChange={handleChange}
                 className={styles.selectField}
+                required
               >
-                <option value="">Select</option>
-                {/* Add your options here */}
+                <option value="">Select Pixel</option>
+                {pixels.map((pixel) => (
+                  <option key={pixel.id} value={pixel.id}>
+                    {pixel.name || pixel.id}
+                  </option>
+                ))}
               </select>
             </div>
 
+
             <div className={styles.column}>
-              <label htmlFor="instagram_account" className={styles.labelText}>
-                Instagram Account (Optional):
+              <label htmlFor="facebook_page_id" className={styles.labelText}>
+                Facebook Page:
               </label>
               <select
-                id="instagram_account"
-                name="instagram_account"
-                value={config.instagram_account}
+                id="facebook_page_id"
+                name="facebook_page_id"
+                value={config.facebook_page_id}
                 onChange={handleChange}
                 className={styles.selectField}
+                required
               >
-                <option value="">Select</option>
-                {/* Add your options here */}
+                <option value="">Select Facebook Page</option>
+                {pages.map((page) => (
+                  <option key={page.id} value={page.id}>
+                    {page.name || page.id}
+                  </option>
+                ))}
               </select>
             </div>
+
+<div className={styles.column}>
+  <label htmlFor="instagram_account" className={styles.labelText}>
+    Instagram Account (Optional):
+  </label>
+  <input
+    type="text"
+    id="instagram_account"
+    name="instagram_account"
+    value={config.instagram_account}
+    onChange={handleChange}
+    className={styles.inputField}
+  />
+</div>
           </div>
         )}
         <hr className={styles.sectionDivider} />
@@ -1005,245 +1188,114 @@ const ConfigForm = ({
             </div>
 
             <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
-              <label htmlFor="custom_audiences" className={styles.labelText}>
-                Custom Audiences (Optional):
-              </label>
-              <select
-                id="custom_audiences"
-                name="custom_audiences"
-                value={config.custom_audiences}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="">Select</option>
-                {/* Add custom audience options here */}
-              </select>
+            <label htmlFor="custom_audiences" className={styles.labelText}>
+          Custom Audiences:
+        </label>
+        <Select
+  id="custom_audiences"
+  isMulti
+  options={customAudiences.map(audience => ({ label: audience.name, value: audience.id }))} // Format the custom audience options for select
+  value={config.custom_audiences}
+  onChange={handleCustomAudienceChange}
+  placeholder="Select custom audiences"
+  className={`${styles.selectField} ${styles.customAudienceSelect}`} // Custom class for styling
+  classNamePrefix="custom-select" // Prefix for easy styling
+  styles={{
+    control: (provided) => ({
+      ...provided,
+      minHeight: '36px',
+      fontSize: '14px',
+      borderColor: '#aaa',
+      boxShadow: 'none',
+      color: '#333',
+      '&:hover': {
+        borderColor: '#aaa',
+      },
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#f0f0f0',
+      fontSize: '12px',
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: '#333',
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      fontSize: '14px',
+      color: '#888',
+    }),
+  }}
+/>
             </div>
 
             <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
 
-              <label htmlFor="targeting_interests" className={styles.labelText}>
-                Targeting Interests (Optional):
-              </label>
-              <select
-                id="targeting_interests"
-                name="targeting_interests"
-                value={config.targeting_interests}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="">Select</option>
-                {/* Add targeting interests options here */}
-              </select>
+            <label htmlFor="targeting_interests" className={styles.labelText}>
+          Targeting Interests:
+        </label>
+        <Select
+          id="targeting_interests"
+          isMulti
+          options={interests}
+          value={selectedInterests}
+          onChange={handleInterestChange}
+          placeholder="Select targeting interests"
+          className={`${styles.selectField} ${styles.customAudienceSelect}`}
+        />
             </div>
-            <div className={`${styles.column} `}>
+            <div className={styles.column}>
               <label htmlFor="location" className={styles.labelText}>
                 Locations:
               </label>
-              <select
-                id="location"
-                name="location"
-                value={config.location}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                <option value="AF">Afghanistan</option>
-                <option value="AL">Albania</option>
-                <option value="DZ">Algeria</option>
-                <option value="AD">Andorra</option>
-                <option value="AO">Angola</option>
-                <option value="AG">Antigua and Barbuda</option>
-                <option value="AR">Argentina</option>
-                <option value="AM">Armenia</option>
-                <option value="AU">Australia</option>
-                <option value="AT">Austria</option>
-                <option value="AZ">Azerbaijan</option>
-                <option value="BS">Bahamas</option>
-                <option value="BH">Bahrain</option>
-                <option value="BD">Bangladesh</option>
-                <option value="BB">Barbados</option>
-                <option value="BY">Belarus</option>
-                <option value="BE">Belgium</option>
-                <option value="BZ">Belize</option>
-                <option value="BJ">Benin</option>
-                <option value="BT">Bhutan</option>
-                <option value="BO">Bolivia</option>
-                <option value="BA">Bosnia and Herzegovina</option>
-                <option value="BW">Botswana</option>
-                <option value="BR">Brazil</option>
-                <option value="BN">Brunei</option>
-                <option value="BG">Bulgaria</option>
-                <option value="BF">Burkina Faso</option>
-                <option value="BI">Burundi</option>
-                <option value="CV">Cabo Verde</option>
-                <option value="KH">Cambodia</option>
-                <option value="CM">Cameroon</option>
-                <option value="CA">Canada</option>
-                <option value="CF">Central African Republic</option>
-                <option value="TD">Chad</option>
-                <option value="CL">Chile</option>
-                <option value="CN">China</option>
-                <option value="CO">Colombia</option>
-                <option value="KM">Comoros</option>
-                <option value="CD">Congo (Democratic Republic)</option>
-                <option value="CG">Congo (Republic)</option>
-                <option value="CR">Costa Rica</option>
-                <option value="HR">Croatia</option>
-                <option value="CU">Cuba</option>
-                <option value="CY">Cyprus</option>
-                <option value="CZ">Czechia</option>
-                <option value="DK">Denmark</option>
-                <option value="DJ">Djibouti</option>
-                <option value="DM">Dominica</option>
-                <option value="DO">Dominican Republic</option>
-                <option value="EC">Ecuador</option>
-                <option value="EG">Egypt</option>
-                <option value="SV">El Salvador</option>
-                <option value="GQ">Equatorial Guinea</option>
-                <option value="ER">Eritrea</option>
-                <option value="EE">Estonia</option>
-                <option value="SZ">Eswatini</option>
-                <option value="ET">Ethiopia</option>
-                <option value="FJ">Fiji</option>
-                <option value="FI">Finland</option>
-                <option value="FR">France</option>
-                <option value="GA">Gabon</option>
-                <option value="GM">Gambia</option>
-                <option value="GE">Georgia</option>
-                <option value="DE">Germany</option>
-                <option value="GH">Ghana</option>
-                <option value="GR">Greece</option>
-                <option value="GD">Grenada</option>
-                <option value="GT">Guatemala</option>
-                <option value="GN">Guinea</option>
-                <option value="GW">Guinea-Bissau</option>
-                <option value="GY">Guyana</option>
-                <option value="HT">Haiti</option>
-                <option value="HN">Honduras</option>
-                <option value="HU">Hungary</option>
-                <option value="IS">Iceland</option>
-                <option value="IN">India</option>
-                <option value="ID">Indonesia</option>
-                <option value="IR">Iran</option>
-                <option value="IQ">Iraq</option>
-                <option value="IE">Ireland</option>
-                <option value="IL">Israel</option>
-                <option value="IT">Italy</option>
-                <option value="JM">Jamaica</option>
-                <option value="JP">Japan</option>
-                <option value="JO">Jordan</option>
-                <option value="KZ">Kazakhstan</option>
-                <option value="KE">Kenya</option>
-                <option value="KI">Kiribati</option>
-                <option value="KP">Korea (North)</option>
-                <option value="KR">Korea (South)</option>
-                <option value="KW">Kuwait</option>
-                <option value="KG">Kyrgyzstan</option>
-                <option value="LA">Laos</option>
-                <option value="LV">Latvia</option>
-                <option value="LB">Lebanon</option>
-                <option value="LS">Lesotho</option>
-                <option value="LR">Liberia</option>
-                <option value="LY">Libya</option>
-                <option value="LI">Liechtenstein</option>
-                <option value="LT">Lithuania</option>
-                <option value="LU">Luxembourg</option>
-                <option value="MG">Madagascar</option>
-                <option value="MW">Malawi</option>
-                <option value="MY">Malaysia</option>
-                <option value="MV">Maldives</option>
-                <option value="ML">Mali</option>
-                <option value="MT">Malta</option>
-                <option value="MH">Marshall Islands</option>
-                <option value="MR">Mauritania</option>
-                <option value="MU">Mauritius</option>
-                <option value="MX">Mexico</option>
-                <option value="FM">Micronesia</option>
-                <option value="MD">Moldova</option>
-                <option value="MC">Monaco</option>
-                <option value="MN">Mongolia</option>
-                <option value="ME">Montenegro</option>
-                <option value="MA">Morocco</option>
-                <option value="MZ">Mozambique</option>
-                <option value="MM">Myanmar</option>
-                <option value="NA">Namibia</option>
-                <option value="NR">Nauru</option>
-                <option value="NP">Nepal</option>
-                <option value="NL">Netherlands</option>
-                <option value="NZ">New Zealand</option>
-                <option value="NI">Nicaragua</option>
-                <option value="NE">Niger</option>
-                <option value="NG">Nigeria</option>
-                <option value="MK">North Macedonia</option>
-                <option value="NO">Norway</option>
-                <option value="OM">Oman</option>
-                <option value="PK">Pakistan</option>
-                <option value="PW">Palau</option>
-                <option value="PA">Panama</option>
-                <option value="PG">Papua New Guinea</option>
-                <option value="PY">Paraguay</option>
-                <option value="PE">Peru</option>
-                <option value="PH">Philippines</option>
-                <option value="PL">Poland</option>
-                <option value="PT">Portugal</option>
-                <option value="QA">Qatar</option>
-                <option value="RO">Romania</option>
-                <option value="RU">Russia</option>
-                <option value="RW">Rwanda</option>
-                <option value="KN">Saint Kitts and Nevis</option>
-                <option value="LC">Saint Lucia</option>
-                <option value="VC">Saint Vincent and the Grenadines</option>
-                <option value="WS">Samoa</option>
-                <option value="SM">San Marino</option>
-                <option value="ST">Sao Tome and Principe</option>
-                <option value="SA">Saudi Arabia</option>
-                <option value="SN">Senegal</option>
-                <option value="RS">Serbia</option>
-                <option value="SC">Seychelles</option>
-                <option value="SL">Sierra Leone</option>
-                <option value="SG">Singapore</option>
-                <option value="SK">Slovakia</option>
-                <option value="SI">Slovenia</option>
-                <option value="SB">Solomon Islands</option>
-                <option value="SO">Somalia</option>
-                <option value="ZA">South Africa</option>
-                <option value="SS">South Sudan</option>
-                <option value="ES">Spain</option>
-                <option value="LK">Sri Lanka</option>
-                <option value="SD">Sudan</option>
-                <option value="SR">Suriname</option>
-                <option value="SE">Sweden</option>
-                <option value="CH">Switzerland</option>
-                <option value="SY">Syria</option>
-                <option value="TW">Taiwan</option>
-                <option value="TJ">Tajikistan</option>
-                <option value="TZ">Tanzania</option>
-                <option value="TH">Thailand</option>
-                <option value="TL">Timor-Leste</option>
-                <option value="TG">Togo</option>
-                <option value="TO">Tonga</option>
-                <option value="TT">Trinidad and Tobago</option>
-                <option value="TN">Tunisia</option>
-                <option value="TR">Turkey</option>
-                <option value="TM">Turkmenistan</option>
-                <option value="TV">Tuvalu</option>
-                <option value="UG">Uganda</option>
-                <option value="UA">Ukraine</option>
-                <option value="AE">United Arab Emirates</option>
-                <option value="GB">United Kingdom</option>
-                <option value="US">United States</option>
-                <option value="UY">Uruguay</option>
-                <option value="UZ">Uzbekistan</option>
-                <option value="VU">Vanuatu</option>
-                <option value="VA">Vatican City</option>
-                <option value="VE">Venezuela</option>
-                <option value="VN">Vietnam</option>
-                <option value="YE">Yemen</option>
-                <option value="ZM">Zambia</option>
-                <option value="ZW">Zimbabwe</option>
-                <option value="PS">Palestine</option>
-                {/* Add location options here */}
-              </select>
+              <Select
+  id="location"
+  isMulti
+  options={countries}
+  value={selectedCountries}
+  onChange={handleCountryChange}
+  placeholder="Select countries"
+  className={`${styles.selectField} ${styles.countrySelect}`} // Custom class
+  classNamePrefix="custom-select" // Prefix for easy styling
+  styles={{
+    control: (provided) => ({
+      ...provided,
+      minHeight: '36px', // Reduced height
+      fontSize: '14px', // Smaller font size
+      borderColor: '#aaa',
+      boxShadow: 'none',
+      padding: '0px', // Adjust padding to reduce height
+      color: '#333', // Font color
+      '&:hover': {
+        borderColor: '#aaa',
+      },
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: '#f0f0f0',
+      fontSize: '12px', // Smaller font size for selected values
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: '#333', // Font color for selected values
+    }),
+    menu: (provided) => ({
+      ...provided,
+      zIndex: 9999,
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      fontSize: '14px', // Adjusted font size for placeholder
+      color: '#888', // Placeholder color
+    }),
+  }}
+/>
+
             </div>
 
             <div className={`${styles.column} ${config.targeting_type === "Advantage" ? styles.blurredField : ""}`}>
