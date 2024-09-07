@@ -16,12 +16,12 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
       try {
-        const response = await axios.get('https://localhost//payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
         setCurrentPlan(response.data.plan);
         setHasUsedFreeTrial(response.data.has_used_free_trial);
 
         // Fetch ad accounts and set the first one as selected
-        const adAccountsResponse = await axios.get('https://localhost//auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get('https://backend.quickcampaigns.io/auth/ad_accounts', { withCredentials: true });
         setAdAccounts(adAccountsResponse.data.ad_accounts);
 
         if (adAccountsResponse.data.ad_accounts.length > 0) {
@@ -47,7 +47,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   
     try {
       // Fetch the current subscription status for the selected ad account
-      const adAccountResponse = await axios.get(`https://localhost//payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
+      const adAccountResponse = await axios.get(`https://backend.quickcampaigns.io/payment/subscription-status/${selectedAdAccountId}`, { withCredentials: true });
       const { plan: adAccountPlan, is_active: adAccountIsActive } = adAccountResponse.data;
   
       if (plan === 'Professional' && adAccountPlan === 'Professional' && adAccountIsActive) {
@@ -76,7 +76,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       }
 
       // Proceed with subscription
-      const response = await axios.post('https://localhost//payment/create-checkout-session', 
+      const response = await axios.post('https://backend.quickcampaigns.io/payment/create-checkout-session', 
         { plan, ad_account_id: selectedAdAccountId },  // Include selected ad account ID
         { withCredentials: true }
       );
@@ -112,7 +112,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       </div>
       <p className={styles.priceDesc}>Flexible Pricing to Suit Every Advertiser</p>
       <div className={styles.priceCardContainer}>
-        {/* Free Trial Plan */}
+        {/* Free Trial Plan
         <div className={styles.priceCard}>
           <p className={styles.priceCardPrice}>$0</p>
           <p className={styles.priceCardAccounts}>1 Ad Account</p>
@@ -146,7 +146,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
           <button onClick={() => handleSubscribe('Free Trial')} className={styles.priceStartBtn}>
             Start Free Trial
           </button>
-        </div>
+        </div> */}
 
         {/* Professional Plan */}
         <div className={`${styles.priceCard} ${styles.popularPlan}`}>
@@ -156,7 +156,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
               <path d="M38.5158 9.90098C25.6315 17.6818 18.4779 31.9119 14.1785 45.8289C13.9575 46.5441 13.6873 47.2619 13.4404 47.9605C12.75 46.5676 8.03917 34.9998 6.13728 35.707C5.02576 36.1204 5.66158 37.6059 5.90619 38.2052C7.67675 42.5372 9.40645 46.4209 11.522 50.6102C13.1143 53.7639 16.0773 52.9418 19.0123 51.9819C23.4934 50.5165 23.8571 50.0963 28.4466 48.4097C29.203 48.1315 29.9979 47.9067 30.699 47.5593C31.5233 47.1502 32.4071 46.2845 31.9695 45.341C31.4735 44.2716 30.3945 44.3471 29.4728 44.7397C29.2803 44.8222 29.0849 44.8977 28.8877 44.9686C26.7215 45.7463 16.8895 49.8951 16.562 49.1937C16.4515 48.9575 16.4888 48.6827 16.5306 48.4255C17.7342 41.0033 20.9214 33.9331 24.6866 27.4731C27.2199 23.126 30.4713 19.1994 34.2601 15.8874C37.3047 13.2258 40.7371 10.966 44.4762 9.40628C48.4857 7.73348 52.366 7.38881 56.6492 7.13439C59.1151 6.98817 57.162 4.63891 55.7901 4.37429C54.2823 4.08303 52.668 4.60609 51.2031 4.91103C46.5692 5.87811 42.3375 7.59325 38.5158 9.90098Z" fill="#5356FF" />
             </svg>
           </div>
-          <p className={styles.priceCardPrice}>$100/month</p>
+          <p className={styles.priceCardPrice}>$129.95/month</p>
           <p className={styles.priceCardAccounts}>1 Ad Account</p>
           <p className={styles.priceCardPlan}>Professional Plan</p>
           <p className={styles.priceCardPlanDesc}>
@@ -205,7 +205,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
               <path d="M38.5158 9.90098C25.6315 17.6818 18.4779 31.9119 14.1785 45.8289C13.9575 46.5441 13.6873 47.2619 13.4404 47.9605C12.75 46.5676 8.03917 34.9998 6.13728 35.707C5.02576 36.1204 5.66158 37.6059 5.90619 38.2052C7.67675 42.5372 9.40645 46.4209 11.522 50.6102C13.1143 53.7639 16.0773 52.9418 19.0123 51.9819C23.4934 50.5165 23.8571 50.0963 28.4466 48.4097C29.203 48.1315 29.9979 47.9067 30.699 47.5593C31.5233 47.1502 32.4071 46.2845 31.9695 45.341C31.4735 44.2716 30.3945 44.3471 29.4728 44.7397C29.2803 44.8222 29.0849 44.8977 28.8877 44.9686C26.7215 45.7463 16.8895 49.8951 16.562 49.1937C16.4515 48.9575 16.4888 48.6827 16.5306 48.4255C17.7342 41.0033 20.9214 33.9331 24.6866 27.4731C27.2199 23.126 30.4713 19.1994 34.2601 15.8874C37.3047 13.2258 40.7371 10.966 44.4762 9.40628C48.4857 7.73348 52.366 7.38881 56.6492 7.13439C59.1151 6.98817 57.162 4.63891 55.7901 4.37429C54.2823 4.08303 52.668 4.60609 51.2031 4.91103C46.5692 5.87811 42.3375 7.59325 38.5158 9.90098Z" fill="#5356FF" />
             </svg>
           </div>
-          <p className={styles.priceCardPrice}>$74/month</p>
+          <p className={styles.priceCardPrice}>$99.95/month</p>
           <p className={styles.priceCardAccounts}>
             For 2 or more ad accounts, with pricing per account.
           </p>

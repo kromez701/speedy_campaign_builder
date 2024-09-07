@@ -7,9 +7,10 @@ import SuccessScreen from "../SuccessScreen";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "../Main/MainStyles.module.css";
+import SetupAdAccountModal from "../Modals/SetupAdAccountModal";  // Import the modal
 import axios from "axios";
 
-const socket = io("http://localhost:5001");
+const socket = io("https://fbbackend.quickcampaigns.io");
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -35,6 +36,16 @@ const Main = ({ activeAccount }) => {
   const [existingCampaigns, setExistingCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [showModal, setShowModal] = useState(false);  // Modal state
+
+  // Check if activeAccount is bound
+  useEffect(() => {
+    if (activeAccount && !activeAccount.is_bound) {
+      setShowModal(true);  // Show modal if the ad account is not bound
+    } else {
+      setShowModal(false);
+    }
+  }, [activeAccount]);
 
   const handleObjectiveSelect = (objective) => {
     setSelectedObjective(objective);
@@ -245,7 +256,7 @@ const Main = ({ activeAccount }) => {
     }
 
     if (taskId) {
-      fetch("http://localhost:5001/cancel_task", {
+      fetch("https://fbbackend.quickcampaigns.io/cancel_task", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ task_id: taskId }),
@@ -296,7 +307,7 @@ const Main = ({ activeAccount }) => {
     setProgress(0);
     setStepVisible(false);
 
-    fetch("http://localhost:5001/create_campaign", {
+    fetch("https://fbbackend.quickcampaigns.io/create_campaign", {
       method: "POST",
       body: formData,
       signal: controller.signal,
@@ -322,6 +333,13 @@ const Main = ({ activeAccount }) => {
 
   return (
     <div className={styles.container}>
+      {showModal && (
+        <SetupAdAccountModal 
+          onClose={() => setShowModal(false)} 
+          activeAccount={activeAccount}  // Pass activeAccount to SetupAdAccountModal
+        />
+      )}
+
       {formId === "mainForm" && (
         <div className={styles.formContainer}>
           <h2 className={styles.heading}>Choose Campaign Objective</h2>

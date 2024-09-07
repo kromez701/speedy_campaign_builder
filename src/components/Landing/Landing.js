@@ -35,7 +35,7 @@ const Landing = () => {
 const handleSubscribe = async (plan) => {
   try {
     console.log("Creating anonymous checkout session...");
-    const response = await axios.post('https://localhost//payment/create-anonymous-checkout-session', 
+    const response = await axios.post('https://backend.quickcampaigns.io/payment/create-anonymous-checkout-session', 
       { plan }, 
       { withCredentials: true }
     );
@@ -272,7 +272,7 @@ const handleSubscribe = async (plan) => {
           <div className="price-card">
             <p className="price-card-price">$0</p>
             <p className="price-card-accounts">1 Ad Account</p>
-            <p className="price-card-plan">Free Trial</p>
+            <p className="price-card-plan">Free 1 Day Trial </p>
             <p className="price-card-plan-desc">
               Try QuickCampaigns Now Risk-Free
             </p>

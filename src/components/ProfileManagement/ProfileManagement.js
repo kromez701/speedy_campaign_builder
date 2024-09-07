@@ -27,7 +27,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('https://localhost//auth/profile', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/auth/profile', { withCredentials: true });
         if (response.status === 200) {
           const { username, email, profile_picture } = response.data.user;
           setFullName(username);
@@ -45,7 +45,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   useEffect(() => {
     const fetchUserSubscriptionStatus = async () => {
       try {
-        const response = await axios.get('https://localhost//payment/user-subscription-status', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/payment/user-subscription-status', { withCredentials: true });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
           setSubscriptionPlan(plan);
@@ -66,7 +66,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     const fetchSubscriptionDetails = async () => {
       try {
         const response = await axios.get(
-          `https://localhost//payment/subscription-status/${activeAccount.id}`, 
+          `https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`, 
           { withCredentials: true }
         );
   
@@ -92,7 +92,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const fetchAdAccountDetails = async (adAccountId) => {
     try {
-      const response = await axios.get(`https://localhost//auth/ad_account/${adAccountId}`, { withCredentials: true });
+      const response = await axios.get(`https://backend.quickcampaigns.io/auth/ad_account/${adAccountId}`, { withCredentials: true });
       const adAccountData = response.data;
       setAdAccountDetails(adAccountData);
 
@@ -160,14 +160,14 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     const { ad_account_id, pixel_id, facebook_page_id } = adAccountDetails;
   
     try {
-        const isAdAccountValid = await verifyField('https://localhost//auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
-        // const isPixelValid = await verifyField('https://localhost//auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
-        // const isPageValid = await verifyField('https://localhost//auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
+        const isAdAccountValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_ad_account', { ad_account_id: adAccount, access_token: accessToken });
+        // const isPixelValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_pixel_id', { pixel_id: pixel, access_token: accessToken });
+        // const isPageValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_facebook_page_id', { facebook_page_id: page, access_token: accessToken });
 
         if (isAdAccountValid) {
             try {
                 const exchangeResponse = await axios.post(
-                    `https://localhost//config/ad_account/${activeAccount.id}/exchange-token`,
+                    `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/exchange-token`,
                     { access_token: accessToken },
                     { withCredentials: true }
                 );
@@ -184,7 +184,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
                     };
 
                     const saveResponse = await axios.post(
-                        'https://localhost//auth/ad_account',
+                        'https://backend.quickcampaigns.io/auth/ad_account',
                         { id: activeAccount.id, ...updatedAdAccountDetails },
                         { withCredentials: true }
                     );
@@ -218,7 +218,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     formData.append('profile_picture', document.querySelector('input[type="file"]').files[0]);
 
     try {
-      const response = await axios.post('https://localhost//auth/profile', formData, { withCredentials: true });
+      const response = await axios.post('https://backend.quickcampaigns.io/auth/profile', formData, { withCredentials: true });
       if (response.status === 200) {
         toast.success('Profile updated successfully');
       }
@@ -230,7 +230,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleCancelSubscription = async () => {
     try {
-      const response = await axios.get('https://localhost//payment/active-ad-accounts', { withCredentials: true });
+      const response = await axios.get('https://backend.quickcampaigns.io/payment/active-ad-accounts', { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
 
       const confirmCancel = window.confirm(
@@ -240,7 +240,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       );
 
       if (confirmCancel) {
-        const cancelResponse = await axios.post('https://localhost//payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
+        const cancelResponse = await axios.post('https://backend.quickcampaigns.io/payment/cancel-subscription', { ad_account_id: activeAccount.id }, { withCredentials: true });
 
         if (cancelResponse.status === 200) {
           toast.success(cancelResponse.data.message);
@@ -258,7 +258,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
 
   const handleRenewSubscription = async () => {
     try {
-      const response = await axios.post('https://localhost//payment/renew-subscription', 
+      const response = await axios.post('https://backend.quickcampaigns.io/payment/renew-subscription', 
         { ad_account_id: activeAccount.id, plan: subscriptionPlan },
         { withCredentials: true }
       );

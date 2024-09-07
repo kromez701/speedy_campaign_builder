@@ -9,6 +9,8 @@ const SuccessScreen = ({ onGoBack }) => {
       <div className={styles.formContainer}>
         <h2 className={styles.heading}>Success!</h2>
         <p>Your ad campaign has been successfully created.</p>
+        <p>Your ads are automatically paused.</p>
+        <p>When you're ready, just turn them on from the ads section in your Ads manager.</p>
         <button className={styles.successGoBackButton} onClick={onGoBack}>Go Back</button>
       </div>
     </div>

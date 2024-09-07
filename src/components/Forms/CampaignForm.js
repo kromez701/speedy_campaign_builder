@@ -41,7 +41,7 @@ const CampaignForm = ({
       if (activeAccount) {
         try {
           const response = await axios.get(
-            `https://localhost//payment/subscription-status/${activeAccount.id}`,
+            `https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`,
             { withCredentials: true }
           );
           setIsActiveSubscription(response.data.is_active);
@@ -60,7 +60,7 @@ const CampaignForm = ({
     const fetchUserPlan = async () => {
       try {
         const response = await axios.get(
-          "https://localhost//payment/user-subscription-status",
+          "https://backend.quickcampaigns.io/payment/user-subscription-status",
           { withCredentials: true }
         );
         setUserPlan(response.data.plan);
@@ -78,7 +78,7 @@ const CampaignForm = ({
       const fetchActiveAdAccountsCount = async () => {
         try {
           const response = await axios.get(
-            "https://localhost//payment/active-ad-accounts",
+            "https://backend.quickcampaigns.io/payment/active-ad-accounts",
             { withCredentials: true }
           );
           setActiveAdAccountsCount(response.data.count);
@@ -102,7 +102,7 @@ const CampaignForm = ({
   const handleSaveConfig = async () => {
     try {
       const response = await fetch(
-        `https://localhost//config/ad_account/${activeAccount.id}/config`,
+        `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`,
         {
           method: "POST",
           headers: {
@@ -283,7 +283,7 @@ const CampaignForm = ({
             onClick={handleSaveConfig}
             className={styles.createAdButton}
           >
-            Save Config
+            Save Current Settings
           </button>
         </div>
       </form>

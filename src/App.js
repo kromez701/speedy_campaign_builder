@@ -12,6 +12,7 @@ import axios from 'axios';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for toastify
+import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup'; // Import the popup as a standalone page
 
 const App = () => {
   const [authMode, setAuthMode] = useState(null);
@@ -24,7 +25,7 @@ const App = () => {
   useEffect(() => {
     const checkCurrentUser = async () => {
       try {
-        const response = await axios.get('https://localhost//auth/current_user', { withCredentials: true });
+        const response = await axios.get('https://backend.quickcampaigns.io/auth/current_user', { withCredentials: true });
         if (response.status === 200) {
           setUser(response.data.user);
         }
@@ -39,7 +40,7 @@ const App = () => {
 
   const handleAuthSuccess = async () => {
     try {
-      const response = await axios.get('https://localhost//auth/current_user', { withCredentials: true });
+      const response = await axios.get('https://backend.quickcampaigns.io/auth/current_user', { withCredentials: true });
       if (response.status === 200) {
         setUser(response.data.user);
         setAuthMode(null);
@@ -52,7 +53,7 @@ const App = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('https://localhost//auth/logout', {}, { withCredentials: true });
+      const response = await axios.post('https://backend.quickcampaigns.io/auth/logout', {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
         setRedirectToMain(false);
@@ -94,6 +95,7 @@ const App = () => {
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
                   <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                   <Route path="/success" element={<PaymentSuccess />} /> {/* New route */}
+                  <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} /> {/* New route for SetupAdAccountPopup */}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>

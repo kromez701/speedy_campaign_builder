@@ -52,7 +52,7 @@
 }
 
 .accountsContainer {
-  max-height: 155px;
+  max-height: 180px;
   overflow-y: auto;
 }
 
@@ -162,6 +162,14 @@
 .dropdownContent {
   display: flex;
   flex-direction: column;
+}
+.inlineContainer {
+  display: flex;
+  align-items: center; /* Vertically align the input and span */
+}
+
+.lab {
+  margin-right: -45px; /* Add spacing between the label and input */
 }
 
 .horizontalRule1 {

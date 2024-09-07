@@ -105,13 +105,36 @@ const ConfigForm = ({
       messenger: true,
     },
     placements: {
+      // Facebook Placements
       feeds: true,
+      profile_feed: true,
+      marketplace: true,
+      video_feeds: true,
+      right_column: true,
       stories: true,
+      reels: true,
       in_stream: true,
       search: true,
-      messages: true,
-      apps_sites: true,
-    },
+      facebook_reels: true,
+    
+      // Instagram Placements
+      instagram_feeds: true,
+      instagram_profile_feed: true,
+      explore: true,
+      explore_home: true,
+      instagram_stories: true,
+      instagram_reels: true,
+      instagram_search: true,
+    
+      // Audience Network Placements
+      native_banner_interstitial: true,
+      rewarded_videos: true,
+
+      // Messages Placements
+      messenger_inbox: true,
+      messenger_stories: true,
+      messenger_sponsored: true,
+    },    
     buying_type: initialConfig.buying_type || "AUCTION",
     targeting_type: "Advantage",
     location: [],
@@ -199,7 +222,7 @@ const ConfigForm = ({
   
     try {
       const response = await axios.post(
-        "https://localhost//targeting/get_countries", 
+        "https://backend.quickcampaigns.io/targeting/get_countries", 
         requestBody, 
         { withCredentials: true } // Sends credentials with the request
       );
@@ -248,7 +271,7 @@ const ConfigForm = ({
 
     try {
       const response = await axios.post(
-        "https://localhost/targeting/custom_audiences", 
+        "https://backend.quickcampaigns.io/targeting/custom_audiences", 
         requestBody, 
         { withCredentials: true }
       );
@@ -306,7 +329,7 @@ const ConfigForm = ({
     };
 
     try {
-      const response = await axios.post("https://localhost/targeting/interests", requestBody, { withCredentials: true });
+      const response = await axios.post("https://backend.quickcampaigns.io/targeting/interests", requestBody, { withCredentials: true });
       if (response.status === 200) {
         const formattedInterests = response.data.map(interest => ({
           label: interest.name,
@@ -429,14 +452,104 @@ const ConfigForm = ({
 
   const handlePlatformChange = (e) => {
     const { name, checked } = e.target;
-    setConfig((prevConfig) => ({
-      ...prevConfig,
-      platforms: {
-        ...prevConfig.platforms,
-        [name]: checked,
-      },
-    }));
-  };
+  
+    setConfig((prevConfig) => {
+      const newConfig = {
+        ...prevConfig,
+        platforms: {
+          ...prevConfig.platforms,
+          [name]: checked,
+        },
+      };
+  
+      // Disable all related placements when a platform is unchecked
+      if (checked) {
+        if (name === 'facebook') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            feeds: true,
+            profile_feed: true,
+            marketplace: true,
+            video_feeds: true,
+            right_column: true,
+            stories: true,
+            reels: true,
+            in_stream: true,
+            search: true,
+            facebook_reels: true,
+          };
+        } else if (name === 'instagram') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            instagram_feeds: true,
+            instagram_profile_feed: true,
+            explore: true,
+            explore_home: true,
+            instagram_stories: true,
+            instagram_reels: true,
+            instagram_search: true,
+          };
+        } else if (name === 'audience_network') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            native_banner_interstitial: true,
+            rewarded_videos: true,
+          };
+        }else if (name ==='messenger'){
+          newConfig.placements= {
+            ...newConfig.placements,
+            messenger_stories: true,
+            messenger_inbox: true,
+            messenger_sponsored: true,
+          }
+        }
+      } else {
+        // Uncheck all related placements when the platform is unchecked
+        if (name === 'facebook') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            feeds: false,
+            profile_feed: false,
+            marketplace: false,
+            video_feeds: false,
+            right_column: false,
+            stories: false,
+            reels: false,
+            in_stream: false,
+            search: false,
+            facebook_reels: false,
+          };
+        } else if (name === 'instagram') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            instagram_feeds: false,
+            instagram_profile_feed: false,
+            explore: false,
+            explore_home: false,
+            instagram_stories: false,
+            instagram_reels: false,
+            instagram_search: false,
+          };
+        } else if (name === 'audience_network') {
+          newConfig.placements = {
+            ...newConfig.placements,
+            native_banner_interstitial: false,
+            rewarded_videos: false,
+          };
+        }
+        else if (name ==='messenger'){
+          newConfig.placements= {
+            ...newConfig.placements,
+            messenger_stories: false,
+            messenger_inbox: false,
+            messenger_sponsored: false,
+          }
+        }
+      }
+  
+      return newConfig;
+    });
+  };  
 
   const handleSliderChange = (event, newValue) => {
     setConfig((prevConfig) => ({
@@ -500,7 +613,7 @@ const ConfigForm = ({
     const fetchConfig = async () => {
       try {
         const response = await fetch(
-          `https://localhost//config/ad_account/${activeAccount.id}/config`,
+          `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`,
           {
             credentials: "include",
           }
@@ -513,10 +626,10 @@ const ConfigForm = ({
             ...result,
           });
         } else {
-          toast.error(result.message || "Failed to load configuration.");
+          // toast.error(result.message || "Failed to load configuration.");
         }
       } catch (error) {
-        toast.error("Failed to load configuration.");
+        // toast.error("Failed to load configuration.");
       }
     };
 
@@ -923,82 +1036,78 @@ const ConfigForm = ({
         </span>
       </div>
       <div className={`${styles.platformContainer} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.facebook}
-              onChange={handlePlatformChange}
-              name="facebook"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Facebook"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+      <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.platforms.facebook}
+        onChange={handlePlatformChange}
+        name="facebook"
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.instagram}
-              onChange={handlePlatformChange}
-              name="instagram"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Instagram"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.platforms.instagram}
+        onChange={handlePlatformChange}
+        name="instagram"
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.platforms.audience_network}
-              onChange={handlePlatformChange}
-              name="audience_network"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Audience Network"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Instagram"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.platforms.audience_network}
+        onChange={handlePlatformChange}
+        name="audience_network"
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
+          },
+        }}
+      />
+    }
+    label="Audience Network"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  {/* <FormControlLabel
           control={
             <Checkbox
               checked={config.platforms.messenger}
               onChange={handlePlatformChange}
               name="messenger"
-              disabled={config.placement_type === "advantage_plus"}
               sx={{
                 '&.Mui-checked': {
                   '& .MuiSvgIcon-root': {
@@ -1014,155 +1123,547 @@ const ConfigForm = ({
               color: '#1E1E1E', // Set the label color here
             },
           }}
-        />
-      </div>
+        /> */}
+</div>
+
 
       {/* Horizontal Rule */}
-      <hr className={styles.sectionDivider2} />
+
+<hr className={styles.sectionDivider2} />
 
       {/* Placements Column */}
       <div className={`${styles.manualOptions} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.feeds}
-              onChange={handlePlacementChange}
-              name="feeds"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Feeds"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+      <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.feeds}
+        onChange={handlePlacementChange}
+        name="feeds"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.stories}
-              onChange={handlePlacementChange}
-              name="stories"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Stories"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook Feed"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.profile_feed}
+        onChange={handlePlacementChange}
+        name="profile_feed"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.in_stream}
-              onChange={handlePlacementChange}
-              name="in_stream"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="In-stream ads for videos and reels"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook Profile Feed"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.marketplace}
+        onChange={handlePlacementChange}
+        name="marketplace"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.search}
-              onChange={handlePlacementChange}
-              name="search"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Search results"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook Marketplace"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.video_feeds}
+        onChange={handlePlacementChange}
+        name="video_feeds"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.messages}
-              onChange={handlePlacementChange}
-              name="messages"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Messages"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook Video Feeds"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.right_column}
+        onChange={handlePlacementChange}
+        name="right_column"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-        <FormControlLabel
-          control={
-            <Checkbox
-              checked={config.placements.apps_sites}
-              onChange={handlePlacementChange}
-              name="apps_sites"
-              disabled={config.placement_type === "advantage_plus"}
-              sx={{
-                '&.Mui-checked': {
-                  '& .MuiSvgIcon-root': {
-                    color: '#5356FF',
-                  },
-                },
-              }}
-            />
-          }
-          label="Apps and sites"
-          sx={{
-            '& .MuiFormControlLabel-label': {
-              color: '#1E1E1E', // Set the label color here
+          },
+        }}
+      />
+    }
+    label="Facebook Right Column"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.in_stream}
+        onChange={handlePlacementChange}
+        name="in_stream"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
             },
-          }}
-        />
-      </div>
-    </div>
+          },
+        }}
+      />
+    }
+    label="Facebook In-stream Videos"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.search}
+        onChange={handlePlacementChange}
+        name="search"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Facebook Search Results"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.stories}
+        onChange={handlePlacementChange}
+        name="stories"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Facebook Stories"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.reels}
+        onChange={handlePlacementChange}
+        name="reels"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Facebook Reels"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+
+<FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.facebook_reels}
+        onChange={handlePlacementChange}
+        name="facebook_reels"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Ads on Facebook reels"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  
+</div>
+
+<hr className={styles.sectionDivider2} />
+
+{/* Instagram Placements */}
+<div className={`${styles.manualOptions} ${!config.platforms.instagram ? styles.disabled : ""} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.instagram_profile_feed}
+        onChange={handlePlacementChange}
+        name="instagram_profile_feed"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Feed"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.instagram_profile_feed}
+        onChange={handlePlacementChange}
+        name="instagram_profile_feed"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Profile Feed"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.explore}
+        onChange={handlePlacementChange}
+        name="explore"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Explore"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.explore_home}
+        onChange={handlePlacementChange}
+        name="explore_home"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Explore Home"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.instagram_stories}
+        onChange={handlePlacementChange}
+        name="instagram_stories"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Stories"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.instagram_reels}
+        onChange={handlePlacementChange}
+        name="instagram_reels"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Reels"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.instagram_search}
+        onChange={handlePlacementChange}
+        name="instagram_search"
+        disabled={!config.platforms.instagram}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Instagram Search Results"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+</div>
+
+<hr className={styles.sectionDivider2} />
+
+{/* Audience Network Placements */}
+<div className={`${styles.manualOptions} ${!config.platforms.audience_network ? styles.disabled : ""} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.native_banner_interstitial}
+        onChange={handlePlacementChange}
+        name="native_banner_interstitial"
+        disabled={!config.platforms.audience_network}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Audience Network Native, Banner and Interstitial"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.rewarded_videos}
+        onChange={handlePlacementChange}
+        name="rewarded_videos"
+        disabled={!config.platforms.audience_network}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Audience Network Rewarded Videos"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+</div>
+{/* <hr className={styles.sectionDivider2} /> */}
+
+{/* Messenger Placements */}
+{/* <div className={`${styles.manualOptions} ${!config.platforms.messenger ? styles.disabled : ""} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+<FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.messenger_stories}
+        onChange={handlePlacementChange}
+        name="messenger_stories"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Messenger Stories"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.messenger_inbox}
+        onChange={handlePlacementChange}
+        name="messenger_inbox"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Messenger Inbox"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+  <FormControlLabel
+    control={
+      <Checkbox
+        checked={config.placements.messenger_sponsored}
+        onChange={handlePlacementChange}
+        name="messenger_sponsored"
+        disabled={!config.platforms.facebook}
+        sx={{
+          '&.Mui-checked': {
+            '& .MuiSvgIcon-root': {
+              color: '#5356FF',
+            },
+          },
+        }}
+      />
+    }
+    label="Messenger Sponsored Messages"
+    sx={{
+      '& .MuiFormControlLabel-label': {
+        color: '#1E1E1E',
+      },
+    }}
+  />
+</div> */}
+</div>
   )}
+
+  
   <hr className={styles.sectionDivider} />
 </div>
 
