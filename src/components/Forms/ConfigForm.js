@@ -9,16 +9,22 @@ import Slider from "@mui/material/Slider";
 import axios from 'axios';
 import Select from 'react-select'; // Import for multi-select dropdown
 
-const eventTypes = [
-  "AD_IMPRESSION", "RATE", "TUTORIAL_COMPLETION", "CONTACT",
-  "CUSTOMIZE_PRODUCT", "DONATE", "FIND_LOCATION", "SCHEDULE",
-  "START_TRIAL", "SUBMIT_APPLICATION", "SUBSCRIBE", "ADD_TO_CART",
-  "ADD_TO_WISHLIST", "INITIATED_CHECKOUT", "ADD_PAYMENT_INFO", "PURCHASE",
-  "LEAD", "COMPLETE_REGISTRATION", "CONTENT_VIEW", "SEARCH",
-  "SERVICE_BOOKING_REQUEST", "MESSAGING_CONVERSATION_STARTED_7D",
-  "LEVEL_ACHIEVED", "ACHIEVEMENT_UNLOCKED", "SPENT_CREDITS",
-  "LISTING_INTERACTION", "D2_RETENTION", "D7_RETENTION", "OTHER"
-];
+const objectiveEventMapping = {
+  OUTCOME_SALES: ["PURCHASE", "ADD_TO_CART", "INITIATED_CHECKOUT", "ADD_PAYMENT_INFO", "ADD_TO_WISHLIST", "COMPLETE_REGISTRATION", "DONATE", "SEARCH", "START_TRIAL", "SUBSCRIBE", "VIEW_CONTENT", "OTHER"],
+  OUTCOME_LEADS: [
+    "LEAD",
+    "COMPLETE_REGISTRATION",
+    "CONTACT",
+    "FIND_LOCATION",
+    "LEAD",
+    "SCHEDULE",
+    "START_TRIAL",
+    "SUBMIT_APPLICATION",
+    "SUBSCRIBE", "OTHER"
+  ],  
+  OUTCOME_TRAFFIC: ["LEAD", "CONTENT_VIEW", "AD_IMPRESSION", "SEARCH", "OTHER"],
+};
+
 
 const attributionSettings = [
   { label: "1-day click", value: "1d_click" },
@@ -53,13 +59,18 @@ const ConfigForm = ({
   activeAccount,
   campaignName,
   setCampaignName,
+  campaignId,
+  objective, // Pass objective as a prop
 }) => {
   const [isCBO, setIsCBO] = useState(false);
+  const [isABOEnabled, setIsABOEnabled] = useState(false); // New variable for ABO
   const [countries, setCountries] = useState([]); // State to store countries
   const [selectedCountries, setSelectedCountries] = useState([]); // Multi-select state for selected countries
   const [customAudiences, setCustomAudiences] = useState([]); // State to store custom audiences
   const [interests, setInterests] = useState([]); // State to store fetched interests
   const [selectedInterests, setSelectedInterests] = useState([]); // State to store selected interests
+  const [filteredEventTypes, setFilteredEventTypes] = useState([]);
+
 
   const [expandedSections, setExpandedSections] = useState({
     budgetSchedule: true,
@@ -186,6 +197,51 @@ const ConfigForm = ({
     }
   };
 
+  useEffect(() => {
+  if (objective && objectiveEventMapping[objective]) {
+    setFilteredEventTypes(objectiveEventMapping[objective]);
+  } else {
+    setFilteredEventTypes([]); // Default to an empty array if no mapping is found
+  }
+}, [objective]);
+
+
+  useEffect(() => {
+    // Only call the API for existing campaigns
+    if (!isNewCampaign && campaignId) {
+      const fetchCampaignOptimization = async () => {
+        try {
+          const response = await axios.post('https://fbbackend.quickcampaigns.io/get_campaign_budget_optimization', {
+            campaign_id: campaignId,
+            ad_account_id: activeAccount.id,
+            app_id: activeAccount.app_id,
+            app_secret: activeAccount.app_secret,
+            access_token: activeAccount.access_token
+          });
+
+          console.log("Response:")
+          console.log(response.data.campaign_budget_optimization)
+
+          if (response.data.campaign_budget_optimization === true) {
+            setIsCBO(true);
+            setIsABOEnabled(false);
+
+          } else {
+            setIsCBO(false);
+            setIsABOEnabled(true);
+          }
+        } catch (error) {
+          console.error('Error fetching campaign budget optimization:', error);
+        }
+      };
+      console.log("Is set ABO Enaabled")
+      console.log(isABOEnabled);
+      console.log(isCBO);
+
+
+      fetchCampaignOptimization();
+    }
+  }, [campaignId, activeAccount.id, isNewCampaign]);
   
   const fetchPixels = async () => {
     try {
@@ -661,7 +717,7 @@ const ConfigForm = ({
   <div className={styles.budgetOptimizationToggle}>
     <button
       type="button"
-      className={`${styles.toggleButton} ${!isCBO ? styles.active : ""}`}
+      className={`${styles.toggleButton} ${!isCBO ? styles.active : ""} ${!isNewCampaign && !isABOEnabled ? styles.disabledButton : ""}`}
       onClick={() => {
         setIsCBO(false);
         setConfig((prevConfig) => ({
@@ -669,6 +725,7 @@ const ConfigForm = ({
           isCBO: false, // Update config when switching to ABO
         }));
       }}
+      disabled={!isNewCampaign && !isABOEnabled}
     >
       ABO
     </button>
@@ -690,7 +747,10 @@ const ConfigForm = ({
 
             {isCBO ? (
               <>
-                <div className={styles.column}>
+                {/* Only show campaign budget and schedule fields for existing campaigns */}
+    {isNewCampaign ? (
+      <>
+      <div className={styles.column}>
                   <label
                     className={styles.labelText}
                     htmlFor="campaign_budget_optimization"
@@ -708,23 +768,6 @@ const ConfigForm = ({
                     <option value="LIFETIME_BUDGET">Lifetime Budget</option>
                   </select>
                 </div>
-
-                <div className={styles.column}>
-                  <label className={styles.labelText} htmlFor="buying_type">
-                    Buying Type:
-                  </label>
-                  <select
-                    id="buying_type"
-                    name="buying_type"
-                    value={config.buying_type}
-                    onChange={handleChange}
-                    className={styles.selectField}
-                  >
-                    <option value="AUCTION">Auction</option>
-                    <option value="RESERVED">Reserved</option>
-                  </select>
-                </div>
-
                 <div className={styles.column}>
                   <label
                     className={styles.labelText}
@@ -740,6 +783,21 @@ const ConfigForm = ({
                     onChange={handleChange}
                     className={styles.inputField}
                   />
+                </div>
+                <div className={styles.column}>
+                  <label className={styles.labelText} htmlFor="buying_type">
+                    Buying Type:
+                  </label>
+                  <select
+                    id="buying_type"
+                    name="buying_type"
+                    value={config.buying_type}
+                    onChange={handleChange}
+                    className={styles.selectField}
+                  >
+                    <option value="AUCTION">Auction</option>
+                    <option value="RESERVED">Reserved</option>
+                  </select>
                 </div>
 
                 <div className={styles.column}>
@@ -761,6 +819,12 @@ const ConfigForm = ({
                     <option value="LOWEST_COST_WITH_BID_CAP">Bid Cap</option>
                   </select>
                 </div>
+                
+      </>
+    ) : (
+      <>
+      </>
+    )}
               </>
             ) : (
               <>
@@ -925,24 +989,24 @@ const ConfigForm = ({
         </div>
         {expandedSections["assets"] && (
           <div className={styles.sectionContent}>
-            <div className={styles.column}>
-              <label htmlFor="event_type" className={styles.labelText}>
-                Event Type:
-              </label>
-              <select
-                id="event_type"
-                name="event_type"
-                value={config.event_type}
-                onChange={handleChange}
-                className={styles.selectField}
-              >
-                {eventTypes.map((event) => (
-                  <option key={event} value={event}>
-                    {formatGoalForUI(event)}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <div className={styles.column}>
+            <label htmlFor="event_type" className={styles.labelText}>
+              Event Type:
+            </label>
+            <select
+              id="event_type"
+              name="event_type"
+              value={config.event_type}
+              onChange={handleChange}
+              className={styles.selectField}
+            >
+              {filteredEventTypes.map((event) => (
+                <option key={event} value={event}>
+                  {formatGoalForUI(event)}
+                </option>
+              ))}
+            </select>
+          </div>
             <div className={styles.column}>
               <label htmlFor="pixel_id" className={styles.labelText}>
                 Pixel ID:
@@ -2111,6 +2175,7 @@ ConfigForm.propTypes = {
   activeAccount: PropTypes.object.isRequired,
   campaignName: PropTypes.string.isRequired,
   setCampaignName: PropTypes.func.isRequired,
+  objective: PropTypes.string.isRequired, // Make objective required
 };
 
 export default ConfigForm;

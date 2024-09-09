@@ -187,7 +187,18 @@ const Main = ({ activeAccount }) => {
     socket.on("error", (data) => {
       if (data.task_id === taskId) {
         clearInterval(logInterval);
-        toast.error(`Error: ${data.message}`);
+        
+        const errorTitle = data.title;
+        const errorMessage = data.message || "An unexpected error occurred";
+        
+        toast.error(
+          <>
+            Error: <br />
+            {errorTitle} <br />
+            {errorMessage}
+          </>
+        );
+        
         setFormId("mainForm");
       }
     });

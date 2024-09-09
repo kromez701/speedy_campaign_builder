@@ -263,13 +263,15 @@ const CampaignForm = ({
             activeAccount={activeAccount}
             campaignName={campaignName} // Pass campaignName down
             setCampaignName={setCampaignName} // Pass setCampaignName down
+            objective={objective}  // Pass the objective here
+            campaignId={campaignId}
           />
         </div>
 
         {/* Button container outside the formSectionsContainer */}
         <div className={styles.buttonContainer}>
           <button type="submit" className={styles.createAdButton}>
-            Launch Ad
+              Create Campaign
           </button>
           <button
             type="button"

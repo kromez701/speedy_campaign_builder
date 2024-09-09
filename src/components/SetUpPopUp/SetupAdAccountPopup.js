@@ -56,11 +56,11 @@ const SetupAdAccountPopup = ({ onClose, onSubmit, accessToken }) => {
     <div className={styles.popupOverlay}>
       <div className={styles.popupContent} ref={popupRef}>
         <div className={styles.leftSide}>
-          <h3>“QuickCampaigns makes it super easy to create and manage ad campaigns. It's efficient, fast, and gets the job done without hassle.”</h3>
+          <h3>“QuickCampaigns Makes It Incredibly Easy To Create Multiple Campaigns With Just One Click, Saving You Countless Hours Of Work.”</h3>
         </div>
         <div className={styles.rightSide}>
           <div className={`${styles.stepContent} ${styles.active}`}>
-            <h3>Which ad account will you be using?</h3>
+            <h3>Which Ad Account Will You Be Using?</h3>
             <p>You'll be able to create and manage campaigns with this ad account.</p>
             <div className={styles.dropdownContainer}>
               <div className={styles.customDropdown}>
