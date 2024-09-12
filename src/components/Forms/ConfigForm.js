@@ -731,7 +731,7 @@ const ConfigForm = ({
     </button>
     <button
       type="button"
-      className={`${styles.toggleButton} ${styles.lastButton} ${isCBO ? styles.active : ""}`}
+      className={`${styles.toggleButton} ${styles.lastButton} ${isCBO ? styles.active : ""}  ${!isNewCampaign && isABOEnabled ? styles.disabledButton : ""}`}
       onClick={() => {
         setIsCBO(true);
         setConfig((prevConfig) => ({
@@ -739,6 +739,7 @@ const ConfigForm = ({
           isCBO: true, // Update config when switching to CBO
         }));
       }}
+      disabled={!isNewCampaign && isABOEnabled}
     >
       CBO
     </button>
@@ -1203,7 +1204,6 @@ const ConfigForm = ({
         checked={config.placements.feeds}
         onChange={handlePlacementChange}
         name="feeds"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1226,7 +1226,6 @@ const ConfigForm = ({
         checked={config.placements.profile_feed}
         onChange={handlePlacementChange}
         name="profile_feed"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1249,7 +1248,6 @@ const ConfigForm = ({
         checked={config.placements.marketplace}
         onChange={handlePlacementChange}
         name="marketplace"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1272,7 +1270,6 @@ const ConfigForm = ({
         checked={config.placements.video_feeds}
         onChange={handlePlacementChange}
         name="video_feeds"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1295,7 +1292,6 @@ const ConfigForm = ({
         checked={config.placements.right_column}
         onChange={handlePlacementChange}
         name="right_column"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1318,7 +1314,6 @@ const ConfigForm = ({
         checked={config.placements.in_stream}
         onChange={handlePlacementChange}
         name="in_stream"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1341,7 +1336,6 @@ const ConfigForm = ({
         checked={config.placements.search}
         onChange={handlePlacementChange}
         name="search"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1365,7 +1359,6 @@ const ConfigForm = ({
         checked={config.placements.stories}
         onChange={handlePlacementChange}
         name="stories"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1388,7 +1381,6 @@ const ConfigForm = ({
         checked={config.placements.reels}
         onChange={handlePlacementChange}
         name="reels"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1412,7 +1404,6 @@ const ConfigForm = ({
         checked={config.placements.facebook_reels}
         onChange={handlePlacementChange}
         name="facebook_reels"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1435,14 +1426,13 @@ const ConfigForm = ({
 <hr className={styles.sectionDivider2} />
 
 {/* Instagram Placements */}
-<div className={`${styles.manualOptions} ${!config.platforms.instagram ? styles.disabled : ""} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+<div className={`${styles.manualOptions} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
   <FormControlLabel
     control={
       <Checkbox
         checked={config.placements.instagram_profile_feed}
         onChange={handlePlacementChange}
         name="instagram_profile_feed"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1465,7 +1455,6 @@ const ConfigForm = ({
         checked={config.placements.instagram_profile_feed}
         onChange={handlePlacementChange}
         name="instagram_profile_feed"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1488,7 +1477,6 @@ const ConfigForm = ({
         checked={config.placements.explore}
         onChange={handlePlacementChange}
         name="explore"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1511,7 +1499,6 @@ const ConfigForm = ({
         checked={config.placements.explore_home}
         onChange={handlePlacementChange}
         name="explore_home"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1534,7 +1521,6 @@ const ConfigForm = ({
         checked={config.placements.instagram_stories}
         onChange={handlePlacementChange}
         name="instagram_stories"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1557,7 +1543,6 @@ const ConfigForm = ({
         checked={config.placements.instagram_reels}
         onChange={handlePlacementChange}
         name="instagram_reels"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1580,7 +1565,6 @@ const ConfigForm = ({
         checked={config.placements.instagram_search}
         onChange={handlePlacementChange}
         name="instagram_search"
-        disabled={!config.platforms.instagram}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1602,14 +1586,13 @@ const ConfigForm = ({
 <hr className={styles.sectionDivider2} />
 
 {/* Audience Network Placements */}
-<div className={`${styles.manualOptions} ${!config.platforms.audience_network ? styles.disabled : ""} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
+<div className={`${styles.manualOptions} ${config.placement_type === "advantage_plus" ? styles.disabled : ""}`}>
   <FormControlLabel
     control={
       <Checkbox
         checked={config.placements.native_banner_interstitial}
         onChange={handlePlacementChange}
         name="native_banner_interstitial"
-        disabled={!config.platforms.audience_network}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1632,7 +1615,6 @@ const ConfigForm = ({
         checked={config.placements.rewarded_videos}
         onChange={handlePlacementChange}
         name="rewarded_videos"
-        disabled={!config.platforms.audience_network}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1660,7 +1642,6 @@ const ConfigForm = ({
         checked={config.placements.messenger_stories}
         onChange={handlePlacementChange}
         name="messenger_stories"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1683,7 +1664,6 @@ const ConfigForm = ({
         checked={config.placements.messenger_inbox}
         onChange={handlePlacementChange}
         name="messenger_inbox"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -1706,7 +1686,6 @@ const ConfigForm = ({
         checked={config.placements.messenger_sponsored}
         onChange={handlePlacementChange}
         name="messenger_sponsored"
-        disabled={!config.platforms.facebook}
         sx={{
           '&.Mui-checked': {
             '& .MuiSvgIcon-root': {
@@ -2127,6 +2106,7 @@ const ConfigForm = ({
                 value={config.destination_url}
                 onChange={handleChange}
                 className={styles.inputField}
+                required
               />
             </div>
 

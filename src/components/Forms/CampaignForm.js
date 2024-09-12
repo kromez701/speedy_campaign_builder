@@ -143,14 +143,15 @@ const CampaignForm = ({
 
     // Ensure file input exists before scrolling into view
     if (uploadedFiles.length === 0) {
-      toast.error("Please upload at least one file.");
-      
-      // Check if the fileInputRef is defined and not null
+      toast.error("Please Upload Your Creatives.");
+
+      // Scroll to the file input if no file is uploaded
       if (fileInputRef.current) {
-        fileInputRef.current.scrollIntoView({ behavior: "smooth" });
+        window.scrollBy({ top: -2900, left: 0, behavior: 'smooth' });
+      } else {
+        console.log("fileInputRef.current is null or undefined");
+        toggleSection("creativeUploading"); // Only toggle if the input is null
       }
-      
-      toggleSection("creativeUploading");
       return;
     }
 
@@ -246,7 +247,6 @@ const CampaignForm = ({
                   webkitdirectory="true"
                   directory="true"
                   multiple
-                  required
                   className={styles.hiddenFileInput}
                   ref={fileInputRef} // Attach ref here
                   onChange={handleFileChange} // Handle file changes
@@ -270,9 +270,9 @@ const CampaignForm = ({
 
         {/* Button container outside the formSectionsContainer */}
         <div className={styles.buttonContainer}>
-          <button type="submit" className={styles.createAdButton}>
-              Create Campaign
-          </button>
+        <button type="submit" className={styles.createAdButton}>
+          {isNewCampaign ? "Create Campaign" : "Create Ad Set"}
+        </button>
           <button
             type="button"
             className={styles.goBackButton}

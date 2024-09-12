@@ -47,28 +47,42 @@ const Main = ({ activeAccount }) => {
     }
   }, [activeAccount]);
 
+  // Reset the form when activeAccount changes
+  useEffect(() => {
+    if (activeAccount) {
+      resetForm();  // Reset the form when the active account changes
+    }
+  }, [activeAccount]);
+
+  const resetForm = () => {
+    setFormId("mainForm");
+    setCampaignType("new");
+    setExistingCampaigns([]);
+    setSelectedCampaign("");
+  };
+
   const handleObjectiveSelect = (objective) => {
     setSelectedObjective(objective);
-
+  
     const objectiveMap = {
       website: "OUTCOME_SALES",
       lead: "OUTCOME_LEADS",
       traffic: "OUTCOME_TRAFFIC",
     };
-
+  
     setConfig((prevConfig) => ({
       ...prevConfig,
       objective: objectiveMap[objective],
     }));
-  };
+  };  
 
   const handleCampaignTypeSelect = async (type) => {
     setCampaignType(type);
-
+  
     if (type === "existing" && activeAccount) {
       try {
         const response = await fetch(
-          `https://graph.facebook.com/v17.0/${activeAccount.ad_account_id}/campaigns?fields=id,name,status&access_token=${activeAccount.access_token}`,
+          `https://graph.facebook.com/v17.0/${activeAccount.ad_account_id}/campaigns?fields=id,name,status,objective&access_token=${activeAccount.access_token}`,
           {
             method: "GET",
             headers: {
@@ -76,12 +90,36 @@ const Main = ({ activeAccount }) => {
             },
           }
         );
-
+  
         if (response.ok) {
           const data = await response.json();
           console.log("Campaigns Data:", data.data);
+  
           if (data.data && data.data.length > 0) {
-            setExistingCampaigns(data.data); // Populate campaigns if data is available
+            // Filter campaigns based on the selected objective
+            const filteredCampaigns = data.data.filter(
+              (campaign) => campaign.objective === config.objective
+            );
+            if (filteredCampaigns.length > 0) {
+              setExistingCampaigns(filteredCampaigns); // Populate campaigns with the filtered ones
+            } else {
+              let objectiveMessage = "";
+              switch (config.objective) {
+                case "OUTCOME_SALES":
+                  objectiveMessage = "No sales campaigns available for this ad account.";
+                  break;
+                case "OUTCOME_LEADS":
+                  objectiveMessage = "No lead campaigns available for this ad account.";
+                  break;
+                case "OUTCOME_TRAFFIC":
+                  objectiveMessage = "No traffic campaigns available for this ad account.";
+                  break;
+                default:
+                  objectiveMessage = "No campaigns available for this objective.";
+              }
+              toast.info(objectiveMessage);
+              setExistingCampaigns([]); // Clear previous campaigns
+            }
           } else {
             toast.info("No campaigns available for this ad account.");
             setExistingCampaigns([]); // Clear any previous campaigns
@@ -91,17 +129,21 @@ const Main = ({ activeAccount }) => {
           setExistingCampaigns([]); // Clear any previous campaigns
         }
       } catch (error) {
-        console.error(
-          "Error fetching existing campaigns from Facebook:",
-          error
-        );
+        console.error("Error fetching existing campaigns from Facebook:", error);
         toast.warning(
           "Error fetching existing campaigns, Please ensure an Ad account is connected."
         );
         setExistingCampaigns([]); // Clear any previous campaigns
       }
     }
-  };
+  };  
+
+  // Re-fetch campaigns when objective changes
+  useEffect(() => {
+    if (campaignType === "existing") {
+      handleCampaignTypeSelect("existing");
+    }
+  }, [selectedObjective]);
 
   const handleCampaignSelect = (event) => {
     setSelectedCampaign(event.target.value);

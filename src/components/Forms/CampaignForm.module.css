@@ -13,6 +13,7 @@
   flex-direction: column;
   align-items: center;
   box-sizing: border-box; /* Ensure padding is included in the width */
+  overflow-y: auto; /* Enable vertical scrolling */
 }
 
 /* Parent Container Styling */
