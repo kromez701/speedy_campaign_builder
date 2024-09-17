@@ -21,13 +21,14 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const fetchAdAccountDetails = async (id) => {
     try {
       const response = await axios.get(`https://backend.quickcampaigns.io/auth/ad_account/${id}`, { withCredentials: true });
-      setAdAccountDetails(response.data);
+      const accountDetails = response.data;
+      setAdAccountDetails(accountDetails);
     } catch (error) {
-      toast.error('Error fetching ad account details');  // Notify user of the error
+      toast.error('Error fetching ad account details');
       console.error('Error fetching ad account details', error);
     }
   };
-
+  
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {

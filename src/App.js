@@ -50,7 +50,7 @@ const App = () => {
       console.error('Error checking current user', error);
     }
   };
-
+  
   const handleLogout = async () => {
     try {
       const response = await axios.post('https://backend.quickcampaigns.io/auth/logout', {}, { withCredentials: true });

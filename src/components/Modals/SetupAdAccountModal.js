@@ -33,21 +33,39 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
     };
   }, []);
 
+  const [businessManagerId, setBusinessManagerId] = useState('');
+
   const handleSetupAccount = () => {
     if (typeof FB === 'undefined') {
       toast.error('Facebook SDK is not loaded yet.');
       return;
     }
-
+  
     FB.login((response) => {
       if (response.authResponse) {
         const accessToken = response.authResponse.accessToken;
         setAccessToken(accessToken);
-        setShowPopup(true); // Show the second popup and hide the form
+  
+        // Fetch the Business Manager ID (BM ID)
+        FB.api('/me/businesses', 'GET', { access_token: accessToken }, (response) => {
+          if (response && !response.error) {
+            if (response.data && response.data.length > 0) {
+              const businessManagerId = response.data[0].id;  // Take the first BM ID
+              setBusinessManagerId(businessManagerId);  // Save the BM ID to state
+              console.log('Business Manager ID:', businessManagerId);
+            } else {
+              console.log('No Business Manager found');
+            }
+          } else {
+            console.error('Error fetching BM ID:', response.error);
+          }
+        });
+  
+        setShowPopup(true);  // Show the popup when login is successful
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
-    }, { scope: 'ads_management,ads_read,pages_show_list,business_management' });
+    }, { scope: 'ads_management,ads_read,pages_show_list,business_management,pages_read_engagement,email,public_profile' });
   };
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
@@ -80,6 +98,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
               access_token: exchangeResponse.data.long_lived_token,
               app_id: '1153977715716035', 
               app_secret: '30d73e973e26535fc1e445f2e0b16cb7', 
+              business_manager_id: businessManagerId
             };
 
             const saveResponse = await axios.post(
@@ -120,17 +139,17 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
     }
   };
 
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target) && !showPopup) {
-        onClose();
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [onClose, showPopup]);
+  // useEffect(() => {
+  //   const handleClickOutside = (event) => {
+  //     if (modalRef.current && !modalRef.current.contains(event.target) && !showPopup) {
+  //       onClose();
+  //     }
+  //   };
+  //   document.addEventListener('mousedown', handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener('mousedown', handleClickOutside);
+  //   };
+  // }, [onClose, showPopup]);
 
   return (
     <div>

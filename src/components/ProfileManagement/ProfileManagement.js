@@ -23,6 +23,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const [runningPlan, setRunningPlan] = useState('No active plan');
   const [showPopup, setShowPopup] = useState(false);  // State to control the visibility of the popup
   const [accessToken, setAccessToken] = useState('');  // State to store the access token from Facebook login
+  const [businessManagerId, setBusinessManagerId] = useState('');
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -142,13 +143,29 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     FB.login(response => {
       if (response.authResponse) {
         const accessToken = response.authResponse.accessToken;
-        setAccessToken(accessToken); // Save the access token to state
-        setShowPopup(true); // Show the popup when login is successful
+        setAccessToken(accessToken);  // Save the access token to state
+  
+        // Fetch the Business Manager ID (BM ID)
+        FB.api('/me/businesses', 'GET', { access_token: accessToken }, (response) => {
+          if (response && !response.error) {
+            if (response.data && response.data.length > 0) {
+              const businessManagerId = response.data[0].id;  // Take the first BM ID
+              setBusinessManagerId(businessManagerId);  // Save the BM ID to state
+              console.log('Business Manager ID:', businessManagerId);
+            } else {
+              console.log('No Business Manager found');
+            }
+          } else {
+            console.error('Error fetching BM ID:', response.error);
+          }
+        });
+  
+        setShowPopup(true);  // Show the popup when login is successful
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
-    }, { scope: 'ads_management,ads_read,pages_show_list,business_management' });
-  };  
+    }, { scope: 'ads_management,ads_read,pages_show_list,business_management,pages_read_engagement,email,public_profile' });
+  };
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
     setShowPopup(false); // Close the popup after submission
@@ -181,7 +198,10 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
                         access_token: exchangeResponse.data.long_lived_token,
                         app_id: '1153977715716035',  // Add the app ID
                         app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
+                        business_manager_id: businessManagerId
                     };
+
+                    console.log(exchangeResponse)
 
                     const saveResponse = await axios.post(
                         'https://backend.quickcampaigns.io/auth/ad_account',

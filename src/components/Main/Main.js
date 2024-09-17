@@ -63,6 +63,7 @@ const Main = ({ activeAccount }) => {
 
   const handleObjectiveSelect = (objective) => {
     setSelectedObjective(objective);
+    setSelectedCampaign("");  // Clear the selected campaign on objective change
   
     const objectiveMap = {
       website: "OUTCOME_SALES",

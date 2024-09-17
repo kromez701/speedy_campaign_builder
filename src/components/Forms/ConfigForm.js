@@ -184,6 +184,7 @@ const ConfigForm = ({
 
   const [pages, setPages] = useState([]);
   const [pixels, setPixels] = useState([]);
+  const [instagramAccounts, setInstagramAccounts] = useState([]);
 
   const fetchPages = async () => {
     try {
@@ -196,6 +197,63 @@ const ConfigForm = ({
       toast.error("Error fetching Facebook pages");
     }
   };
+
+  const fetchInstagramAccountsForBM = async (businessManagerId, userAccessToken) => {
+    try {
+      const response = await fetch(
+        `https://graph.facebook.com/v15.0/${businessManagerId}/owned_instagram_accounts?fields=username,id&access_token=${userAccessToken}`
+      );
+      const data = await response.json();
+      
+      // If the API returns data with Instagram accounts
+      if (data && data.data) {
+        const instagramAccounts = data.data.map(account => ({
+          label: account.username,  // Use the username as the label
+          value: account.id,        // Store the account ID as the value
+        }));
+        return instagramAccounts;
+      } else {
+        console.log("No Instagram accounts found.");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error fetching Instagram accounts:", error);
+      return [];
+    }
+  };  
+  
+  // Function to fetch Instagram accounts based on the ad account's BM
+const handleAdAccountSelect = async () => {
+  const businessManagerId = activeAccount.business_manager_id; // Use BM ID from activeAccount
+
+  if (!businessManagerId) {
+    console.error("Business Manager ID not found.");
+    return;
+  }
+
+  // Fetch Instagram accounts for the existing BM ID
+  const instagramAccounts = await fetchInstagramAccountsForBM(businessManagerId, activeAccount.access_token);
+
+  // Now set the Instagram accounts in the dropdown, correctly displaying the username
+  setInstagramAccounts(instagramAccounts.map(account => ({
+    label: account.label, // Use the username as the label
+    value: account.value, // Use the account ID as the value
+  })));
+};
+
+
+  useEffect(() => {
+    if (activeAccount && activeAccount.is_bound) {
+      handleAdAccountSelect(); // Use the existing BM ID from activeAccount
+    }
+  }, [activeAccount]);
+
+  const handleInstagramAccountChange = (selectedAccountId) => {
+    setConfig((prevConfig) => ({
+      ...prevConfig,
+      instagram_account: selectedAccountId, // Update the config with the selected Instagram account
+    }));
+  };  
 
   useEffect(() => {
   if (objective && objectiveEventMapping[objective]) {
@@ -1051,19 +1109,27 @@ const ConfigForm = ({
               </select>
             </div>
 
-<div className={styles.column}>
+            <div className={styles.column}>
   <label htmlFor="instagram_account" className={styles.labelText}>
-    Instagram Account (Optional):
+    Instagram Account:
   </label>
-  <input
-    type="text"
+  <select
     id="instagram_account"
     name="instagram_account"
-    value={config.instagram_account}
-    onChange={handleChange}
-    className={styles.inputField}
-  />
+    value={config.instagram_account || ""}  // Set the value correctly
+    onChange={(e) => handleInstagramAccountChange(e.target.value)} // Pass the selected account id
+    className={styles.selectField}
+  >
+    <option value="">Select Instagram Account</option>
+    {instagramAccounts.map((account) => (
+      <option key={account.value} value={account.value}>
+        {account.label} {/* Display the username */}
+      </option>
+    ))}
+  </select>
 </div>
+
+
           </div>
         )}
         <hr className={styles.sectionDivider} />

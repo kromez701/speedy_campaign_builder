@@ -55,6 +55,7 @@ const CampaignForm = ({
 
     fetchSubscriptionStatus();
   }, [activeAccount]);
+  
 
   useEffect(() => {
     const fetchUserPlan = async () => {
