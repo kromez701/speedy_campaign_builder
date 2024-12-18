@@ -10,6 +10,9 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 import '../ToastifyOverrides.css';
 import styles from './Auth.module.css';
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => (
   <div className={styles['password-container']}>
@@ -155,7 +158,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
   const onSubmit = async (values, { resetForm }) => {
     let url = '';
     if (isForgotPassword) {  // Forgot Password case
-      url = `http://localhost:5000/auth/forgot_password`;
+      url = `${apiUrl}/auth/forgot_password`;
       try {
         const response = await axios.post(url, {
           email: values.email,
@@ -171,7 +174,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
       }
     } else if (location.pathname.startsWith('/reset_password')) {
       const token = location.pathname.split('/').pop(); // Extract token from URL
-      url = `http://localhost:5000/auth/reset_password/${token}`;
+      url = `${apiUrl}/auth/reset_password/${token}`;
       try {
         const response = await axios.post(url, { password: values.password });
         if (response.status === 200) {
@@ -182,7 +185,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
         toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     } else if (isLogin) {  // Login case
-      url = 'http://localhost:5000/auth/login';
+      url = `${apiUrl}/auth/login`;
       try {
         const response = await axios.post(url, values, { withCredentials: true });
         if (response.status === 200 || response.status === 201) {
@@ -194,7 +197,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
         toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
     } else {  // Registration case
-      url = 'http://localhost:5000/auth/register';
+      url = `${apiUrl}/auth/register`;
       try {
         const response = await axios.post(url, values, { withCredentials: true });
         if (response.status === 200 || response.status === 201) {
@@ -209,7 +212,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
 
   const responseGoogle = async ({ accessToken, remember }) => {
     try {
-      await axios.post('http://localhost:5000/auth/google', { token: accessToken, remember }, { withCredentials: true });
+      await axios.post(`${apiUrl}/auth/google`, { token: accessToken, remember }, { withCredentials: true });
       onAuthSuccess();
       toast.success('Logged in with Google successfully!');
     } catch (error) {
@@ -223,7 +226,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
 
   const responseFacebook = async ({ accessToken, name, email }) => {
     try {
-      await axios.post('http://localhost:5000/auth/facebook', { accessToken, name, email }, { withCredentials: true });
+      await axios.post(`${apiUrl}/auth/facebook`, { accessToken, name, email }, { withCredentials: true });
       onAuthSuccess();
       toast.success('Logged in with Facebook successfully!');
     } catch (error) {

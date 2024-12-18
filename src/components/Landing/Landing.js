@@ -4,6 +4,9 @@ import ScopedGlobalStyle from './LandingStyles';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../ToastifyOverrides.css';
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const Landing = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -35,7 +38,7 @@ const Landing = () => {
 const handleSubscribe = async (plan) => {
   try {
     console.log("Creating anonymous checkout session...");
-    const response = await axios.post('http://localhost:5000/payment/create-anonymous-checkout-session', 
+    const response = await axios.post(`${apiUrl}/payment/create-anonymous-checkout-session`, 
       { plan }, 
       { withCredentials: true }
     );

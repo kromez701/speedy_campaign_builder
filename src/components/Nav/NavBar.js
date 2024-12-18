@@ -5,6 +5,9 @@ import { toast } from 'react-toastify';  // Import toast from react-toastify
 import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
 import '../ToastifyOverrides.css';
 import './NavBar.css';
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -13,7 +16,7 @@ const Navbar = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/profile', { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/auth/profile`, { withCredentials: true });
         if (response.status === 200) {
           const { profile_picture } = response.data.user;
           if (profile_picture) {

@@ -8,6 +8,10 @@ import styles from "./ConfigForm.module.css";
 import Slider from "@mui/material/Slider";
 import axios from 'axios';
 import Select from 'react-select'; // Import for multi-select dropdown
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
+const facebookAdsApiUrl = config.facebookAdsApiUrl;
 
 const objectiveEventMapping = {
   OUTCOME_SALES: ["PURCHASE", "ADD_TO_CART", "INITIATED_CHECKOUT", "ADD_PAYMENT_INFO", "ADD_TO_WISHLIST", "COMPLETE_REGISTRATION", "DONATE", "SEARCH", "START_TRIAL", "SUBSCRIBE", "VIEW_CONTENT", "OTHER"],
@@ -269,7 +273,7 @@ const handleAdAccountSelect = async () => {
     if (!isNewCampaign && campaignId) {
       const fetchCampaignOptimization = async () => {
         try {
-          const response = await axios.post('http://localhost:5001/get_campaign_budget_optimization', {
+          const response = await axios.post(`${facebookAdsApiUrl}/get_campaign_budget_optimization`, {
             campaign_id: campaignId,
             ad_account_id: activeAccount.id,
             app_id: activeAccount.app_id,
@@ -336,7 +340,7 @@ const handleAdAccountSelect = async () => {
   
     try {
       const response = await axios.post(
-        "http://localhost:5000/targeting/get_countries", 
+        `${apiUrl}/targeting/get_countries`, 
         requestBody, 
         { withCredentials: true } // Sends credentials with the request
       );
@@ -385,7 +389,7 @@ const handleAdAccountSelect = async () => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/targeting/custom_audiences", 
+        `${apiUrl}/targeting/custom_audiences`, 
         requestBody, 
         { withCredentials: true }
       );
@@ -443,7 +447,7 @@ const handleAdAccountSelect = async () => {
     };
 
     try {
-      const response = await axios.post("http://localhost:5000/targeting/interests", requestBody, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/targeting/interests`, requestBody, { withCredentials: true });
       if (response.status === 200) {
         const formattedInterests = response.data.map(interest => ({
           label: interest.name,
@@ -727,7 +731,7 @@ const handleAdAccountSelect = async () => {
     const fetchConfig = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
+          `${apiUrl}/config/ad_account/${activeAccount.id}/config`,
           {
             credentials: "include",
           }

@@ -6,6 +6,9 @@ import styles from './SetupAdAccountModal.module.css';
 import SetupAdAccountPopup from '../SetUpPopUp/SetupAdAccountPopup';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeAccount is passed in
   const modalRef = useRef(null);
@@ -75,7 +78,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
 
   const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
     try {
-      const isAdAccountValid = await verifyField('http://localhost:5000/auth/verify_ad_account', {
+      const isAdAccountValid = await verifyField(`${apiUrl}/auth/verify_ad_account`, {
         ad_account_id: adAccount,
         access_token: accessToken,
       });
@@ -85,7 +88,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
           // Here, the endpoint matches exactly like ProfileManagement
           console.log(activeAccount)
           const exchangeResponse = await axios.post(
-            `http://localhost:5000/config/ad_account/${activeAccount.id}/exchange-token`,
+            `${apiUrl}/config/ad_account/${activeAccount.id}/exchange-token`,
             { access_token: accessToken },
             { withCredentials: true } 
           );
@@ -102,7 +105,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
             };
 
             const saveResponse = await axios.post(
-              'http://localhost:5000/auth/ad_account',
+              `${apiUrl}/auth/ad_account`,
               { id: activeAccount.id, ...updatedAdAccountDetails },
               { withCredentials: true }
             );

@@ -9,8 +9,10 @@ import "react-toastify/dist/ReactToastify.css";
 import styles from "../Main/MainStyles.module.css";
 import SetupAdAccountModal from "../Modals/SetupAdAccountModal";  // Import the modal
 import axios from "axios";
+import config from '../../config';
 
-const socket = io("http://localhost:5001");
+const facebookAdsApiUrl = config.facebookAdsApiUrl;
+const socket = io(`${facebookAdsApiUrl}`);
 
 const getDefaultStartTime = () => {
   const startTime = new Date();
@@ -310,7 +312,7 @@ const Main = ({ activeAccount }) => {
     }
 
     if (taskId) {
-      fetch("http://localhost:5001/cancel_task", {
+      fetch(`${facebookAdsApiUrl}/cancel_task`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ task_id: taskId }),
@@ -361,7 +363,7 @@ const Main = ({ activeAccount }) => {
     setProgress(0);
     setStepVisible(false);
 
-    fetch("http://localhost:5001/create_campaign", {
+    fetch(`${facebookAdsApiUrl}/create_campaign`, {
       method: "POST",
       body: formData,
       signal: controller.signal,

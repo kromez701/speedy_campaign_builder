@@ -5,6 +5,9 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import styles from "../Forms/CampaignForm.module.css";
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const CampaignForm = ({
   formId,
@@ -41,7 +44,7 @@ const CampaignForm = ({
       if (activeAccount) {
         try {
           const response = await axios.get(
-            `http://localhost:5000/payment/subscription-status/${activeAccount.id}`,
+            `${apiUrl}/payment/subscription-status/${activeAccount.id}`,
             { withCredentials: true }
           );
           setIsActiveSubscription(response.data.is_active);
@@ -61,7 +64,7 @@ const CampaignForm = ({
     const fetchUserPlan = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5000/payment/user-subscription-status",
+          `${apiUrl}/payment/user-subscription-status`,
           { withCredentials: true }
         );
         setUserPlan(response.data.plan);
@@ -79,7 +82,7 @@ const CampaignForm = ({
       const fetchActiveAdAccountsCount = async () => {
         try {
           const response = await axios.get(
-            "http://localhost:5000/payment/active-ad-accounts",
+            `${apiUrl}/payment/active-ad-accounts`,
             { withCredentials: true }
           );
           setActiveAdAccountsCount(response.data.count);
@@ -103,7 +106,7 @@ const CampaignForm = ({
   const handleSaveConfig = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
+        `${apiUrl}/config/ad_account/${activeAccount.id}/config`,
         {
           method: "POST",
           headers: {

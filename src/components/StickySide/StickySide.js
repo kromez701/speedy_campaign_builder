@@ -5,6 +5,9 @@ import { toast } from 'react-toastify';  // Import toast from react-toastify
 import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
 import styles from './StickySide.module.css';
 import '../ToastifyOverrides.css';
+import config from '../../config';
+
+const apiUrl = config.apiUrl;
 
 const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
@@ -20,7 +23,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   const fetchAdAccountDetails = async (id) => {
     try {
-      const response = await axios.get(`http://localhost:5000/auth/ad_account/${id}`, { withCredentials: true });
+      const response = await axios.get(`${apiUrl}/auth/ad_account/${id}`, { withCredentials: true });
       const accountDetails = response.data;
       setAdAccountDetails(accountDetails);
     } catch (error) {
@@ -32,10 +35,10 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {
-        const userPlanResponse = await axios.get('http://localhost:5000/payment/user-subscription-status', { withCredentials: true });
+        const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
         setUserSubscriptionPlan(userPlanResponse.data.plan);
 
-        const adAccountsResponse = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
 
         if (adAccountsResponse.data.ad_accounts.length > 0) {
           const activeAccount = adAccountsResponse.data.ad_accounts[0];
@@ -86,9 +89,9 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   const handleAddAdAccountClick = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/payment/add_ad_account', {}, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/payment/add_ad_account`, {}, { withCredentials: true });
       if (response.status === 200) {
-        const newAdAccounts = await axios.get('http://localhost:5000/auth/ad_accounts', { withCredentials: true });
+        const newAdAccounts = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
         setAdAccounts(newAdAccounts.data.ad_accounts);
 
         const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];

@@ -13,6 +13,9 @@ import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for toastify
 import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup'; // Import the popup as a standalone page
+import config from './config';
+
+const apiUrl = config.apiUrl;
 
 const App = () => {
   const [authMode, setAuthMode] = useState(null);
@@ -25,7 +28,7 @@ const App = () => {
   useEffect(() => {
     const checkCurrentUser = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true });
         if (response.status === 200) {
           setUser(response.data.user);
         }
@@ -40,7 +43,7 @@ const App = () => {
 
   const handleAuthSuccess = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/auth/current_user', { withCredentials: true });
+      const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true });
       if (response.status === 200) {
         setUser(response.data.user);
         setAuthMode(null);
@@ -53,7 +56,7 @@ const App = () => {
   
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:5000/auth/logout', {}, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/auth/logout`, {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
         setRedirectToMain(false);
