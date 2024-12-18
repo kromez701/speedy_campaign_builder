@@ -269,7 +269,7 @@ const handleAdAccountSelect = async () => {
     if (!isNewCampaign && campaignId) {
       const fetchCampaignOptimization = async () => {
         try {
-          const response = await axios.post('https://fbbackend.quickcampaigns.io/get_campaign_budget_optimization', {
+          const response = await axios.post('http://localhost:5001/get_campaign_budget_optimization', {
             campaign_id: campaignId,
             ad_account_id: activeAccount.id,
             app_id: activeAccount.app_id,
@@ -336,7 +336,7 @@ const handleAdAccountSelect = async () => {
   
     try {
       const response = await axios.post(
-        "https://backend.quickcampaigns.io/targeting/get_countries", 
+        "http://localhost:5000/targeting/get_countries", 
         requestBody, 
         { withCredentials: true } // Sends credentials with the request
       );
@@ -385,7 +385,7 @@ const handleAdAccountSelect = async () => {
 
     try {
       const response = await axios.post(
-        "https://backend.quickcampaigns.io/targeting/custom_audiences", 
+        "http://localhost:5000/targeting/custom_audiences", 
         requestBody, 
         { withCredentials: true }
       );
@@ -443,7 +443,7 @@ const handleAdAccountSelect = async () => {
     };
 
     try {
-      const response = await axios.post("https://backend.quickcampaigns.io/targeting/interests", requestBody, { withCredentials: true });
+      const response = await axios.post("http://localhost:5000/targeting/interests", requestBody, { withCredentials: true });
       if (response.status === 200) {
         const formattedInterests = response.data.map(interest => ({
           label: interest.name,
@@ -727,7 +727,7 @@ const handleAdAccountSelect = async () => {
     const fetchConfig = async () => {
       try {
         const response = await fetch(
-          `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`,
+          `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
           {
             credentials: "include",
           }

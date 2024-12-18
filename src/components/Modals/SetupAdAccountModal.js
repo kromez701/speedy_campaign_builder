@@ -75,7 +75,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
 
   const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
     try {
-      const isAdAccountValid = await verifyField('https://backend.quickcampaigns.io/auth/verify_ad_account', {
+      const isAdAccountValid = await verifyField('http://localhost:5000/auth/verify_ad_account', {
         ad_account_id: adAccount,
         access_token: accessToken,
       });
@@ -85,7 +85,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
           // Here, the endpoint matches exactly like ProfileManagement
           console.log(activeAccount)
           const exchangeResponse = await axios.post(
-            `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/exchange-token`,
+            `http://localhost:5000/config/ad_account/${activeAccount.id}/exchange-token`,
             { access_token: accessToken },
             { withCredentials: true } 
           );
@@ -102,7 +102,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
             };
 
             const saveResponse = await axios.post(
-              'https://backend.quickcampaigns.io/auth/ad_account',
+              'http://localhost:5000/auth/ad_account',
               { id: activeAccount.id, ...updatedAdAccountDetails },
               { withCredentials: true }
             );

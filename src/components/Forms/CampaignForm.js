@@ -41,7 +41,7 @@ const CampaignForm = ({
       if (activeAccount) {
         try {
           const response = await axios.get(
-            `https://backend.quickcampaigns.io/payment/subscription-status/${activeAccount.id}`,
+            `http://localhost:5000/payment/subscription-status/${activeAccount.id}`,
             { withCredentials: true }
           );
           setIsActiveSubscription(response.data.is_active);
@@ -61,7 +61,7 @@ const CampaignForm = ({
     const fetchUserPlan = async () => {
       try {
         const response = await axios.get(
-          "https://backend.quickcampaigns.io/payment/user-subscription-status",
+          "http://localhost:5000/payment/user-subscription-status",
           { withCredentials: true }
         );
         setUserPlan(response.data.plan);
@@ -79,7 +79,7 @@ const CampaignForm = ({
       const fetchActiveAdAccountsCount = async () => {
         try {
           const response = await axios.get(
-            "https://backend.quickcampaigns.io/payment/active-ad-accounts",
+            "http://localhost:5000/payment/active-ad-accounts",
             { withCredentials: true }
           );
           setActiveAdAccountsCount(response.data.count);
@@ -103,7 +103,7 @@ const CampaignForm = ({
   const handleSaveConfig = async () => {
     try {
       const response = await fetch(
-        `https://backend.quickcampaigns.io/config/ad_account/${activeAccount.id}/config`,
+        `http://localhost:5000/config/ad_account/${activeAccount.id}/config`,
         {
           method: "POST",
           headers: {
