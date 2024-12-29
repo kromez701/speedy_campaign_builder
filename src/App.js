@@ -11,8 +11,9 @@ import PaymentSuccess from './components/PaymentSuccess/PaymentSuccess';
 import axios from 'axios';
 import './App.css';
 import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; // Import the CSS for toastify
-import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup'; // Import the popup as a standalone page
+import 'react-toastify/dist/ReactToastify.css'; 
+import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup';
+import TermsOfService from './components/Policies/TermsOfService'; // Import the Terms of Service
 import config from './config';
 
 const apiUrl = config.apiUrl;
@@ -69,7 +70,7 @@ const App = () => {
   };
 
   const handlePlanUpgrade = () => {
-    setRefreshTrigger(prev => !prev); // Toggle refresh trigger
+    setRefreshTrigger(prev => !prev);
   };
 
   useEffect(() => {
@@ -97,8 +98,9 @@ const App = () => {
                   <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
                   <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
                   <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
-                  <Route path="/success" element={<PaymentSuccess />} /> {/* New route */}
-                  <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} /> {/* New route for SetupAdAccountPopup */}
+                  <Route path="/success" element={<PaymentSuccess />} />
+                  <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>
@@ -110,6 +112,7 @@ const App = () => {
               <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
               <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
               <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
+              <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </>

@@ -590,7 +590,7 @@ const handleSubscribe = async (plan) => {
             <p>Help</p>
             <ul>
               <li><a href="#contact-section">Contact</a></li>
-              <li><a href="#">Terms & Conditions</a></li>
+              <li><a href="/terms-of-service">Terms & Conditions</a></li>
               <li><a href="#">Privacy policy</a></li>
             </ul>
           </div>
