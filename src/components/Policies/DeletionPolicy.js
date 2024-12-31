@@ -2,19 +2,19 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ScopedGlobalStyle from './PolicyPageStyles'; // Ensure this path matches the actual file location
 
-const TermsOfService = () => {
+const DataDeletionPolicy = () => {
     const navigate = useNavigate(); // Initialize useNavigate
   
     const handleHamburgMenuClick = () => {
-      document.querySelector('.nav-menu-btn-container').style.right = '0';
+        document.querySelector('.nav-menu-btn-container').style.right = '0';
     };
   
     const handleCloseSidebarClick = () => {
-      document.querySelector('.nav-menu-btn-container').style.right = '-310px';
+        document.querySelector('.nav-menu-btn-container').style.right = '-310px';
     };
   
     return (
-        <div id="terms-of-service">
+        <div id="data-deletion-policy">
             {/* Scoped Global Styles */}
             <ScopedGlobalStyle />
             
@@ -99,92 +99,70 @@ const TermsOfService = () => {
 
             {/* Main Content */}
             <main className="content">
-            <h1>Terms of Service for QuickCampaigns</h1>
-            <section>
-                <h2>1. Introduction</h2>
-                <p>
-                Welcome to QuickCampaigns, a platform operated by Crown18 Limited, designed to help marketers 
-                create and upload Facebook Ads campaigns directly from their desktop, streamlining the campaign creation process. 
-                These Terms of Service ("Terms") govern your use of QuickCampaigns, including all features, content, 
-                and functionality provided. By accessing the platform, you agree to comply with these Terms.
-                </p>
-            </section>
+                <h1>Data Deletion Policy for QuickCampaigns</h1>
 
-            <section>
-                <h2>2. Eligibility</h2>
-                <p>
-                You must be at least 18 years old and legally authorized to enter into agreements. 
-                By using QuickCampaigns, you confirm that you meet these eligibility requirements.
-                </p>
-            </section>
+                <section>
+                    <h2>Last Updated: December 29, 2024</h2>
+                </section>
 
-            <section>
-                <h2>3. Account Registration and Access</h2>
-                <p>
-                To use the platform, you must create an account with accurate and complete information, including a valid email address. 
-                You are responsible for maintaining the security of your account credentials. Notify us immediately at 
-                <a href="mailto:support@quickcampaigns.io">[support@quickcampaigns.io]</a> if you suspect unauthorized access.
-                </p>
-            </section>
+                <section>
+                    <h2>Introduction</h2>
+                    <p>
+                        At QuickCampaigns.io, we prioritize user privacy and data protection. In compliance with Facebook’s platform policies 
+                        and GDPR, we offer users full control over their personal data. If you no longer wish to use our services and would 
+                        like to request the deletion of your data, please follow the instructions below.
+                    </p>
+                </section>
 
-            <section>
-                <h2>4. Subscription Terms</h2>
-                <p>
-                QuickCampaigns offers a Free Trial, Professional Plan, and Enterprise Plan. Subscription plans renew automatically 
-                each month, with charges billed to your registered payment method unless canceled before the next billing cycle. 
-                Plan upgrades or downgrades will take effect in the next billing cycle.
-                </p>
-            </section>
+                <section>
+                    <h2>How to Request Data Deletion</h2>
+                    <h3>Option 1: Delete via Account Settings (Recommended)</h3>
+                    <p>
+                        1. Log in to your QuickCampaigns.io account.<br />
+                        2. Navigate to Settings - Account.<br />
+                        3. Click on "Delete Account" and confirm your request.<br />
+                        Upon confirmation, all personal data associated with your account will be permanently deleted within 7 business days, 
+                        except for data we are required to retain by law.
+                    </p>
 
-            <section>
-                <h2>5. Refund Policy</h2>
-                <p>
-                Customers may request a refund within 30 days of purchase if they are not satisfied with the software. 
-                Refunds are issued to the original payment method. Refer to our Refund Policy for full details.
-                </p>
-            </section>
+                    <h3>Option 2: Request Deletion by Email</h3>
+                    <p>
+                        Alternatively, you can email us directly at:<br />
+                        📧 <a href="mailto:support@quickcampaigns.io">support@quickcampaigns.io</a>
+                    </p>
+                    <ul>
+                        <li>Subject: Data Deletion Request</li>
+                        <li>Required Details: Full Name, Registered Email Address, and (Optional) Reason for Data Deletion</li>
+                    </ul>
+                    <p>
+                        We will process your request within 7 business days and confirm once your data has been deleted.
+                    </p>
+                </section>
 
-            <section>
-                <h2>6. User Conduct</h2>
-                <p>Users agree not to:</p>
-                <ul>
-                <li>Misuse the software or resell its features without authorization.</li>
-                <li>Provide false information or impersonate others.</li>
-                <li>Use the platform to create misleading or illegal ads.</li>
-                </ul>
-                <p>Violation of these terms may result in account suspension or termination.</p>
-            </section>
+                <section>
+                    <h2>Automatic Data Deletion (Inactivity)</h2>
+                    <p>
+                        Accounts inactive for 12 months will be automatically deleted after receiving a 30-day prior notification. Users will 
+                        have the opportunity to log in and reactivate their accounts before automatic deletion occurs.
+                    </p>
+                </section>
 
-            <section>
-                <h2>7. Limitation of Liability</h2>
-                <p>
-                QuickCampaigns, its owners, and affiliates are not liable for any indirect, incidental, or consequential 
-                damages resulting from the use of the software, including data loss, ad account issues, or interruptions beyond our control.
-                </p>
-            </section>
+                <section>
+                    <h2>Important Notes</h2>
+                    <ul>
+                        <li>Ad-related data (e.g., Facebook Ads uploaded through QuickCampaigns) may still exist within your Facebook account. 
+                        To delete ad data, follow Facebook’s data deletion process directly.</li>
+                        <li>Data required for legal, regulatory, or security reasons may be retained as per applicable laws.</li>
+                    </ul>
+                </section>
 
-            <section>
-                <h2>8. Intellectual Property</h2>
-                <p>
-                All content, trademarks, and technology related to QuickCampaigns are the property of Crown18 Limited. 
-                Users retain rights to the campaigns they create, but all platform tools and templates remain the property of Crown18 Limited.
-                </p>
-            </section>
-
-            <section>
-                <h2>9. Termination</h2>
-                <p>
-                Accounts may be terminated for violation of these Terms. Users can cancel subscriptions at any time, but fees for 
-                the current billing cycle are non-refundable.
-                </p>
-            </section>
-
-            <section>
-                <h2>10. Dispute Resolution</h2>
-                <p>
-                Disputes will be resolved under the jurisdiction applicable to Crown18 Limited.
-                </p>
-            </section>
+                <section>
+                    <h2>Need Help?</h2>
+                    <p>
+                        If you have any questions or encounter issues during the data deletion process, feel free to contact our support team at:<br />
+                        📧 <a href="mailto:support@quickcampaigns.io">support@quickcampaigns.io</a>
+                    </p>
+                </section>
             </main>
 
             {/* Footer */}
@@ -284,7 +262,7 @@ const TermsOfService = () => {
             </div>
             </footer>
         </div>
-);
+    );
 };
 
-export default TermsOfService;
+export default DataDeletionPolicy;

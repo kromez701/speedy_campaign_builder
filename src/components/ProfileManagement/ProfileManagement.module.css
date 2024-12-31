@@ -72,6 +72,14 @@
   margin-top: 20px;
 }
 
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 50%;
+  gap: 10px; /* Add spacing between buttons */
+}
+
+
 .button {
   background-color: #007bff;
   color: white;
@@ -82,6 +90,8 @@
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 10px;
+  flex: 1; /* Make buttons the same size */
+  text-align: center;
 }
 
 .primaryButton {
@@ -108,6 +118,14 @@
 
 .infoText{
   text-align: center;
+}
+
+.dangerButton {
+  background-color: #ff4d4f;
+}
+
+.dangerButton:hover {
+  background-color: #d9363e;
 }
 
 /* Media Queries for Responsive Design */

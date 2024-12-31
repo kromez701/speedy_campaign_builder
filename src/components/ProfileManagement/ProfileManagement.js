@@ -251,6 +251,31 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    const confirmDelete = window.confirm(
+      'Are you sure you want to delete your account? This action cannot be undone.'
+    );
+  
+    if (confirmDelete) {
+      try {
+        const response = await axios.delete(`${apiUrl}/user_management/delete_user`, {
+          withCredentials: true,
+        });
+        if (response.status === 200) {
+          toast.success('Your account has been deleted.');
+          onLogout(); // Clears session and redirects to login
+          window.location.reload(); // Refreshes the page
+        } else {
+          toast.error('Failed to delete your account. Please try again.');
+        }
+      } catch (error) {
+        toast.error('An error occurred while trying to delete your account.');
+        console.error('Error deleting account:', error);
+      }
+    }
+  };  
+  
+
   const handleCancelSubscription = async () => {
     try {
       const response = await axios.get(`${apiUrl}/payment/active-ad-accounts`, { withCredentials: true });
@@ -358,12 +383,20 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
             disabled
             className={styles.profileInput}
           />
-          <button
-          onClick={handleSaveChanges}
-          className={`${styles.button} ${styles.primaryButton}`}
-        >
-          Save Profile
-        </button>
+          <div className={styles.buttonContainer}>
+            <button
+              onClick={handleSaveChanges}
+              className={`${styles.button} ${styles.primaryButton}`}
+            >
+              Save Profile
+            </button>
+            <button
+              onClick={handleDeleteAccount}
+              className={`${styles.button} ${styles.dangerButton}`}
+            >
+              Delete Account
+            </button>
+          </div>
         </div>
         <div className={styles.section}>
           <h3>Ad Account Settings</h3>

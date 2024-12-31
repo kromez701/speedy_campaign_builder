@@ -263,6 +263,8 @@ const Auth = ({ mode, onAuthSuccess }) => {
                 className={styles.linkText}
                 onClick={() => {
                   setIsPasswordResetSent(false);
+                  setIsForgotPassword(false);
+                  setIsLogin(true);
                   navigate('/login');
                 }}
               >
@@ -345,8 +347,10 @@ const Auth = ({ mode, onAuthSuccess }) => {
               </Formik>
               {!isForgotPassword && (
                 <div className={styles.socialLogin}>
+                  {/*
                   <CustomGoogleLogin isLogin={isLogin} onSuccess={responseGoogle} onError={responseGoogleError} remember={remember} />
                   <CustomFacebookLogin isLogin={isLogin} onSuccess={responseFacebook} onError={responseGoogleError} />
+                  */}
                 </div>
               )}
               {!isForgotPassword && (

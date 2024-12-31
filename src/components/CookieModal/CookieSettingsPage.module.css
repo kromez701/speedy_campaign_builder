@@ -1,0 +1,152 @@
+.container {
+    font-family: 'Poppins', sans-serif;
+    max-width: 800px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+
+  .goBack {
+    font-size: 16px;
+    color: #5356ff;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: bold;
+    display: inline-block;
+    transition: color 0.3s ease;
+  }
+  
+  .goBack:hover {
+    color: #4044c9;
+  }
+  
+  .heading {
+    font-size: 24px;
+    color: #333333;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .description {
+    font-size: 16px;
+    color: #555555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+  
+  .category {
+    margin-top: 20px;
+  }
+  
+  .categoryTitle {
+    font-size: 18px;
+    color: #5356FF;
+    margin-bottom: 5px;
+  }
+  
+  .categoryDescription {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+  
+  .checkboxLabel {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 10px;
+    cursor: pointer;
+  }
+  
+  .checkboxInput {
+    margin-right: 10px;
+  }
+  
+  .saveButton {
+    background-color: #5356FF;
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .saveButton:hover {
+    background-color: #4044C9;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .container {
+      width: 90%;
+      padding: 15px;
+    }
+  
+    .heading {
+      font-size: 22px;
+    }
+  
+    .description {
+      font-size: 14px;
+    }
+  
+    .categoryTitle {
+      font-size: 16px;
+    }
+  
+    .categoryDescription {
+      font-size: 13px;
+    }
+  
+    .checkboxLabel {
+      font-size: 13px;
+    }
+  
+    .saveButton {
+      font-size: 14px;
+      padding: 10px 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .container {
+      width: 95%;
+      padding: 10px;
+    }
+  
+    .heading {
+      font-size: 20px;
+    }
+  
+    .description {
+      font-size: 13px;
+    }
+  
+    .categoryTitle {
+      font-size: 14px;
+    }
+  
+    .categoryDescription {
+      font-size: 12px;
+    }
+  
+    .checkboxLabel {
+      font-size: 12px;
+    }
+  
+    .saveButton {
+      font-size: 13px;
+      padding: 8px 10px;
+    }
+  }
+  

@@ -1,15 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom'; // Combine imports
 import ScopedGlobalStyle from './LandingStyles';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import '../ToastifyOverrides.css';
 import config from '../../config';
+import CookiePopup from '../CookieModal/CookiePopup';
 
 const apiUrl = config.apiUrl;
 
 const Landing = () => {
   const navigate = useNavigate(); // Initialize useNavigate
+  const location = useLocation(); // Initialize useLocation
 
   const handleHamburgMenuClick = () => {
     document.querySelector('.nav-menu-btn-container').style.right = '0';
@@ -35,27 +37,42 @@ const Landing = () => {
     }
   };
 
-const handleSubscribe = async (plan) => {
-  try {
-    console.log("Creating anonymous checkout session...");
-    const response = await axios.post(`${apiUrl}/payment/create-anonymous-checkout-session`, 
-      { plan }, 
-      { withCredentials: true }
-    );
+  const handleSubscribe = async (plan) => {
+    try {
+      console.log('Creating anonymous checkout session...');
+      const response = await axios.post(
+        `${apiUrl}/payment/create-anonymous-checkout-session`,
+        { plan },
+        { withCredentials: true }
+      );
 
-    if (response.data.sessionId) {
-      console.log("Stripe session created, redirecting to checkout...");
-      const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
-      stripe.redirectToCheckout({ sessionId: response.data.sessionId });
-    } else {
-      console.error('Failed to create checkout session.');
-      toast.error('Failed to create checkout session');
+      if (response.data.sessionId) {
+        console.log('Stripe session created, redirecting to checkout...');
+        const stripe = window.Stripe(
+          'pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY'
+        );
+        stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+      } else {
+        console.error('Failed to create checkout session.');
+        toast.error('Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Error during checkout or login process:', error);
+      toast.error('Error: ' + error.message);
     }
-  } catch (error) {
-    console.error('Error during checkout or login process:', error);
-    toast.error('Error: ' + error.message);
-  }
-};
+  };
+
+  // Scroll to section if the state contains a target
+  useEffect(() => {
+    if (location.state?.section) {
+      const target = document.getElementById(location.state.section);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        navigate(location.pathname, { replace: true });
+      }
+    }
+  }, [location.state]);
 
   return (
     <div id="home">
@@ -91,13 +108,14 @@ const handleSubscribe = async (plan) => {
           </div>
         </div>
       </nav>
+      <CookiePopup />
       <div className="hero">
         <img className="back-shadow hero-mid-shadow" src="./assets/hero-center-shadow.svg" alt="" />
         <img className="back-shadow hero-bottom-shadow" src="./assets/hero-bottom-shadow.svg" alt="" />
         <div className="hero-inner">
           <p className="hero-heading">
             Revolutionize Your Facebook
-            <span>Ads Campaigns with Lightning-Fast</span> Creation & Upload
+            <span> Ads Campaigns with Lightning-Fast</span> Creation & Upload
           </p>
           <p className="hero-description">
             Are you tired of spending hours painstakingly building your Facebook
@@ -106,10 +124,15 @@ const handleSubscribe = async (plan) => {
             lightning-fast campaign creation with our groundbreaking software.
           </p>
           <div className="hero-video">
-            <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            </svg> */}
+            <video
+              src="./assets/video1.mp4"
+              playsInline
+              controls
+            ></video>
           </div>
         </div>
       </div>
@@ -129,6 +152,15 @@ const handleSubscribe = async (plan) => {
             With each click, you're forced to wait for pages to load, eating away
             at your precious time and productivity.
           </p>
+
+          <video
+            className="old-way-video"
+            src="./assets/video2.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          ></video>
         </div>
         <div className="new-way-wrapper">
           <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -140,10 +172,18 @@ const handleSubscribe = async (plan) => {
           </p>
           <p className="old-new-way-section-desc">
             Our revolutionary software eliminates the frustration of slow campaign
-            creation. With our intuitive desktop application, you can build and
-            upload campaigns at lightning speed, directly from your local PC. No
+            creation. With our intuitive Software, you can build and
+            upload campaigns at lightning speed, directly from your PC. No
             more waiting for pages to load or clicking through endless settings.
           </p>
+          <video
+            className="new-way-video"
+            src="./assets/video3.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          ></video>
         </div>
       </div>
 
@@ -225,8 +265,7 @@ const handleSubscribe = async (plan) => {
               <div className="how-works-card-wrapper">
                 <p className="how-work-card-number">1</p>
                 <p className="how-work-card-desc">
-                  Select the folders containing your ad creatives (videos and
-                  images) from your desktop.
+                  Connect your Facebook Ad account by following the simple authorization process, ensuring a secure and seamless link to your ad manager.
                 </p>
               </div>
             </div>
@@ -234,7 +273,7 @@ const handleSubscribe = async (plan) => {
               <div className="how-works-card-wrapper">
                 <p className="how-work-card-number">2</p>
                 <p className="how-work-card-desc">
-                  Choose to create a new campaign or add to an existing one.
+                  Choose whether to start a new campaign or add an ad set to an existing campaign, giving you flexibility based on your current advertising strategy.
                 </p>
               </div>
             </div>
@@ -242,7 +281,7 @@ const handleSubscribe = async (plan) => {
               <div className="how-works-card-wrapper">
                 <p className="how-work-card-number">3</p>
                 <p className="how-work-card-desc">
-                  Set your default ad copy, headline, and traffic destination.
+                  Upload your ad creatives directly from your desktop, set your default ad copy, targeting, and preferences, and quickly build your campaign to streamline future uploads.
                 </p>
               </div>
             </div>
@@ -250,7 +289,7 @@ const handleSubscribe = async (plan) => {
               <div className="how-works-card-wrapper">
                 <p className="how-work-card-number">4</p>
                 <p className="how-work-card-desc">
-                  Click upload and watch as your campaigns are built in seconds.
+                  Click upload and watch as the software automatically builds and launches your campaign in seconds, saving you time and eliminating manual effort.
                 </p>
               </div>
             </div>
@@ -258,48 +297,54 @@ const handleSubscribe = async (plan) => {
         </div>
         <div className="how-work-right">
           <div className="how-works-video">
-            <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
               <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            </svg> */}
+            <video
+              src="./assets/video4.mp4"
+              playsInline
+              controls
+              muted
+            ></video>
           </div>
         </div>
       </div>
 
       <div id="pricing-section" className="pricing-section">
         <p className="price-heading">
-          Choose the <span>Perfect Plan</span> for Your Needs
+          Choose The <span>Perfect Plan</span> For Your Needs
         </p>
         <p className="price-desc">Flexible Pricing to Suit Every Advertiser</p>
         <div className="price-card-container">
           <div className="price-card">
-            <p className="price-card-price">$0</p>
-            <p className="price-card-accounts">1 Ad Account</p>
-            <p className="price-card-plan">Free 1 Day Trial </p>
-            <p className="price-card-plan-desc">
-              Try QuickCampaigns Now Risk-Free
-            </p>
+          <div class="price-card-description-container">
+              <p class="price-card-price">$0</p>
+              <p class="price-card-accounts">1 Ad Account</p>
+              <p class="price-card-plan">Free 1 Day Trial</p>
+              <p class="price-card-plan-desc">Try QuickCampaigns Now Risk-Free</p>
+          </div>
             <div className="price-card-feature-container">
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Upload ads to your ad account once for free.
+                Upload ads to 1 ad account once.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Experience all the features and benefits.
+                Experience full feature access during the trial.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Get a feel for the tool before subscribing.
+                Test the software risk-free before committing.
               </div>
             </div>
             <button className="price-start-btn" onClick={() => handleSubscribe('Free Trial')}>Get Started</button>
@@ -311,40 +356,42 @@ const handleSubscribe = async (plan) => {
                 <path d="M38.5158 9.90098C25.6315 17.6818 18.4779 31.9119 14.1785 45.8289C13.9575 46.5441 13.6873 47.2619 13.4404 47.9605C12.75 46.5676 8.03917 34.9998 6.13728 35.707C5.02576 36.1204 5.66158 37.6059 5.90619 38.2052C7.67675 42.5372 9.40645 46.4209 11.522 50.6102C13.1143 53.7639 16.0773 52.9418 19.0123 51.9819C23.4934 50.5165 23.8571 50.0963 28.4466 48.4097C29.203 48.1315 29.9979 47.9067 30.699 47.5593C31.5233 47.1502 32.4071 46.2845 31.9695 45.341C31.4735 44.2716 30.3945 44.3471 29.4728 44.7397C29.2803 44.8222 29.0849 44.8977 28.8877 44.9686C26.7215 45.7463 16.8895 49.8951 16.562 49.1937C16.4515 48.9575 16.4888 48.6827 16.5306 48.4255C17.7342 41.0033 20.9214 33.9331 24.6866 27.4731C27.2199 23.126 30.4713 19.1994 34.2601 15.8874C37.3047 13.2258 40.7371 10.966 44.4762 9.40628C48.4857 7.73348 52.366 7.38881 56.6492 7.13439C59.1151 6.98817 57.162 4.63891 55.7901 4.37429C54.2823 4.08303 52.668 4.60609 51.2031 4.91103C46.5692 5.87811 42.3375 7.59325 38.5158 9.90098Z" fill="#5356FF" />
               </svg>
             </div>
-            <p className="price-card-price">$129.95/month</p>
-            <p className="price-card-accounts">1 Ad Accounts</p>
-            <p className="price-card-plan">Professional Plan</p>
-            <p className="price-card-plan-desc">
-              Perfect for Individual Advertisers and Small Teams
-            </p>
+            <div class="price-card-description-container">
+              <p className="price-card-price">$129.95/month</p>
+              <p className="price-card-accounts">1 Ad Account</p>
+              <p className="price-card-plan">Professional Plan</p>
+              <p className="price-card-plan-desc">
+                Perfect for Individual Advertisers and Small Teams
+              </p>
+            </div>
             <div className="price-card-feature-container">
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Upload Unlimited Ads.
+                Upload unlimited ads to 1 ad account.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Ideal for solo marketers or small teams.
+                Perfect for solo marketers and small teams.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Enjoy all customization options and real-time adjustments.
+                Access all features and customization tools.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Receive dedicated support for your ad management needs.
+                Receive dedicated support for ad management.
               </div>
             </div>
             <button className="price-start-btn" onClick={() => handleSubscribe('Professional')}>Get Started</button>
@@ -368,28 +415,28 @@ const handleSubscribe = async (plan) => {
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Upload Unlimited Ads.
+                Upload unlimited ads to multiple ad accounts.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Manage multiple accounts with ease.
+                Perfect for agencies and businesses.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Streamline ad uploads and management across all accounts.
+                Access all features and customization tools.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Get priority support tailored for multi-account management.
+                Receive dedicated support for ad management.
               </div>
             </div>
             <button className="price-start-btn" onClick={() => handleSubscribe('Enterprise')}>Get Started</button>
@@ -399,7 +446,7 @@ const handleSubscribe = async (plan) => {
 
 
       <div id="review-section" className="customer-say-section">
-        <p className="customer-say-heading">What our customers says</p>
+        <p className="customer-say-heading">What Our Customers Say</p>
         <div className="customer-say-container">
           <div className="single-customer-say">
             <div>
@@ -517,7 +564,7 @@ const handleSubscribe = async (plan) => {
         </div>
       </div>
 
-      <div className="have-que-section">
+      {/* <div className="have-que-section">
         <img className="back-shadow have-que-left-shadow" src="./assets/have-que-left-shadow.svg" alt="" />
         <img className="back-shadow have-que-right-shadow" src="./assets/have-que-right-shadow.svg" alt="" />
         <div className="have-que-inner">
@@ -535,7 +582,7 @@ const handleSubscribe = async (plan) => {
             </button>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div id="contact-section" className="contact-us-section">
         <p className="contact-us-heading">Contact Us</p>
@@ -579,7 +626,7 @@ const handleSubscribe = async (plan) => {
           <div>
             <p>Pages</p>
             <ul>
-              <li><a href="#home">Home</a></li>
+              <li><a href="/">Home</a></li>
               <li><a href="#benefit-section">Benefits</a></li>
               <li><a href="#pricing-section">Pricing</a></li>
               <li><a href="#review-section">Reviews</a></li>
@@ -591,7 +638,10 @@ const handleSubscribe = async (plan) => {
             <ul>
               <li><a href="#contact-section">Contact</a></li>
               <li><a href="/terms-of-service">Terms & Conditions</a></li>
-              <li><a href="#">Privacy policy</a></li>
+              <li><a href="/privacy-policy">Privacy Policy</a></li>
+              <li><a href="/refund-policy">Refund Policy</a></li>
+              <li><a href="/deletion-policy">Data Deletion Policy</a></li>
+              <li><a href="/cookies-policy">Cookies Policy</a></li>
             </ul>
           </div>
         </div>

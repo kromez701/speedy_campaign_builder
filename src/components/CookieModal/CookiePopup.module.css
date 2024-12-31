@@ -1,0 +1,134 @@
+.cookiePopup {
+    position: fixed;
+    bottom: -150px; /* Start hidden */
+    right: 20px; /* Positioned in the bottom-right corner */
+    background: rgba(255, 255, 255, 0.9); /* Slight transparency */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    z-index: 1000;
+    width: 380px;
+    font-family: 'Poppins', sans-serif;
+    transition: transform 0.5s ease, opacity 0.5s ease;
+    transform: translateY(-150px); /* Slide into view */
+    opacity: 1;
+    animation: slideIn 0.5s ease forwards;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(0px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(-150px);
+    }
+}
+
+.message {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px; /* Adjust margin for spacing */
+    line-height: 1.5;
+}
+
+.settingsLink {
+    color: #5356FF;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.settingsLink:hover {
+    color: #4044C9;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: center; /* Center buttons */
+    gap: 10%; /* Adjust gap between buttons */
+}
+
+.acceptButton {
+    background: #5356FF; /* Purple background */
+    color: #FFFFFF; /* White text */
+    border: 1px solid #4044C9; /* Slightly darker purple border */
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.acceptButton:hover {
+    background: #4044C9; /* Darker purple on hover */
+    color: #EDEDED; /* Slightly off-white text */
+    transform: scale(1.05);
+}
+
+.settingsButton, .rejectButton {
+    background: #FFFFFF; /* White background */
+    color: #333333; /* Dark text */
+    border: 1px solid #666666; /* Black outline */
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.settingsButton:hover, .rejectButton:hover {
+    background: #F5F5F5; /* Light grey background on hover */
+    border-color: #333333; /* Darker outline on hover */
+    transform: scale(1.05);
+}
+
+.closeButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    background: none;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s ease;
+}
+
+.closeButton:hover {
+    color: #666;
+}
+
+.cookiePopup:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .cookiePopup {
+        width: 90%;
+        right: 5%;
+        padding: 15px; /* Reduce padding for smaller screens */
+    }
+
+    .message {
+        font-size: 13px; /* Reduced size but still readable */
+        line-height: 1.4; /* Adjusted line height for smaller screens */
+    }
+
+    .buttonGroup {
+        flex-direction: column; /* Stack buttons vertically on smaller screens */
+        gap: 10px; /* Spacing between buttons */
+    }
+
+    .acceptButton,
+    .rejectButton,
+    .settingsButton{
+        width: 100%; /* Full-width buttons on smaller screens */
+        font-size: 13px; /* Slightly smaller text */
+    }
+}

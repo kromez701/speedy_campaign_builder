@@ -99,92 +99,77 @@ const TermsOfService = () => {
 
             {/* Main Content */}
             <main className="content">
-            <h1>Terms of Service for QuickCampaigns</h1>
-            <section>
-                <h2>1. Introduction</h2>
-                <p>
-                Welcome to QuickCampaigns, a platform operated by Crown18 Limited, designed to help marketers 
-                create and upload Facebook Ads campaigns directly from their desktop, streamlining the campaign creation process. 
-                These Terms of Service ("Terms") govern your use of QuickCampaigns, including all features, content, 
-                and functionality provided. By accessing the platform, you agree to comply with these Terms.
-                </p>
-            </section>
+                <h1>Refund Policy for QuickCampaigns</h1>
 
-            <section>
-                <h2>2. Eligibility</h2>
-                <p>
-                You must be at least 18 years old and legally authorized to enter into agreements. 
-                By using QuickCampaigns, you confirm that you meet these eligibility requirements.
-                </p>
-            </section>
+                <section>
+                    <h2>1. Overview</h2>
+                    <p>
+                        We offer a 30-day money-back guarantee for all subscriptions. If you are not satisfied with the software, 
+                        you may request a full refund.
+                    </p>
+                </section>
 
-            <section>
-                <h2>3. Account Registration and Access</h2>
-                <p>
-                To use the platform, you must create an account with accurate and complete information, including a valid email address. 
-                You are responsible for maintaining the security of your account credentials. Notify us immediately at 
-                <a href="mailto:support@quickcampaigns.io">[support@quickcampaigns.io]</a> if you suspect unauthorized access.
-                </p>
-            </section>
+                <section>
+                    <h2>2. Eligibility</h2>
+                    <p>Refunds must be requested within 30 days of the initial purchase.</p>
+                    <p>Only subscriptions with no more than one active campaign upload will be eligible for refunds.</p>
+                </section>
 
-            <section>
-                <h2>4. Subscription Terms</h2>
-                <p>
-                QuickCampaigns offers a Free Trial, Professional Plan, and Enterprise Plan. Subscription plans renew automatically 
-                each month, with charges billed to your registered payment method unless canceled before the next billing cycle. 
-                Plan upgrades or downgrades will take effect in the next billing cycle.
-                </p>
-            </section>
+                <section>
+                    <h2>3. Refund Process</h2>
+                    <p>To request a refund, contact <a href="mailto:support@quickcampaigns.io">[support@quickcampaigns.io]</a> with your account details.</p>
+                    <p>Refunds will be processed within 7 business days to the original payment method.</p>
+                </section>
 
-            <section>
-                <h2>5. Refund Policy</h2>
-                <p>
-                Customers may request a refund within 30 days of purchase if they are not satisfied with the software. 
-                Refunds are issued to the original payment method. Refer to our Refund Policy for full details.
-                </p>
-            </section>
+                <section>
+                    <h2>4. Limitations</h2>
+                    <p>Refunds are not provided after 30 days.</p>
+                    <p>Accounts that abuse the refund process may be flagged for review.</p>
+                </section>
 
-            <section>
-                <h2>6. User Conduct</h2>
-                <p>Users agree not to:</p>
-                <ul>
-                <li>Misuse the software or resell its features without authorization.</li>
-                <li>Provide false information or impersonate others.</li>
-                <li>Use the platform to create misleading or illegal ads.</li>
-                </ul>
-                <p>Violation of these terms may result in account suspension or termination.</p>
-            </section>
+                <h1>Affiliate Program Terms for QuickCampaigns</h1>
 
-            <section>
-                <h2>7. Limitation of Liability</h2>
-                <p>
-                QuickCampaigns, its owners, and affiliates are not liable for any indirect, incidental, or consequential 
-                damages resulting from the use of the software, including data loss, ad account issues, or interruptions beyond our control.
-                </p>
-            </section>
+                <section>
+                    <h2>1. Introduction</h2>
+                    <p>
+                        The QuickCampaigns Affiliate Program allows you to earn 30% recurring commission on referrals that lead to 
+                        new subscriptions.
+                    </p>
+                </section>
 
-            <section>
-                <h2>8. Intellectual Property</h2>
-                <p>
-                All content, trademarks, and technology related to QuickCampaigns are the property of Crown18 Limited. 
-                Users retain rights to the campaigns they create, but all platform tools and templates remain the property of Crown18 Limited.
-                </p>
-            </section>
+                <section>
+                    <h2>2. Enrollment and Eligibility</h2>
+                    <p>
+                        Affiliates must apply and be approved before accessing affiliate tools. We reserve the right to accept or 
+                        deny applicants at our discretion.
+                    </p>
+                </section>
 
-            <section>
-                <h2>9. Termination</h2>
-                <p>
-                Accounts may be terminated for violation of these Terms. Users can cancel subscriptions at any time, but fees for 
-                the current billing cycle are non-refundable.
-                </p>
-            </section>
+                <section>
+                    <h2>3. Commission Structure</h2>
+                    <p>Affiliates earn 30% of each successful subscription payment.</p>
+                    <p>Payments are made monthly once the minimum payout threshold is met.</p>
+                </section>
 
-            <section>
-                <h2>10. Dispute Resolution</h2>
-                <p>
-                Disputes will be resolved under the jurisdiction applicable to Crown18 Limited.
-                </p>
-            </section>
+                <section>
+                    <h2>4. Affiliate Responsibilities</h2>
+                    <ul>
+                        <li>Promote the software responsibly and ethically.</li>
+                        <li>Avoid false advertising or misleading claims.</li>
+                        <li>Follow applicable advertising regulations.</li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h2>5. Termination</h2>
+                    <p>
+                        Affiliate accounts may be terminated for violations, including spam marketing, false claims, or misuse of 
+                        branding.
+                    </p>
+                    <p>
+                        For questions regarding the affiliate program, contact <a href="mailto:support@example.com">[support email]</a>.
+                    </p>
+                </section>
             </main>
 
             {/* Footer */}

@@ -188,9 +188,13 @@ nav ul li a {
 .hero-video {
     background: linear-gradient(180deg, #67c6e3 0%, rgba(83, 86, 255, 0.7) 100%);
     width: 100%;
-    height: 591px;
-    border-radius: 16px 16px 0px 0px;
+    border-radius: 16px 16px 16px 16px;
     position: relative;
+    display: flex; /* Use flexbox to align content */
+    justify-content: center; /* Center the video horizontally */
+    align-items: center; /* Center the video vertically */
+    overflow: hidden; /* Prevent overflow */
+    margin-bottom: 40px;
 }
 
 .hero-video svg {
@@ -198,12 +202,20 @@ nav ul li a {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none; /* Ensure the SVG does not interfere with video interaction */
+}
+
+.hero-video video {
+    width: 100%; /* Make the video fit the container's width */
+    height: auto; /* Ensure the height adjusts dynamically */
+    border-radius: 16px 16px 16px 16px; /* Match container's rounded corners */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
 }
 
 .old-new-way-section {
     background-color: #fff;
     padding: 40px 120px;
-    /* display: flex; */
+    display: flex;
     flex-direction: column;
 }
 
@@ -258,6 +270,14 @@ nav ul li a {
     position: absolute;
     top: 0;
     left: -24px;
+}
+
+.old-way-video, .new-way-video {
+    width: 100%; /* Ensure videos take full width of their containers */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top: 10px;
 }
 
 .benefit-section {
@@ -335,10 +355,11 @@ nav ul li a {
 .how-works-section {
     display: flex;
     justify-content: space-between;
-    background: #ffffff05;
-    padding: 79px 120px 78px 120px;
+    background: #ffffff05;gap: 30px;
+    padding: 79px 30px 78px 120px;
     position: relative;
     overflow: hidden;
+    gap: 30px;
 }
 
 .how-work-bottom-shadow {
@@ -364,7 +385,15 @@ nav ul li a {
 }
 
 .how-work-left {
-    width: calc(50% - 100px);
+    width: 40%;
+}
+
+.how-work-right{
+    flex: 1; /* Allow the video section to take up available space */
+    display: flex; /* Use flexbox for alignment */
+    justify-content: center; /* Center the video horizontally */
+    align-items: center; /* Center the video vertically */
+    margin-top:-30px;
 }
 
 .how-works-card-container {
@@ -431,10 +460,20 @@ nav ul li a {
 
 .how-works-video {
     background: linear-gradient(180deg, #67c6e3 0%, rgba(83, 86, 255, 0.7) 100%);
-    width: 100%;
-    height: 100%;
+    width: 100%; /* Allow the video container to scale with the parent */
     border-radius: 16px;
     position: relative;
+    display: flex; /* Use flexbox to align content */
+    justify-content: center; /* Center the video horizontally */
+    align-items: center; /* Center the video vertically */
+    overflow: hidden; /* Prevent overflow */
+}
+
+.how-works-video video {
+    width: 100%; /* Make the video fit within the container */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 16px; /* Match the container's rounded corners */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
 }
 
 .how-works-video svg {
@@ -442,6 +481,7 @@ nav ul li a {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    pointer-events: none; /* Ensure the SVG does not interfere with video interaction */
 }
 
 .pricing-section {
@@ -483,6 +523,8 @@ nav ul li a {
     border: 1px solid #eaecf0;
     box-shadow: 0px 12px 16px -4px #10182814;
     width: 384px;
+    display: flex; /* Enable flexbox */
+    flex-direction: column; /* Stack children vertically */
 }
 
 .price-card-price {
@@ -523,8 +565,12 @@ nav ul li a {
 .price-card-feature-container {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 16px;
-    margin-top: 32px;
+    flex-grow: 1; /* Allow this section to expand */
+    justify-content: center; /* Center content within available space */
+    margin-top:20px;
+    margin-bottom: 40px; /* Keep the bottom margin */
 }
 
 .price-card-feature {
@@ -535,6 +581,7 @@ nav ul li a {
     font-weight: 400;
     line-height: 24px;
     text-align: left;
+    width: 100%;
     color: #667085;
 }
 
@@ -546,7 +593,7 @@ nav ul li a {
 }
 
 .price-start-btn {
-    margin-top: 40px;
+    margin-top: auto; /* Push button to the bottom */
     padding: 12px 24px;
     width: 100%;
     background-color: #5356ff;
@@ -989,6 +1036,71 @@ footer {
 }
 
 /* Media Queries  */
+
+@media (min-width: 1600px) {
+    .old-new-way-section div {
+        height: 500px; /* Adjust height for 1920px width screens */        
+    }
+
+}
+
+@media (min-width: 1920px) {
+    .old-new-way-section div {
+        height: 600px; /* Adjust height for 1920px width screens */        
+    }
+    .new-way-video {
+        margin-left:3%;
+    }
+    .old-way-video{
+        margin-right:3%;
+    }
+
+}
+
+@media (min-width: 2100px) {
+    .old-new-way-section div {
+        height: 700px; /* Adjust height for 2560px width screens */
+    }
+}
+
+@media (min-width: 2500px) {
+    .old-new-way-section div {
+        height: 800px; /* Adjust height for 2560px width screens */
+    }
+}
+
+@media (min-width: 3000px) {
+    .old-new-way-section div {
+        height: 900px; /* Adjust height for 3200px width screens */
+    }
+}
+
+@media (min-width: 3540px) {
+    .old-new-way-section div {
+        height: 1000px; /* Adjust height for 3840px width screens */
+    }
+}
+
+@media (min-width: 1135px) {
+    .old-way-video, .new-way-video {
+    position: absolute; /* Position videos outside of the section */
+    top: 50%; /* Vertically center the video relative to the section */
+    transform: translateY(-50%); /* Adjust for proper centering */
+    width: 100%; /* Adjust the video width */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    margin-top:0px;
+    }
+
+    .old-way-video {
+        right: -110%; /* Place the old way video on the left side of the border */
+    }
+
+    .new-way-video {
+        left: -110%; /* Place the new way video on the right side of the border */
+    }
+}
 
 @media (max-width: 1620px) {
     nav ul {

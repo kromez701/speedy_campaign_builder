@@ -29,6 +29,30 @@ body {
     height: 100vh;
 }
 
+.content {
+      flex: 1;
+      padding: 40px 150px; /* Add padding for content */
+      padding-bottom: 120px;
+      margin-left: 0px;
+  }
+
+.content h1,
+.content h2 {
+    margin-bottom: 10px; /* Space between headers and following content */
+}
+
+.content section {
+    margin-bottom: 20px; /* Space between sections */
+}
+
+.content h1 {
+    font-size: 1.8rem; /* Larger font size for h1 */
+}
+
+.content h2 {
+    font-size: 1.5rem; /* Smaller than h1 */
+}
+  
 nav {
     padding: 25px 120px;
     display: flex;
@@ -280,62 +304,8 @@ footer {
         font-size: 34px;
         line-height: 52px;
     }
-
-    .price-card-price {
-        font-size: 2.5rem;
-    }
-
-    .hero-description,
-    .old-new-way-section-desc {
-        font-size: 16px;
-        line-height: 25px;
-    }
-
-    .benefit-card-heading {
-        font-size: 1.3rem;
-        line-height: 30px;
-    }
-
-    .how-works-card-wrapper {
-        padding: 15px 10px;
-    }
-
-    .how-work-card-desc {
-        font-size: 16px;
-        line-height: 25px;
-    }
-
-    .price-desc {
-        font-size: 16px;
-        line-height: 24px;
-    }
-
-    .faq-single-heading {
-        font-size: 18px;
-        line-height: 21px;
-    }
-
-    .faq-single-desc {
-        font-size: 16px;
-        line-height: 21px;
-    }
-
-    .have-que-inner p {
-        font-size: 30px;
-        line-height: 40px;
-    }
-
-    .get-start-heading {
-        margin-bottom: 30px;
-    }
-
-    .get-start-desc {
-        font-size: 16px;
-        line-height: 24px;
-    }
-
-    .contact-form {
-        padding: 41px 30px;
+    .content {
+        padding: 40px 100px; /* Reduced padding for smaller screens */
     }
 }
 
@@ -417,110 +387,9 @@ footer {
         z-index: -1;
     }
 
-    .old-new-way-section div:first-child {
-        border-left: 4px solid #5356ff;
-        padding-left: 25px;
-        width: 100%;
-        border-right: none;
-        padding-bottom: 40px;
-    }
-
-    .old-new-way-section div:first-child svg {
-        left: -24px;
-    }
-
-    .new-way-wrapper {
-        width: 100%;
-        padding-left: 25px;
-    }
-
-    .benefit-heading {
-        width: 100%;
-    }
-
-    .benefit-card {
-        width: calc(50.7% - 20px);
-    }
-
-    .how-works-section {
-        flex-direction: column;
-        padding-bottom: 0;
-    }
-
-    .how-work-left,
-    .how-work-right {
-        width: 100%;
-    }
-
-    .how-work-right {
-        margin-top: 40px;
-        height: 385px;
-    }
-
-    .how-works-video {
-        border-radius: 16px 16px 0 0;
-    }
-
-    .price-card-container {
-        flex-wrap: wrap;
-        gap: 32px;
-    }
-
-    .popular-plan-wrapper {
-        right: 50px;
-    }
-
-    .faqs-container {
-        width: 100%;
-    }
-
-    .get-start-section {
-        flex-direction: column;
-    }
-
-    .get-start-wrapper-first {
-        width: 100%;
-        padding-right: 0;
-        border-right: none;
-        padding-bottom: 40px;
-        margin-bottom: 40px;
-        border-bottom: 2px solid #050315b2;
-    }
-
-    .get-start-wrapper-last {
-        width: 100%;
-        padding-left: 0;
-    }
-
-    .have-que-inner {
-        flex-direction: column;
-        gap: 80px;
-    }
-
-    .have-que-btn-shadow {
-        top: -105px;
-    }
-
-    .have-que-inner {
-        padding-bottom: 80px;
-    }
-
-    .have-que-inner p {
-        text-align: center;
-    }
-
-    .send-msg-heading {
-        font-size: 24px;
-        margin-bottom: 30px;
-    }
-
-    .contact-form label {
-        font-size: 16px;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-        font-size: 16px;
+    .content {
+        padding: 40px 60px; /* Further reduced padding */
+        margin-top: 60px
     }
 
     footer {
@@ -545,9 +414,21 @@ footer {
     .footer-column-container {
         justify-content: space-between;
     }
+    .content h1 {
+    font-size: 1.6rem; /* Larger font size for h1 */
+    }
+
+    .content h2 {
+        font-size: 1.3rem; /* Smaller than h1 */
+    }
 }
 
 @media (max-width: 768px) {
+
+    .content {
+        padding: 40px 24px; /* Minimal padding for very small screens */
+    }
+
     nav {
         padding: 18px 24px;
     }
@@ -590,125 +471,6 @@ footer {
         padding-block: 60px;
     }
 
-    .price-card {
-        width: 100%;
-    }
-
-    .how-works-section {
-        padding-top: 24px;
-    }
-
-    .how-works-card-wrapper {
-        gap: 16px;
-        padding: 6px;
-    }
-
-    .how-work-card-number {
-        width: 68px;
-        height: 68px;
-    }
-
-    .how-work-card-desc {
-        font-size: 12px;
-        line-height: 18px;
-    }
-
-    .faq-desc {
-        font-size: 15px;
-        line-height: 24px;
-        margin: 20px 0 40px 0;
-    }
-
-    .faq-single-heading span {
-        font-size: 30px;
-    }
-
-    .have-que-inner button {
-        height: 50px;
-        font-size: 16px;
-        min-width: 200px;
-    }
-
-    .hero-inner {
-        width: calc(100% - 48px);
-    }
-
-    .old-new-way-section-desc {
-        margin-top: 30px;
-    }
-
-    .benefit-card {
-        width: 100%;
-    }
-
-    .benefit-card-wrapper {
-        padding: 23px 10px;
-    }
-
-    .benefit-card-desc {
-        font-size: 14px;
-        line-height: 23px;
-    }
-
-    .customer-say-container {
-        flex-direction: column;
-    }
-
-    .pricing-section {
-        padding-block: 43px;
-    }
-
-    .single-customer-say {
-        width: 100%;
-    }
-
-    .contact-form {
-        width: 100%;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-        margin-top: 15px;
-    }
-
-    .popular-plan-wrapper {
-        right: 35%;
-    }
-
-    .single-customer-say p {
-        font-size: 16px;
-        line-height: 25px;
-        margin-top: 20px;
-    }
-
-    .get-start-desc {
-        font-size: 16px;
-        line-height: 25px;
-    }
-
-    .faq-single-heading {
-        font-size: 15px;
-        line-height: 19px;
-    }
-
-    .faq-single-desc {
-        font-size: 13px;
-        line-height: 18px;
-    }
-
-    .send-msg-heading {
-        font-size: 16px;
-        margin-bottom: 20px;
-    }
-
-    .contact-form label {
-        font-size: 14px;
-    }
-
-    .contact-form input,
-    .contact-form textarea {
-        font-size: 12px;
-    }
 
     .footer-logo-desc {
         font-size: 16px;
@@ -732,6 +494,14 @@ footer {
 
     .footer-third-col input {
         font-size: 14px;
+    }
+
+    .content h1 {
+    font-size: 1.5rem; /* Larger font size for h1 */
+    }
+
+    .content h2 {
+        font-size: 1.2rem; /* Smaller than h1 */
     }
 }
 `;

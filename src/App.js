@@ -13,7 +13,12 @@ import './App.css';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; 
 import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup';
+import PrivacyPolicy from './components/Policies/PrivacyPolicy';
+import RefundPolicy from './components/Policies/RefundPolicy';
+import DeletionPolicy from './components/Policies/DeletionPolicy';
 import TermsOfService from './components/Policies/TermsOfService'; // Import the Terms of Service
+import CookiesPolicy from './components/Policies/CookiesPolicy.js';
+import CookiesSettings from './components/CookieModal/CookiesSettings';
 import config from './config';
 
 const apiUrl = config.apiUrl;
@@ -100,7 +105,12 @@ const App = () => {
                   <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                   <Route path="/success" element={<PaymentSuccess />} />
                   <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/refund-policy" element={<RefundPolicy />} />
+                  <Route path="/cookies-policy" element={<CookiesPolicy />} />
+                  <Route path="/deletion-policy" element={<DeletionPolicy />} />
                   <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
+                  <Route path="/cookies-settings" element={<CookiesSettings />} />
                   <Route path="*" element={<Navigate to="/" />} />
                 </Routes>
               </div>
@@ -112,7 +122,12 @@ const App = () => {
               <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
               <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
               <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/refund-policy" element={<RefundPolicy />} />
+              <Route path="/deletion-policy" element={<DeletionPolicy />} />
+              <Route path="/cookies-policy" element={<CookiesPolicy />} />
               <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
+              <Route path="/cookie-settings" element={<CookiesSettings />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
           </>

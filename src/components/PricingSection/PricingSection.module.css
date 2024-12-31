@@ -109,8 +109,12 @@
 .priceCardFeatureContainer {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: 16px;
-    margin-top: 32px;
+    flex-grow: 1; /* Allow this section to expand */
+    justify-content: center; /* Center content within available space */
+    margin-top:20px;
+    margin-bottom: 40px; /* Keep the bottom margin */
 }
 
 .priceCardFeature {
@@ -122,6 +126,7 @@
     line-height: 24px;
     text-align: left;
     color: #667085;
+    width: 100%;
 }
 
 .priceCardFeature svg {
@@ -132,7 +137,7 @@
 }
 
 .priceStartBtn {
-    margin-top: 40px;
+    margin-top: auto; /* Push button to the bottom */
     padding: 12px 24px;
     width: 100%;
     background-color:#5356FF;

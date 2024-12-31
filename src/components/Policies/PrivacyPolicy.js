@@ -99,92 +99,67 @@ const TermsOfService = () => {
 
             {/* Main Content */}
             <main className="content">
-            <h1>Terms of Service for QuickCampaigns</h1>
-            <section>
-                <h2>1. Introduction</h2>
-                <p>
-                Welcome to QuickCampaigns, a platform operated by Crown18 Limited, designed to help marketers 
-                create and upload Facebook Ads campaigns directly from their desktop, streamlining the campaign creation process. 
-                These Terms of Service ("Terms") govern your use of QuickCampaigns, including all features, content, 
-                and functionality provided. By accessing the platform, you agree to comply with these Terms.
-                </p>
-            </section>
+                <h1>Privacy Policy for QuickCampaigns</h1>
 
-            <section>
-                <h2>2. Eligibility</h2>
-                <p>
-                You must be at least 18 years old and legally authorized to enter into agreements. 
-                By using QuickCampaigns, you confirm that you meet these eligibility requirements.
-                </p>
-            </section>
+                <section>
+                    <h2>1. Introduction</h2>
+                    <p>
+                        QuickCampaigns is committed to protecting your privacy. This Privacy Policy explains our data 
+                        collection practices and your rights regarding your information.
+                    </p>
+                </section>
 
-            <section>
-                <h2>3. Account Registration and Access</h2>
-                <p>
-                To use the platform, you must create an account with accurate and complete information, including a valid email address. 
-                You are responsible for maintaining the security of your account credentials. Notify us immediately at 
-                <a href="mailto:support@quickcampaigns.io">[support@quickcampaigns.io]</a> if you suspect unauthorized access.
-                </p>
-            </section>
+                <section>
+                    <h2>2. Data Collection</h2>
+                    <p>
+                        <strong>Account Information:</strong> Collected during registration (name, email, company name, payment details).
+                    </p>
+                    <p>
+                        <strong>Usage Data:</strong> We track interactions with the platform, including ad uploads and account activity.
+                    </p>
+                    <p>
+                        <strong>Payment Information:</strong> Securely processed through third-party providers. Payment data is not stored on our servers.
+                    </p>
+                </section>
 
-            <section>
-                <h2>4. Subscription Terms</h2>
-                <p>
-                QuickCampaigns offers a Free Trial, Professional Plan, and Enterprise Plan. Subscription plans renew automatically 
-                each month, with charges billed to your registered payment method unless canceled before the next billing cycle. 
-                Plan upgrades or downgrades will take effect in the next billing cycle.
-                </p>
-            </section>
+                <section>
+                    <h2>3. Data Storage and Security</h2>
+                    <p>
+                        Data is securely stored on cloud servers and encrypted to protect user information. Only authorized 
+                        personnel have access to sensitive data.
+                    </p>
+                </section>
 
-            <section>
-                <h2>5. Refund Policy</h2>
-                <p>
-                Customers may request a refund within 30 days of purchase if they are not satisfied with the software. 
-                Refunds are issued to the original payment method. Refer to our Refund Policy for full details.
-                </p>
-            </section>
+                <section>
+                    <h2>4. Use of Data</h2>
+                    <ul>
+                        <li>Improve user experience and software functionality.</li>
+                        <li>Provide customer support and resolve technical issues.</li>
+                        <li>Send promotional emails (with opt-out options).</li>
+                    </ul>
+                </section>
 
-            <section>
-                <h2>6. User Conduct</h2>
-                <p>Users agree not to:</p>
-                <ul>
-                <li>Misuse the software or resell its features without authorization.</li>
-                <li>Provide false information or impersonate others.</li>
-                <li>Use the platform to create misleading or illegal ads.</li>
-                </ul>
-                <p>Violation of these terms may result in account suspension or termination.</p>
-            </section>
+                <section>
+                    <h2>5. User Rights</h2>
+                    <p>
+                        You may request access, modification, or deletion of your personal data by contacting 
+                        <a href="mailto:support@quickcampaigns.io"> [support@quickcampaigns.io]</a>.
+                    </p>
+                </section>
 
-            <section>
-                <h2>7. Limitation of Liability</h2>
-                <p>
-                QuickCampaigns, its owners, and affiliates are not liable for any indirect, incidental, or consequential 
-                damages resulting from the use of the software, including data loss, ad account issues, or interruptions beyond our control.
-                </p>
-            </section>
+                <section>
+                    <h2>6. Cookies</h2>
+                    <p>
+                        We use cookies to enhance user experience. You can adjust cookie settings through your browser.
+                    </p>
+                </section>
 
-            <section>
-                <h2>8. Intellectual Property</h2>
-                <p>
-                All content, trademarks, and technology related to QuickCampaigns are the property of Crown18 Limited. 
-                Users retain rights to the campaigns they create, but all platform tools and templates remain the property of Crown18 Limited.
-                </p>
-            </section>
-
-            <section>
-                <h2>9. Termination</h2>
-                <p>
-                Accounts may be terminated for violation of these Terms. Users can cancel subscriptions at any time, but fees for 
-                the current billing cycle are non-refundable.
-                </p>
-            </section>
-
-            <section>
-                <h2>10. Dispute Resolution</h2>
-                <p>
-                Disputes will be resolved under the jurisdiction applicable to Crown18 Limited.
-                </p>
-            </section>
+                <section>
+                    <h2>7. Policy Changes</h2>
+                    <p>
+                        We reserve the right to update this Privacy Policy. Users will be notified of significant changes.
+                    </p>
+                </section>
             </main>
 
             {/* Footer */}
