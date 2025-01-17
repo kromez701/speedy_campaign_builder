@@ -8,6 +8,7 @@ import '../ToastifyOverrides.css';
 import config from '../../config';
 
 const apiUrl = config.apiUrl;
+const stripePublishableKey = config.stripePublishableKey;
 
 const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
@@ -100,7 +101,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
         const sessionId = response.data.sessionId;
         if (sessionId) {
-          const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+          const stripe = window.Stripe(stripePublishableKey);
           stripe.redirectToCheckout({ sessionId });
         } else {
           console.error('No session ID returned from backend');

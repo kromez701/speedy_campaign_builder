@@ -8,6 +8,7 @@ import config from '../../config';
 import CookiePopup from '../CookieModal/CookiePopup';
 
 const apiUrl = config.apiUrl;
+const stripePublishableKey = config.stripePublishableKey;
 
 const Landing = () => {
   const navigate = useNavigate(); // Initialize useNavigate
@@ -49,7 +50,7 @@ const Landing = () => {
       if (response.data.sessionId) {
         console.log('Stripe session created, redirecting to checkout...');
         const stripe = window.Stripe(
-          'pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY'
+          stripePublishableKey
         );
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {

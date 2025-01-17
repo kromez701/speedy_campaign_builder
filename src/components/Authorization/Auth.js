@@ -11,8 +11,10 @@ import 'react-toastify/dist/ReactToastify.css'; // Import Toastify CSS
 import '../ToastifyOverrides.css';
 import styles from './Auth.module.css';
 import config from '../../config';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const apiUrl = config.apiUrl;
+const APP_ID = config.appId
 
 const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => (
   <div className={styles['password-container']}>
@@ -71,7 +73,7 @@ const CustomFacebookLogin = ({ isLogin, onSuccess, onError }) => {
     // Initialize the Facebook SDK once the script has loaded
     window.fbAsyncInit = function() {
       FB.init({
-        appId      : '1153977715716035',
+        appId      : APP_ID,
         cookie     : true,
         xfbml      : true,
         version    : 'v20.0'
@@ -132,6 +134,12 @@ const Auth = ({ mode, onAuthSuccess }) => {
   const [isPasswordResetSent, setIsPasswordResetSent] = useState(false); // For password reset confirmation
   const location = useLocation();
   const navigate = useNavigate();
+  
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const [recaptchaToken, setRecaptchaToken] = useState(null);
+  const handleRecaptchaChange = (token) => {
+    setRecaptchaToken(token);
+  };  
 
   useEffect(() => {
     setIsLogin(mode === 'login');
@@ -144,6 +152,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
     password: '',
     confirmPassword: '',
     remember: false,
+    recaptcha: '',
   };
 
   const validationSchema = Yup.object({
@@ -152,6 +161,9 @@ const Auth = ({ mode, onAuthSuccess }) => {
     password: !isForgotPassword ? Yup.string().min(6, 'Password must be at least 6 characters').required('Required') : Yup.string().min(6, 'Password must be at least 6 characters').required('Required'),
     confirmPassword: (!isLogin && !isForgotPassword) || isForgotPassword
       ? Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Required')
+      : Yup.string(),
+    recaptcha: (failedAttempts >= 2 && isLogin) || !isLogin
+      ? Yup.string().required('Please verify you are human.')
       : Yup.string(),
   });
 
@@ -186,28 +198,47 @@ const Auth = ({ mode, onAuthSuccess }) => {
       }
     } else if (isLogin) {  // Login case
       url = `${apiUrl}/auth/login`;
+      
       try {
-        const response = await axios.post(url, values, { withCredentials: true });
+        const payload = {
+          ...values,
+          recaptcha: failedAttempts >= 2 ? values.recaptcha : null, // Include `recaptcha` token only if visible
+        };
+    
+        const response = await axios.post(url, payload, { withCredentials: true });
+    
         if (response.status === 200 || response.status === 201) {
           onAuthSuccess();
           resetForm();
+          setFailedAttempts(0); // Reset failed attempts on success
+          console.log("Login successful. failedAttempts reset to 0.");
           toast.success('Logged in successfully!');
+        } else {
+          setFailedAttempts((prev) => {
+            const newAttempts = prev + 1;
+            return newAttempts;
+          });
         }
       } catch (error) {
         toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
+        setFailedAttempts((prev) => {
+          const newAttempts = prev + 1;
+          return newAttempts;
+        });
       }
-    } else {  // Registration case
+    }else {  // Registration case
       url = `${apiUrl}/auth/register`;
       try {
-        const response = await axios.post(url, values, { withCredentials: true });
+        const payload = { ...values, recaptcha: values.recaptcha};
+        const response = await axios.post(url, payload, { withCredentials: true });
         if (response.status === 200 || response.status === 201) {
-          setIsEmailSent(true); // Trigger email verification screen
+          setIsEmailSent(true);
           toast.success('Registration successful! Please check your email for verification.');
         }
       } catch (error) {
         toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
       }
-    }
+      }
   };
 
   const responseGoogle = async ({ accessToken, remember }) => {
@@ -249,6 +280,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
                 className={styles.linkText}
                 onClick={() => {
                   setIsEmailSent(false);
+                  setIsLogin(true);
                   navigate('/login');
                 }}
               >
@@ -280,7 +312,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
                 onSubmit={onSubmit}
                 enableReinitialize={true}
               >
-                {() => (
+                {({ setFieldValue }) => (
                   <Form className={styles['form-container']}>
                     {errorMessage && <div className={styles.error}>{errorMessage}</div>}
                     {!isLogin && !isForgotPassword && (
@@ -338,6 +370,27 @@ const Auth = ({ mode, onAuthSuccess }) => {
                         <Field type="checkbox" name="remember" checked={remember} onChange={() => setRemember(!remember)} />
                         <label className={styles['remember-me-text']} htmlFor="remember">Remember me</label>
                       </div>
+                    )}
+
+                    {(failedAttempts >= 2 && isLogin) && (
+                      <>
+                        <ReCAPTCHA
+                          sitekey="6LdiOKsqAAAAAAXA7QmC0Qwb_XUX_tklNpxHcPhr" // Replace with your site key
+                          onChange={(token) => {
+                            setFieldValue('recaptcha', token); // Update Formik state
+                          }}
+                        />
+                        <ErrorMessage name="recaptcha" component="div" className={styles.error} />
+                      </>
+                    )}
+                    {!isLogin && (
+                      <>
+                        <ReCAPTCHA
+                          sitekey="6LdiOKsqAAAAAAXA7QmC0Qwb_XUX_tklNpxHcPhr" // Replace with your site key
+                          onChange={(token) => setFieldValue('recaptcha', token)} // Update Formik state
+                        />
+                        <ErrorMessage name="recaptcha" component="div" className={styles.error} />
+                      </>
                     )}
                     <button type="submit" className={styles['option-button']}>
                       {isForgotPassword ? 'Send Reset Link' : isLogin ? 'Sign In' : 'Create account'}

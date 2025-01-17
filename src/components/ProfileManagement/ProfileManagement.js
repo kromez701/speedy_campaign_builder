@@ -11,6 +11,9 @@ import SetupAdAccountPopup from '../SetUpPopUp/SetupAdAccountPopup';
 import config from '../../config';
 
 const apiUrl = config.apiUrl;
+const stripePublishableKey = config.stripePublishableKey;
+const APP_ID = config.appId
+const APP_SECRET = config.appSecret
 
 const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
   const navigate = useNavigate();
@@ -199,8 +202,8 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
                         facebook_page_id: '',
                         pixel_id: '',
                         access_token: exchangeResponse.data.long_lived_token,
-                        app_id: '1153977715716035',  // Add the app ID
-                        app_secret: '30d73e973e26535fc1e445f2e0b16cb7',  // Add the app secret
+                        app_id: APP_ID,  // Add the app ID
+                        app_secret: APP_SECRET,  // Add the app secret
                         business_manager_id: businessManagerId
                     };
 
@@ -312,7 +315,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
       );
 
       if (response.data.sessionId) {
-        const stripe = window.Stripe('pk_test_51PiyL901UFm1325d6TwRCbSil7dWz63iOlmtqEZV6uLOQhXZSPwqhZPZ1taioo9s6g1IAbFjsD4OV6q4zWcv1ycV00fISOFZLY');
+        const stripe = window.Stripe(stripePublishableKey);
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else {
         toast.error('Failed to create checkout session');
@@ -336,7 +339,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     // Initialize the Facebook SDK once the script has loaded
     window.fbAsyncInit = function() {
       FB.init({
-        appId      : '1153977715716035',
+        appId      : APP_ID,
         cookie     : true,
         xfbml      : true,
         version    : 'v20.0'

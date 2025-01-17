@@ -9,6 +9,9 @@ import axios from 'axios';
 import config from '../../config';
 
 const apiUrl = config.apiUrl;
+const APP_ID = config.appId
+const APP_SECRET = config.appSecret
+
 
 const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeAccount is passed in
   const modalRef = useRef(null);
@@ -28,7 +31,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
 
     window.fbAsyncInit = function () {
       FB.init({
-        appId: '1153977715716035',
+        appId: APP_ID,
         cookie: true,
         xfbml: true,
         version: 'v20.0'
@@ -99,8 +102,8 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
               facebook_page_id: page || '',
               pixel_id: pixel || '',
               access_token: exchangeResponse.data.long_lived_token,
-              app_id: '1153977715716035', 
-              app_secret: '30d73e973e26535fc1e445f2e0b16cb7', 
+              app_id: APP_ID, 
+              app_secret: APP_SECRET, 
               business_manager_id: businessManagerId
             };
 
