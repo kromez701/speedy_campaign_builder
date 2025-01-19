@@ -206,6 +206,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
         };
     
         const response = await axios.post(url, payload, { withCredentials: true });
+        console.log('Response:', response);  // Add this line
     
         if (response.status === 200 || response.status === 201) {
           onAuthSuccess();

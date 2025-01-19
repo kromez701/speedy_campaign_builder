@@ -140,6 +140,21 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount }) => {
     setAdAccountDetails({ ...adAccountDetails, [name]: value });
   };
 
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${apiUrl}/auth/logout`, {}, { withCredentials: true });
+      
+      // Clear session-related state
+      setActiveAccount(null);
+      localStorage.removeItem('activeAccount'); // Clear local storage
+      toast.success('Logged out successfully');
+      navigate('/login'); // Redirect to login page
+    } catch (error) {
+      toast.error('Error logging out');
+      console.error('Logout error:', error);
+    }
+  };
+  
   const handleAdAccountSave = async () => {
     if (isBound) {
       toast.error('Ad account settings can only be changed once.');

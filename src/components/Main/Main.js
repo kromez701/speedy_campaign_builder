@@ -28,7 +28,7 @@ const getDefaultEndTime = () => {
   return endTime.toISOString().slice(0, 16);
 };
 
-const Main = ({ activeAccount }) => {
+const Main = ({ activeAccount, setActiveAccount }) => {
   const [formId, setFormId] = useState("mainForm");
   const [previousForm, setPreviousForm] = useState("mainForm");
   const [progress, setProgress] = useState(0);
@@ -42,7 +42,6 @@ const Main = ({ activeAccount }) => {
 
   // Check if activeAccount is bound
   useEffect(() => {
-    console.log("Active Account Updated:", activeAccount);
     setShowModal(prev => (activeAccount && !activeAccount.is_bound ? true : false));
   }, [activeAccount]);
 
@@ -394,7 +393,8 @@ const Main = ({ activeAccount }) => {
       {showModal && (
         <SetupAdAccountModal 
           onClose={() => setShowModal(false)} 
-          activeAccount={activeAccount}  // Pass activeAccount to SetupAdAccountModal
+          activeAccount={activeAccount}
+          setActiveAccount={setActiveAccount} 
         />
       )}
 

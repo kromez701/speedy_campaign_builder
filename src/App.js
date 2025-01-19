@@ -49,6 +49,37 @@ const AppContent = () => {
     checkCurrentUser();
   }, []);
 
+  const handleAuthSuccess = async () => {
+    try {
+      const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true });
+      if (response.status === 200) {
+        setUser(response.data.user);
+        setAuthMode(null);
+        setRedirectToMain(true);
+      }
+    } catch (error) {
+      console.error('Error checking current user', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/auth/logout`, {}, { withCredentials: true });
+      if (response.status === 200) {
+        setUser(null);
+        setRedirectToMain(false);
+      } else {
+        console.error('Failed to log out');
+      }
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
+
+  const handlePlanUpgrade = () => {
+    setRefreshTrigger(prev => !prev);
+  };
+
   useEffect(() => {
     if (redirectToMain) {
       setRedirectToMain(false);
@@ -90,17 +121,14 @@ const AppContent = () => {
                     />
                     <div className="content">
                       <Routes>
-                        <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
-                        <Route
-                          path="/profile-management"
-                          element={
-                            <ProfileManagement
-                              activeAccount={activeAccount}
-                              setActiveAccount={setActiveAccount}
-                            />
-                          }
-                        />
-                        <Route path="/pricing-section" element={<PricingSection />} />
+                      <Route 
+                        path="/" 
+                        element={activeAccount ? 
+                          <Main activeAccount={activeAccount} setActiveAccount={setActiveAccount} /> 
+                          : <p>Loading...</p>} 
+                      />
+                        <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
+                        <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                         <Route path="/success" element={<PaymentSuccess />} />
                         <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
                         <Route path="*" element={<Navigate to="/" />} />
@@ -115,8 +143,8 @@ const AppContent = () => {
           <>
             {/* Non-authenticated User Layout */}
             <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
-            <Route path="/login" element={<Auth mode="login" />} />
-            <Route path="/register" element={<Auth mode="register" />} />
+            <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
+            <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
             <Route path="*" element={<Navigate to="/" />} />
           </>
         )}

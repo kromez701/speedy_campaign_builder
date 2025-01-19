@@ -12,7 +12,7 @@ const apiUrl = config.apiUrl;
 const APP_ID = config.appId;
 const APP_SECRET = config.appSecret;
 
-const SetupAdAccountModal = ({ onClose, activeAccount }) => {
+const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   const modalRef = useRef(null);
   const [showPopup, setShowPopup] = useState(false);
   const [accessToken, setAccessToken] = useState('');
@@ -118,6 +118,14 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {
 
             if (saveResponse.status === 200) {
               toast.success('Ad account updated successfully');
+
+              // Fetch updated account details and update global state
+              const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
+
+              // Update state in App.js via setActiveAccount prop
+              setActiveAccount(updatedAccountResponse.data);
+              localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
+
               setTimeout(() => {
                 window.location.reload();
               }, 700);
