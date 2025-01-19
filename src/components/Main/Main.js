@@ -38,15 +38,12 @@ const Main = ({ activeAccount }) => {
   const [existingCampaigns, setExistingCampaigns] = useState([]);
   const [selectedCampaign, setSelectedCampaign] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [showModal, setShowModal] = useState(false);  // Modal state
+  const [showModal, setShowModal] = useState(() => activeAccount ? !activeAccount.is_bound : false);
 
   // Check if activeAccount is bound
   useEffect(() => {
-    if (activeAccount && !activeAccount.is_bound) {
-      setShowModal(true);  // Show modal if the ad account is not bound
-    } else {
-      setShowModal(false);
-    }
+    console.log("Active Account Updated:", activeAccount);
+    setShowModal(prev => (activeAccount && !activeAccount.is_bound ? true : false));
   }, [activeAccount]);
 
   // Reset the form when activeAccount changes
@@ -270,6 +267,11 @@ const Main = ({ activeAccount }) => {
   }, [taskId]);
 
   const handleShowForm = (formId) => {
+    if (!activeAccount || !activeAccount.is_bound) {
+      toast.warning("Please connect an ad account to create campaigns.");
+      return; // Prevent navigation if the ad account is not bound
+    }
+
     if (campaignType === "existing" && formId === "next" && !selectedCampaign) {
       toast.warning("Please select an existing campaign before proceeding.");
       return;

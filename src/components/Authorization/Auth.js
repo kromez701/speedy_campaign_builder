@@ -158,8 +158,8 @@ const Auth = ({ mode, onAuthSuccess }) => {
   const validationSchema = Yup.object({
     name: !isLogin && !isForgotPassword ? Yup.string().required('Required') : Yup.string(),
     email: Yup.string().email('Invalid email format').required('Required'),
-    password: !isForgotPassword ? Yup.string().min(6, 'Password must be at least 6 characters').required('Required') : Yup.string().min(6, 'Password must be at least 6 characters').required('Required'),
-    confirmPassword: (!isLogin && !isForgotPassword) || isForgotPassword
+    password: isForgotPassword ? Yup.string() : Yup.string().min(6, 'Password must be at least 6 characters').required('Required'),
+    confirmPassword: (!isLogin && !isForgotPassword)
       ? Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Required')
       : Yup.string(),
     recaptcha: (failedAttempts >= 2 && isLogin) || !isLogin
@@ -348,22 +348,6 @@ const Auth = ({ mode, onAuthSuccess }) => {
                         showPassword={showConfirmPassword}
                         setShowPassword={setShowConfirmPassword}
                       />
-                    )}
-                    {isForgotPassword && (
-                      <>
-                        <PasswordField
-                          name="password"
-                          placeholder="New Password"
-                          showPassword={showPassword}
-                          setShowPassword={setShowPassword}
-                        />
-                        <PasswordField
-                          name="confirmPassword"
-                          placeholder="Confirm New Password"
-                          showPassword={showConfirmPassword}
-                          setShowPassword={setShowConfirmPassword}
-                        />
-                      </>
                     )}
                     {isLogin && !isForgotPassword && (
                       <div className={styles['remember-me']}>

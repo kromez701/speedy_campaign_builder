@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
-import { toast } from 'react-toastify';  // Import toast from react-toastify
-import 'react-toastify/dist/ReactToastify.css';  // Import CSS for toastify
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import styles from './StickySide.module.css';
 import '../ToastifyOverrides.css';
 import config from '../../config';
@@ -14,7 +14,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
   const [userSubscriptionPlan, setUserSubscriptionPlan] = useState('');
-  const [isDropdownVisible, setDropdownVisible] = useState(false);
+  const [isDropdownVisible, setDropdownVisible] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -32,7 +32,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
       console.error('Error fetching ad account details', error);
     }
   };
-  
+
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {
@@ -41,7 +41,15 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
         const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
 
-        if (adAccountsResponse.data.ad_accounts.length > 0) {
+        const savedAccount = localStorage.getItem('activeAccount'); // Retrieve saved account from localStorage
+        const savedAccountParsed = savedAccount ? JSON.parse(savedAccount) : null;
+
+        if (savedAccountParsed && adAccountsResponse.data.ad_accounts.find(acc => acc.id === savedAccountParsed.id)) {
+          // Use the saved account if it exists in the list of accounts
+          setActiveAccount(savedAccountParsed);
+          fetchAdAccountDetails(savedAccountParsed.id);
+        } else if (adAccountsResponse.data.ad_accounts.length > 0) {
+          // Fallback to the first account if no saved account exists
           const activeAccount = adAccountsResponse.data.ad_accounts[0];
           setActiveAccount(activeAccount);
           fetchAdAccountDetails(activeAccount.id);
@@ -52,13 +60,20 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
       } catch (error) {
         setError(error);
         setIsLoading(false);
-        toast.error('Error fetching ad accounts or user plan');  // Notify user of the error
+        toast.error('Error fetching ad accounts or user plan');
         console.error('Error fetching ad accounts or user plan', error);
       }
     };
 
     fetchAdAccountsAndPlan();
   }, [setActiveAccount, refreshTrigger]);
+
+  useEffect(() => {
+    if (activeAccount) {
+      // Save the active account to localStorage whenever it changes
+      localStorage.setItem('activeAccount', JSON.stringify(activeAccount));
+    }
+  }, [activeAccount]);
 
   useEffect(() => {
     if (activeAccountRef.current) {
@@ -92,13 +107,6 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
     try {
       const response = await axios.post(`${apiUrl}/payment/add_ad_account`, {}, { withCredentials: true });
       if (response.status === 200) {
-        const newAdAccounts = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
-        setAdAccounts(newAdAccounts.data.ad_accounts);
-
-        const latestAdAccount = newAdAccounts.data.ad_accounts[newAdAccounts.data.ad_accounts.length - 1];
-        setActiveAccount(latestAdAccount);
-        fetchAdAccountDetails(latestAdAccount.id);
-
         const sessionId = response.data.sessionId;
         if (sessionId) {
           const stripe = window.Stripe(stripePublishableKey);
@@ -106,10 +114,10 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         } else {
           console.error('No session ID returned from backend');
         }
-        toast.success('Ad account added successfully');  // Notify user of the success
+        toast.success('Creating Ad account');
       }
     } catch (error) {
-      toast.error('Error adding ad account');  // Notify user of the error
+      toast.error('Error adding ad account');
       console.error('Error adding ad account', error);
     }
   };
@@ -141,8 +149,8 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
               adAccounts.map((account, index) => (
                 <button
                   key={index}
-                  ref={activeAccount === account ? activeAccountRef : null}
-                  className={`${styles.accountButton} ${activeAccount === account ? styles.active : ''}`}
+                  ref={activeAccount?.id === account.id ? activeAccountRef : null} // Compare IDs
+                  className={`${styles.accountButton} ${activeAccount?.id === account.id ? styles.active : ''}`} // Compare IDs
                   onClick={() => handleAccountClick(index)}
                   aria-label={`Switch to Ad Account ${index + 1}`}
                 >
@@ -160,7 +168,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
               onClick={handleAddAdAccountClick}
               aria-label="Create New Ad Account"
             >
-             Add New Ad Account
+              Add New Ad Account
             </button>
           )}
           <div className={styles.dropdownSection}>
@@ -175,10 +183,10 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
             {isDropdownVisible && activeAccount && (
               <div className={styles.dropdownContent}>
                 <div className={styles.dropdownRow}>
-                <div className={styles.inlineContainer}> {/* Add a flex container */}
-                  <span className={`${styles.input} ${styles.input1} ${styles.lab}`}>Ad Account - </span>
-                  <input className={`${styles.input} ${styles.input1}`} placeholder="Ad Account ID" value={adAccountDetails.name || ''} readOnly />
-                </div>
+                  <div className={styles.inlineContainer}>
+                    <span className={`${styles.input} ${styles.input1} ${styles.lab}`}>Ad Account - </span>
+                    <input className={`${styles.input} ${styles.input1}`} placeholder="Ad Account ID" value={adAccountDetails.name || ''} readOnly />
+                  </div>
                   <hr className={styles.horizontalRule1} />
                 </div>
                 {/* <div className={styles.dropdownRow}>

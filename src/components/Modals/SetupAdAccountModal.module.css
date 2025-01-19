@@ -1,13 +1,26 @@
+/* Interaction Blocking Overlay */
+.interactionBlockingOverlay {
+  position: fixed;
+  top: 0;
+  left: calc(50% - 310px); /* Center the overlay based on modal width */
+  width: 620px; /* Match modal width */
+  height: auto; /* Full height of the screen */
+  background-color: transparent; /* Invisible overlay */
+  z-index: 999; /* Below the modal */
+  pointer-events: auto; /* Block interactions within modal width */
+}
+
 /* Modal Container Styles */
 .modalContainer {
   position: absolute;
   top: 20px;
   left: calc(50% + 125px); /* Shift it right by half the sidebar's width */
   transform: translateX(-50%);
-  width: 100%;  /* Ensure it takes the full width of the screen */
+  width: 100%; /* Ensure it takes the full width of the screen */
   display: flex;
   justify-content: center;
   z-index: 10000;
+  pointer-events: none; /* Prevent interaction outside modal */
 }
 
 @media (max-width: 960px) {
@@ -26,6 +39,8 @@
   width: 100%; /* Modal width */
   text-align: center;
   position: relative;
+  pointer-events: auto; /* Enable interactions within the modal */
+  z-index: 10001; /* Above everything, including overlay */
 }
 
 .closeIcon {
@@ -60,7 +75,7 @@
 
 /* Form-specific container */
 .formContainer {
-  max-height: 600px;  /* Apply this only to the form content */
+  max-height: 600px; /* Apply this only to the form content */
   overflow-y: auto;
 }
 

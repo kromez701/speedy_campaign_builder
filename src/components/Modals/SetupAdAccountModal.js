@@ -9,17 +9,24 @@ import axios from 'axios';
 import config from '../../config';
 
 const apiUrl = config.apiUrl;
-const APP_ID = config.appId
-const APP_SECRET = config.appSecret
+const APP_ID = config.appId;
+const APP_SECRET = config.appSecret;
 
-
-const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeAccount is passed in
+const SetupAdAccountModal = ({ onClose, activeAccount }) => {
   const modalRef = useRef(null);
   const [showPopup, setShowPopup] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const navigate = useNavigate();
+  const [businessManagerId, setBusinessManagerId] = useState('');
 
   useEffect(() => {
+
+    // Dynamically set the overlay height
+    const overlay = document.querySelector(`.${styles.interactionBlockingOverlay}`);
+    if (overlay) {
+      overlay.style.height = `${document.body.scrollHeight}px`;
+    }
+    
     // Load the Facebook SDK script asynchronously
     (function (d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
@@ -39,25 +46,23 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
     };
   }, []);
 
-  const [businessManagerId, setBusinessManagerId] = useState('');
-
   const handleSetupAccount = () => {
     if (typeof FB === 'undefined') {
       toast.error('Facebook SDK is not loaded yet.');
       return;
     }
-  
+
     FB.login((response) => {
       if (response.authResponse) {
         const accessToken = response.authResponse.accessToken;
         setAccessToken(accessToken);
-  
+
         // Fetch the Business Manager ID (BM ID)
         FB.api('/me/businesses', 'GET', { access_token: accessToken }, (response) => {
           if (response && !response.error) {
             if (response.data && response.data.length > 0) {
               const businessManagerId = response.data[0].id;  // Take the first BM ID
-              setBusinessManagerId(businessManagerId);  // Save the BM ID to state
+              setBusinessManagerId(businessManagerId);
               console.log('Business Manager ID:', businessManagerId);
             } else {
               console.log('No Business Manager found');
@@ -66,8 +71,8 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
             console.error('Error fetching BM ID:', response.error);
           }
         });
-  
-        setShowPopup(true);  // Show the popup when login is successful
+
+        setShowPopup(true); // Show the popup when login is successful
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
@@ -75,7 +80,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
   };
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
-    setShowPopup(false); 
+    setShowPopup(false);
     verifyAndSaveAdAccount(accessToken, adAccount, page, pixel);
   };
 
@@ -88,12 +93,10 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
 
       if (isAdAccountValid) {
         try {
-          // Here, the endpoint matches exactly like ProfileManagement
-          console.log(activeAccount)
           const exchangeResponse = await axios.post(
             `${apiUrl}/config/ad_account/${activeAccount.id}/exchange-token`,
             { access_token: accessToken },
-            { withCredentials: true } 
+            { withCredentials: true }
           );
 
           if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
@@ -102,8 +105,8 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
               facebook_page_id: page || '',
               pixel_id: pixel || '',
               access_token: exchangeResponse.data.long_lived_token,
-              app_id: APP_ID, 
-              app_secret: APP_SECRET, 
+              app_id: APP_ID,
+              app_secret: APP_SECRET,
               business_manager_id: businessManagerId
             };
 
@@ -145,22 +148,11 @@ const SetupAdAccountModal = ({ onClose, activeAccount }) => {  // Ensure activeA
     }
   };
 
-  // useEffect(() => {
-  //   const handleClickOutside = (event) => {
-  //     if (modalRef.current && !modalRef.current.contains(event.target) && !showPopup) {
-  //       onClose();
-  //     }
-  //   };
-  //   document.addEventListener('mousedown', handleClickOutside);
-  //   return () => {
-  //     document.removeEventListener('mousedown', handleClickOutside);
-  //   };
-  // }, [onClose, showPopup]);
-
   return (
     <div>
       {!showPopup && (
         <div className={styles.modalContainer}>
+          <div className={styles.interactionBlockingOverlay}></div>
           <div ref={modalRef} className={styles.modal}>
             <button className={styles.closeIcon} onClick={onClose}>
               &times;

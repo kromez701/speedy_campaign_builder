@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Landing from './components/Landing/Landing';
 import Auth from './components/Authorization/Auth';
+import ResetPassword from './components/Authorization/PasswordReset';
+import Registration from './components/Authorization/Registration';
 import Main from './components/Main/Main';
 import Navbar from './components/Nav/NavBar';
 import StickySide from './components/StickySide/StickySide';
@@ -16,14 +18,14 @@ import SetupAdAccountPopup from './components/SetUpPopUp/SetupAdAccountPopup';
 import PrivacyPolicy from './components/Policies/PrivacyPolicy';
 import RefundPolicy from './components/Policies/RefundPolicy';
 import DeletionPolicy from './components/Policies/DeletionPolicy';
-import TermsOfService from './components/Policies/TermsOfService'; // Import the Terms of Service
+import TermsOfService from './components/Policies/TermsOfService';
 import CookiesPolicy from './components/Policies/CookiesPolicy.js';
 import CookiesSettings from './components/CookieModal/CookiesSettings';
 import config from './config';
 
 const apiUrl = config.apiUrl;
 
-const App = () => {
+const AppContent = () => {
   const [authMode, setAuthMode] = useState(null);
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -47,37 +49,6 @@ const App = () => {
     checkCurrentUser();
   }, []);
 
-  const handleAuthSuccess = async () => {
-    try {
-      const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true });
-      if (response.status === 200) {
-        setUser(response.data.user);
-        setAuthMode(null);
-        setRedirectToMain(true);
-      }
-    } catch (error) {
-      console.error('Error checking current user', error);
-    }
-  };
-  
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post(`${apiUrl}/auth/logout`, {}, { withCredentials: true });
-      if (response.status === 200) {
-        setUser(null);
-        setRedirectToMain(false);
-      } else {
-        console.error('Failed to log out');
-      }
-    } catch (error) {
-      console.error('Error logging out:', error);
-    }
-  };
-
-  const handlePlanUpgrade = () => {
-    setRefreshTrigger(prev => !prev);
-  };
-
   useEffect(() => {
     if (redirectToMain) {
       setRedirectToMain(false);
@@ -89,52 +60,75 @@ const App = () => {
   }
 
   return (
-    <Router>
-      <div className="app">
+    <div className="app">
       <ToastContainer />
+      <Routes>
+        {/* Standalone Pages */}
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="/refund-policy" element={<RefundPolicy />} />
+        <Route path="/deletion-policy" element={<DeletionPolicy />} />
+        <Route path="/cookies-policy" element={<CookiesPolicy />} />
+        <Route path="/terms-of-service" element={<TermsOfService />} />
+        <Route path="/cookie-settings" element={<CookiesSettings />} />
+        <Route path="/registration" element={<Registration />} />
+
+        {/* Authenticated User Layout */}
         {user ? (
           <>
             {redirectToMain && <Navigate to="/" replace />}
-            <Navbar />
-            <div className="layout">
-              <StickySide setActiveAccount={setActiveAccount} activeAccount={activeAccount} refreshTrigger={refreshTrigger} />
-              <div className="content">
-                <Routes>
-                  <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
-                  <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
-                  <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
-                  <Route path="/success" element={<PaymentSuccess />} />
-                  <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/refund-policy" element={<RefundPolicy />} />
-                  <Route path="/cookies-policy" element={<CookiesPolicy />} />
-                  <Route path="/deletion-policy" element={<DeletionPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
-                  <Route path="/cookies-settings" element={<CookiesSettings />} />
-                  <Route path="*" element={<Navigate to="/" />} />
-                </Routes>
-              </div>
-            </div>
+            <Route
+              path="*"
+              element={
+                <>
+                  <Navbar />
+                  <div className="layout">
+                    <StickySide
+                      setActiveAccount={setActiveAccount}
+                      activeAccount={activeAccount}
+                      refreshTrigger={refreshTrigger}
+                    />
+                    <div className="content">
+                      <Routes>
+                        <Route path="/" element={activeAccount ? <Main activeAccount={activeAccount} /> : <p>Loading...</p>} />
+                        <Route
+                          path="/profile-management"
+                          element={
+                            <ProfileManagement
+                              activeAccount={activeAccount}
+                              setActiveAccount={setActiveAccount}
+                            />
+                          }
+                        />
+                        <Route path="/pricing-section" element={<PricingSection />} />
+                        <Route path="/success" element={<PaymentSuccess />} />
+                        <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
+                        <Route path="*" element={<Navigate to="/" />} />
+                      </Routes>
+                    </div>
+                  </div>
+                </>
+              }
+            />
           </>
         ) : (
           <>
-            <Routes>
-              <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
-              <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
-              <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
-              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-              <Route path="/refund-policy" element={<RefundPolicy />} />
-              <Route path="/deletion-policy" element={<DeletionPolicy />} />
-              <Route path="/cookies-policy" element={<CookiesPolicy />} />
-              <Route path="/terms-of-service" element={<TermsOfService />} /> {/* Add Terms of Service */}
-              <Route path="/cookie-settings" element={<CookiesSettings />} />
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
+            {/* Non-authenticated User Layout */}
+            <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
+            <Route path="/login" element={<Auth mode="login" />} />
+            <Route path="/register" element={<Auth mode="register" />} />
+            <Route path="*" element={<Navigate to="/" />} />
           </>
         )}
-      </div>
-    </Router>
+      </Routes>
+    </div>
   );
 };
+
+const App = () => (
+  <Router>
+    <AppContent />
+  </Router>
+);
 
 export default App;
