@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -21,6 +21,8 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const sidebarRef = useRef(null);
   const activeAccountRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
+
 
   const fetchAdAccountDetails = async (id) => {
     try {
@@ -36,38 +38,62 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {
+        // Fetch the user subscription plan
         const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
         setUserSubscriptionPlan(userPlanResponse.data.plan);
-
+  
+        // Fetch all ad accounts from backend
         const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
-
-        const savedAccount = localStorage.getItem('activeAccount'); // Retrieve saved account from localStorage
+        const fetchedAccounts = adAccountsResponse.data.ad_accounts;
+        setAdAccounts(fetchedAccounts);
+  
+        // Get saved ad account and count from local storage
+        const savedAccount = localStorage.getItem('activeAccount');
         const savedAccountParsed = savedAccount ? JSON.parse(savedAccount) : null;
-
-        if (savedAccountParsed && adAccountsResponse.data.ad_accounts.find(acc => acc.id === savedAccountParsed.id)) {
+  
+        const storedAccountCount = localStorage.getItem('adAccountCount');
+        const currentAccountCount = fetchedAccounts.length;
+  
+        console.log("DEBUG: Stored account count:", storedAccountCount);
+        console.log("DEBUG: Current fetched account count:", currentAccountCount);
+        console.log("DEBUG: Fetched accounts:", fetchedAccounts);
+        console.log("DEBUG: Saved account from local storage:", savedAccountParsed);
+  
+        if (storedAccountCount && parseInt(storedAccountCount) < currentAccountCount) {
+          console.log("DEBUG: Number of accounts has increased. Setting last account as active.");
+          // If new ad account was added, set the last account as active
+          const newActiveAccount = fetchedAccounts[fetchedAccounts.length - 1];
+          setActiveAccount(newActiveAccount);
+          fetchAdAccountDetails(newActiveAccount.id);
+        } else if (savedAccountParsed && fetchedAccounts.some(acc => acc.id === savedAccountParsed.id)) {
+          console.log("DEBUG: Using saved account:", savedAccountParsed);
           // Use the saved account if it exists in the list of accounts
           setActiveAccount(savedAccountParsed);
           fetchAdAccountDetails(savedAccountParsed.id);
-        } else if (adAccountsResponse.data.ad_accounts.length > 0) {
-          // Fallback to the first account if no saved account exists
-          const activeAccount = adAccountsResponse.data.ad_accounts[0];
+        } else if (fetchedAccounts.length > 0) {
+          console.log("DEBUG: Saved account not found, falling back to first account.");
+          // Fallback to the first account if the saved one isn't found
+          const activeAccount = fetchedAccounts[0];
           setActiveAccount(activeAccount);
           fetchAdAccountDetails(activeAccount.id);
+        } else {
+          console.log("DEBUG: No ad accounts available.");
         }
-
-        setAdAccounts(adAccountsResponse.data.ad_accounts);
+  
+        // Update local storage with the new count of ad accounts
+        localStorage.setItem('adAccountCount', fetchedAccounts.length.toString());
         setIsLoading(false);
       } catch (error) {
         setError(error);
         setIsLoading(false);
         toast.error('Error fetching ad accounts or user plan');
-        console.error('Error fetching ad accounts or user plan', error);
+        console.error('DEBUG: Error fetching ad accounts or user plan', error);
       }
     };
-
+  
     fetchAdAccountsAndPlan();
-  }, [setActiveAccount, refreshTrigger]);
-
+  }, [setActiveAccount, refreshTrigger]);  
+  
   useEffect(() => {
     if (activeAccount) {
       // Save the active account to localStorage whenever it changes
@@ -85,6 +111,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
     const selectedAccount = adAccounts[index];
     setActiveAccount(selectedAccount);
     fetchAdAccountDetails(selectedAccount.id);
+    localStorage.setItem('activeAccount', JSON.stringify(selectedAccount));
   };
 
   const handleDropdownToggle = () => {
@@ -114,7 +141,6 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         } else {
           console.error('No session ID returned from backend');
         }
-        toast.success('Creating Ad account');
       }
     } catch (error) {
       toast.error('Error adding ad account');

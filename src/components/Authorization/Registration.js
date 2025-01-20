@@ -90,25 +90,35 @@ const Register = () => {
   });
 
   const onSubmit = async (values) => {
+    // Ensure updatedEmail is not null or undefined by providing a fallback to original email
+    const updatedEmail = values.email ? values.email.trim() : userData.email;
+  
+    const requestData = {
+      originalEmail: userData.email,  // Email from session details
+      updatedEmail: updatedEmail,     // Use form email or fallback to original email
+      username: values.username,
+      password: values.password,
+    };
+  
+    console.log('Submitting request data:', requestData);
+  
     try {
       const updateResponse = await axios.post(
         `${apiUrl}/auth/update-user`,
-        {
-          email: values.email,
-          username: values.username,
-          password: values.password,
-        },
+        requestData,
         { withCredentials: true }
       );
   
       if (updateResponse.status === 200) {
         toast.success('Profile updated successfully!');
-        window.location.href = updateResponse.data.redirect_url;  // Redirect via frontend
+        window.location.href = updateResponse.data.redirect_url;
       }
     } catch (error) {
+      console.error('Error response:', error.response);
       toast.error(error.response?.data?.message || 'Failed to update profile. Please try again.');
     }
   };  
+  
 
   return (
     <div className={styles['page-container']}>
@@ -122,11 +132,21 @@ const Register = () => {
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={onSubmit}
+          onSubmit={(values) => {
+            const requestData = {
+              originalEmail: userData.email,  // Original email from session details
+              updatedEmail: values.email,     // User-modified email from form
+              username: values.username,
+              password: values.password,
+            };
+
+            onSubmit(requestData);
+          }}
           enableReinitialize={true}
         >
           {({ values, setFieldValue }) => (
             <Form className={styles['form-container']}>
+
               <Field
                 type="text"
                 name="username"
@@ -142,8 +162,8 @@ const Register = () => {
                 name="email"
                 placeholder="Email"
                 className={styles['form-input']}
-                value={userData.email}
-                readOnly
+                value={values.email}
+                onChange={(e) => setFieldValue('email', e.target.value)}
               />
               <ErrorMessage name="email" component="div" className={styles.error} />
 
@@ -163,7 +183,7 @@ const Register = () => {
 
               <button type="submit" className={styles['option-button']}>
                 Finish
-               </button>
+              </button>
             </Form>
           )}
         </Formik>

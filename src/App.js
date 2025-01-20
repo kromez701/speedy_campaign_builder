@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Landing from './components/Landing/Landing';
 import Auth from './components/Authorization/Auth';
 import ResetPassword from './components/Authorization/PasswordReset';
@@ -32,6 +32,7 @@ const AppContent = () => {
   const [redirectToMain, setRedirectToMain] = useState(false);
   const [activeAccount, setActiveAccount] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkCurrentUser = async () => {
@@ -68,6 +69,7 @@ const AppContent = () => {
       if (response.status === 200) {
         setUser(null);
         setRedirectToMain(false);
+        navigate('/login');
       } else {
         console.error('Failed to log out');
       }
@@ -77,14 +79,15 @@ const AppContent = () => {
   };
 
   const handlePlanUpgrade = () => {
-    setRefreshTrigger(prev => !prev);
+    setRefreshTrigger((prev) => !prev);
   };
 
   useEffect(() => {
     if (redirectToMain) {
+      navigate('/');
       setRedirectToMain(false);
     }
-  }, [redirectToMain]);
+  }, [redirectToMain, navigate]);
 
   if (loading) {
     return null;
@@ -107,7 +110,6 @@ const AppContent = () => {
         {/* Authenticated User Layout */}
         {user ? (
           <>
-            {redirectToMain && <Navigate to="/" replace />}
             <Route
               path="*"
               element={
@@ -121,17 +123,22 @@ const AppContent = () => {
                     />
                     <div className="content">
                       <Routes>
-                      <Route 
-                        path="/" 
-                        element={activeAccount ? 
-                          <Main activeAccount={activeAccount} setActiveAccount={setActiveAccount} /> 
-                          : <p>Loading...</p>} 
-                      />
-                        <Route path="/profile-management" element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />} />
+                        <Route
+                          path="/"
+                          element={activeAccount ? (
+                            <Main activeAccount={activeAccount} setActiveAccount={setActiveAccount} />
+                          ) : (
+                            <p>Loading...</p>
+                          )}
+                        />
+                        <Route
+                          path="/profile-management"
+                          element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />}
+                        />
                         <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                         <Route path="/success" element={<PaymentSuccess />} />
                         <Route path="/setup-ad-account" element={<SetupAdAccountPopup />} />
-                        <Route path="*" element={<Navigate to="/" />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
                       </Routes>
                     </div>
                   </div>
@@ -145,7 +152,7 @@ const AppContent = () => {
             <Route path="/" element={<Landing setAuthMode={setAuthMode} />} />
             <Route path="/login" element={<Auth mode="login" onAuthSuccess={handleAuthSuccess} />} />
             <Route path="/register" element={<Auth mode="register" onAuthSuccess={handleAuthSuccess} />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
           </>
         )}
       </Routes>

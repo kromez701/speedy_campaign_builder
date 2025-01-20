@@ -90,52 +90,44 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
         ad_account_id: adAccount,
         access_token: accessToken,
       });
-
+  
       if (isAdAccountValid) {
-        try {
-          const exchangeResponse = await axios.post(
-            `${apiUrl}/config/ad_account/${activeAccount.id}/exchange-token`,
-            { access_token: accessToken },
+        const exchangeResponse = await axios.post(
+          `${apiUrl}/config/ad_account/${activeAccount.id}/exchange-token`,
+          { access_token: accessToken },
+          { withCredentials: true }
+        );
+  
+        if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
+          const updatedAdAccountDetails = {
+            ad_account_id: adAccount,
+            facebook_page_id: page || '',
+            pixel_id: pixel || '',
+            access_token: exchangeResponse.data.long_lived_token,
+            app_id: APP_ID,
+            app_secret: APP_SECRET,
+            business_manager_id: businessManagerId
+          };
+  
+          const saveResponse = await axios.post(
+            `${apiUrl}/auth/ad_account`,
+            { id: activeAccount.id, ...updatedAdAccountDetails },
             { withCredentials: true }
           );
+  
+          if (saveResponse.status === 200) {
+            toast.success('Ad account updated successfully');
 
-          if (exchangeResponse.status === 200 && exchangeResponse.data.long_lived_token) {
-            const updatedAdAccountDetails = {
-              ad_account_id: adAccount,
-              facebook_page_id: page || '',
-              pixel_id: pixel || '',
-              access_token: exchangeResponse.data.long_lived_token,
-              app_id: APP_ID,
-              app_secret: APP_SECRET,
-              business_manager_id: businessManagerId
-            };
-
-            const saveResponse = await axios.post(
-              `${apiUrl}/auth/ad_account`,
-              { id: activeAccount.id, ...updatedAdAccountDetails },
-              { withCredentials: true }
-            );
-
-            if (saveResponse.status === 200) {
-              toast.success('Ad account updated successfully');
-
-              // Fetch updated account details and update global state
-              const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
-
-              // Update state in App.js via setActiveAccount prop
-              setActiveAccount(updatedAccountResponse.data);
-              localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
-
-              setTimeout(() => {
-                window.location.reload();
-              }, 700);
-            }
-          } else {
-            toast.error('Failed to exchange token.');
+            const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
+            setActiveAccount(updatedAccountResponse.data);
+            localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
+  
+            setTimeout(() => {
+              window.location.reload(); // Refresh the UI with new data
+            }, 700);
           }
-        } catch (error) {
-          toast.error('Error saving ad account.');
-          console.error('Error saving ad account:', error);
+        } else {
+          toast.error('Failed to exchange token.');
         }
       } else {
         toast.error('Invalid ad account details.');
@@ -144,7 +136,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
       toast.error('Error verifying ad account.');
       console.error('Error verifying ad account:', error);
     }
-  };
+  };  
 
   const verifyField = async (url, fieldData) => {
     try {
