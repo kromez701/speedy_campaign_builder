@@ -54,30 +54,20 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         const storedAccountCount = localStorage.getItem('adAccountCount');
         const currentAccountCount = fetchedAccounts.length;
   
-        console.log("DEBUG: Stored account count:", storedAccountCount);
-        console.log("DEBUG: Current fetched account count:", currentAccountCount);
-        console.log("DEBUG: Fetched accounts:", fetchedAccounts);
-        console.log("DEBUG: Saved account from local storage:", savedAccountParsed);
-  
         if (storedAccountCount && parseInt(storedAccountCount) < currentAccountCount) {
-          console.log("DEBUG: Number of accounts has increased. Setting last account as active.");
           // If new ad account was added, set the last account as active
           const newActiveAccount = fetchedAccounts[fetchedAccounts.length - 1];
           setActiveAccount(newActiveAccount);
           fetchAdAccountDetails(newActiveAccount.id);
         } else if (savedAccountParsed && fetchedAccounts.some(acc => acc.id === savedAccountParsed.id)) {
-          console.log("DEBUG: Using saved account:", savedAccountParsed);
           // Use the saved account if it exists in the list of accounts
           setActiveAccount(savedAccountParsed);
           fetchAdAccountDetails(savedAccountParsed.id);
         } else if (fetchedAccounts.length > 0) {
-          console.log("DEBUG: Saved account not found, falling back to first account.");
           // Fallback to the first account if the saved one isn't found
           const activeAccount = fetchedAccounts[0];
           setActiveAccount(activeAccount);
           fetchAdAccountDetails(activeAccount.id);
-        } else {
-          console.log("DEBUG: No ad accounts available.");
         }
   
         // Update local storage with the new count of ad accounts
@@ -87,12 +77,11 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         setError(error);
         setIsLoading(false);
         toast.error('Error fetching ad accounts or user plan');
-        console.error('DEBUG: Error fetching ad accounts or user plan', error);
       }
     };
   
     fetchAdAccountsAndPlan();
-  }, [setActiveAccount, refreshTrigger]);  
+  }, [setActiveAccount, refreshTrigger, location.pathname]); // <- Added location.pathname dependency  
   
   useEffect(() => {
     if (activeAccount) {
