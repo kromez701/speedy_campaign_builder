@@ -130,18 +130,14 @@ const Register = () => {
         <p>Set your username and password to proceed.</p>
         
         <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={(values) => {
-            const requestData = {
-              originalEmail: userData.email,  // Original email from session details
-              updatedEmail: values.email,     // User-modified email from form
-              username: values.username,
-              password: values.password,
-            };
-
-            onSubmit(requestData);
+          initialValues={{
+            username: userData.username || '',
+            email: userData.email || '',
+            password: '',
+            confirmPassword: '',
           }}
+          validationSchema={validationSchema}
+          onSubmit={onSubmit}
           enableReinitialize={true}
         >
           {({ values, setFieldValue }) => (
@@ -162,7 +158,7 @@ const Register = () => {
                 name="email"
                 placeholder="Email"
                 className={styles['form-input']}
-                value={values.email}
+                value={values.email} // Ensures user-entered email persists
                 onChange={(e) => setFieldValue('email', e.target.value)}
               />
               <ErrorMessage name="email" component="div" className={styles.error} />
@@ -187,7 +183,6 @@ const Register = () => {
             </Form>
           )}
         </Formik>
-
         <div className={styles.switchLink} onClick={() => navigate('/login')}>
           <span className={styles.linkText}>Back to Login</span>
         </div>

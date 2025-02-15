@@ -139,55 +139,57 @@ const Landing = () => {
       </div>
 
       <div className="old-new-way-section">
-        <div className="old-way-wrapper">
-          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="22" cy="22" r="16" fill="#5356FF" stroke="white" strokeWidth="12" />
-          </svg>
-          <p className="old-new-way-section-heading">
-            The old way: Slow, Inefficient Campaign Creation
-          </p>
-          <p className="old-new-way-section-desc">
-            As a digital marketer, you know the importance of testing multiple
-            creatives to optimize your Facebook Ads performance. But the process
-            of manually creating campaigns, ad sets, and ads is painfully slow.
-            With each click, you're forced to wait for pages to load, eating away
-            at your precious time and productivity.
-          </p>
+          <div className="divider-line"></div>
 
-          <video
-            className="old-way-video"
-            src="./assets/video2.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          ></video>
-        </div>
-        <div className="new-way-wrapper">
-          <svg width="44" height="44" viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="22" cy="22" r="16" fill="#5356FF" stroke="white" strokeWidth="12" />
-          </svg>
-          <p className="old-new-way-section-heading">
-            The new way: Streamlined Campaign Upload from Your
-            <span> Desktop</span>
-          </p>
-          <p className="old-new-way-section-desc">
-            Our revolutionary software eliminates the frustration of slow campaign
-            creation. With our intuitive Software, you can build and
-            upload campaigns at lightning speed, directly from your PC. No
-            more waiting for pages to load or clicking through endless settings.
-          </p>
-          <video
-            className="new-way-video"
-            src="./assets/video3.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-          ></video>
-        </div>
-      </div>
+          <div className="old-new-way-wrapper">
+            <div className="old-new-way-content">
+              <h2 className="old-new-way-section-heading">
+                The <span>Old Way:</span> Slow, Inefficient Campaign Creation
+              </h2>
+              <p className="old-new-way-section-desc">
+                As a digital marketer, you know the importance of testing multiple creatives to optimize your Facebook Ads performance. But the process of manually creating campaigns, ad sets, and ads is painfully slow. With each click, you're forced to wait for pages to load, eating away at your precious time and productivity.
+              </p>
+              <div className="arrow-wrapper">
+                <img className="connector-line" src="./assets/move-right.svg" alt="Arrow Connector" />
+              </div>
+            </div>
+            <div className="old-new-way-video">
+              <video
+                className="old-way-video"
+                src="./assets/video2.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+              ></video>
+            </div>
+          </div>
 
+          <div className="old-new-way-wrapper">
+            <div className="old-new-way-content">
+              <h2 className="old-new-way-section-heading">
+                The <span>New Way:</span> Streamlined Campaign Upload From Your Desktop
+              </h2>
+              <p className="old-new-way-section-desc">
+                Our revolutionary software eliminates the frustration of slow campaign creation. With our intuitive desktop application, you can build and upload campaigns at lightning speed, directly from your local PC. No more waiting for pages to load or clicking through endless settings.
+              </p>
+              <div className="arrow-wrapper">
+                <img className="connector-line" src="./assets/move-right.svg" alt="Arrow Connector" />
+              </div>
+            </div>
+            <div className="old-new-way-video">
+              <video
+                className="new-way-video"
+                src="./assets/video3.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+              ></video>
+            </div>
+          </div>
+        </div>
+        
       <div id="benefit-section" className="benefit-section">
         <p className="benefit-heading">
           The Benefits: Save <span>Time</span>, Boost <span>Productivity</span>,
@@ -260,7 +262,20 @@ const Landing = () => {
         <img className="back-shadow how-work-mid-shadow" src="./assets/how-work-mid-shadow.svg" alt="" />
         <img className="back-shadow how-work-right-shadow" src="./assets/how-works-right-shadow.svg" alt="" />
         <div className="how-work-left">
-          <p className="how-work-heading">How It Works:</p>
+          <p className="how-work-heading">How <span>QuickCampaigns</span> Works</p>
+          <div className="how-work-right">
+            <div className="how-works-video">
+              {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg> */}
+              <video
+                src="./assets/video4.mp4"
+                playsInline
+                controls
+              ></video>
+            </div>
+          </div>
           <div className="how-works-card-container">
             <div className="how-works-card">
               <div className="how-works-card-wrapper">
@@ -296,20 +311,6 @@ const Landing = () => {
             </div>
           </div>
         </div>
-        <div className="how-work-right">
-          <div className="how-works-video">
-            {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg> */}
-            <video
-              src="./assets/video4.mp4"
-              playsInline
-              controls
-              muted
-            ></video>
-          </div>
-        </div>
       </div>
 
       <div id="pricing-section" className="pricing-section">
@@ -319,19 +320,19 @@ const Landing = () => {
         <p className="price-desc">Flexible Pricing to Suit Every Advertiser</p>
         <div className="price-card-container">
           <div className="price-card">
-          <div class="price-card-description-container">
+            <div class="price-card-description-container">
               <p class="price-card-price">$0</p>
               <p class="price-card-accounts">1 Ad Account</p>
               <p class="price-card-plan">Free 1 Day Trial</p>
               <p class="price-card-plan-desc">Try QuickCampaigns Now Risk-Free</p>
-          </div>
+            </div>
             <div className="price-card-feature-container">
-              <div className="price-card-feature">
+              <div className="price-card-feature text-free">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect width="24" height="24" rx="12" fill="#378CE7" fillOpacity="0.7" />
                   <path fillRule="evenodd" clipRule="evenodd" d="M17.0964 7.39016L9.93638 14.3002L8.03638 12.2702C7.68638 11.9402 7.13638 11.9202 6.73638 12.2002C6.34638 12.4902 6.23638 13.0002 6.47638 13.4102L8.72638 17.0702C8.94638 17.4102 9.32638 17.6202 9.75638 17.6202C10.1664 17.6202 10.5564 17.4102 10.7764 17.0702C11.1364 16.6002 18.0064 8.41016 18.0064 8.41016C18.9064 7.49016 17.8164 6.68016 17.0964 7.38016V7.39016Z" fill="#EEEEEE" />
                 </svg>
-                Upload ads to 1 ad account once.
+                Upload ads to 1 ad account <br /> once.
               </div>
               <div className="price-card-feature">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -585,6 +586,56 @@ const Landing = () => {
         </div>
       </div> */}
 
+      <div className="affiliate-section">
+        {/* Background images */}
+        <div className="affiliate-bg">
+          <img className="affiliate-bg-img get-start-shadow" src="./assets/get-start-shadow.svg" alt="" />
+          <img className="affiliate-bg-img money-back-shadow" src="./assets/money-back-shadow.svg" alt="" />
+        </div>
+        <h2>
+          Become a QuickCampaigns Affiliate <br className="desktop-break" />
+          And Earn 30% Recurring Commissions!
+        </h2>
+        <p>
+          Refer customers to QuickCampaigns and earn 30% recurring commissions on every payment they make. 
+          Build a stream of passive income as your referrals continue using the service!
+        </p>
+
+        {/* Cards */}
+        <div className="affiliate-cards">
+          {/* Card 1 */}
+          <div className="affiliate-card">
+            <p className="affiliate-card-number">1</p>
+            <h3>Sign Up</h3>
+            <p>It’s quick, easy, and free to join. Simply fill out a short form, and 
+              you’ll get instant access to your affiliate dashboard and referral link.</p>
+          </div>
+
+          {/* Card 2 */}
+          <div className="affiliate-card">
+            <p className="affiliate-card-number">2</p>
+            <h3>Share Link</h3>
+            <p>Promote QuickCampaigns to your audience through your blog, website, or 
+              social media channels.</p>
+          </div>
+
+          {/* Card 3 */}
+          <div className="affiliate-card">
+            <p className="affiliate-card-number">3</p>
+            <h3>Earn Commissions</h3>
+            <p>Earn 30% of every customer’s monthly payments for as long as they stay active users.</p>
+          </div>
+        </div>
+
+        {/* Sign Up Button */}
+        <button className="affiliate-signup-btn" onClick={() => navigate('/register')}>
+          Sign Up Now
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 8L22 12M22 12L18 16M22 12H2" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
       <div id="contact-section" className="contact-us-section">
         <p className="contact-us-heading">Contact Us</p>
         <form className="contact-form" action="#">
@@ -607,7 +658,7 @@ const Landing = () => {
           <div>
             <label>Write your message</label>
             <br />
-            <textarea rows="3" placeholder="write Your Question Here..."></textarea>
+            <textarea rows="3" placeholder="Write Your Question Here..."></textarea>
           </div>
           <button className="contact-send-msg">Send Message</button>
         </form>

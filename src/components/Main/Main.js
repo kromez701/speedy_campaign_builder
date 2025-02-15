@@ -11,6 +11,7 @@ import SetupAdAccountModal from "../Modals/SetupAdAccountModal";  // Import the 
 import axios from "axios";
 import config from '../../config';
 
+const apiUrl = config.apiUrl;
 const facebookAdsApiUrl = config.facebookAdsApiUrl;
 const socket = io(`${facebookAdsApiUrl}`);
 
@@ -39,11 +40,36 @@ const Main = ({ activeAccount, setActiveAccount }) => {
   const [selectedCampaign, setSelectedCampaign] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [showModal, setShowModal] = useState(() => activeAccount ? !activeAccount.is_bound : false);
+  const [isActiveSubscription, setIsActiveSubscription] = useState(false);
+  const [userPlan, setUserPlan] = useState('');
+  const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
+
 
   // Check if activeAccount is bound
   useEffect(() => {
     setShowModal(prev => (activeAccount && !activeAccount.is_bound ? true : false));
   }, [activeAccount]);
+
+  useEffect(() => {
+    const fetchSubscriptionData = async () => {
+      try {
+        // Fetch user subscription status
+        const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
+        setIsActiveSubscription(userPlanResponse.data.is_active);
+        setUserPlan(userPlanResponse.data.plan);
+  
+        // Fetch active ad accounts count
+        const adAccountsResponse = await axios.get(`${apiUrl}/payment/active-ad-accounts`, { withCredentials: true });
+        setActiveAdAccountsCount(adAccountsResponse.data.count);
+      } catch (error) {
+        console.error("Error fetching subscription data:", error);
+        toast.error("Error fetching subscription details.");
+      }
+    };
+  
+    fetchSubscriptionData();
+  }, [activeAccount]);  // Re-run when `activeAccount` changes
+  
 
   // Reset the form when activeAccount changes
   useEffect(() => {
@@ -266,6 +292,17 @@ const Main = ({ activeAccount, setActiveAccount }) => {
   }, [taskId]);
 
   const handleShowForm = (formId) => {
+
+    if (!isActiveSubscription) {
+      toast.info("Please choose a subscription plan for the selected ad account before creating an ad.");
+      return;
+    }
+    
+    if (userPlan === "Enterprise" && activeAdAccountsCount < 2) {
+      toast.info("Please purchase a second ad account to activate and enjoy the Enterprise plan.");
+      return;
+    }    
+    
     if (!activeAccount || !activeAccount.is_bound) {
       toast.warning("Please connect an ad account to create campaigns.");
       return; // Prevent navigation if the ad account is not bound

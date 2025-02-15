@@ -213,71 +213,141 @@ nav ul li a {
 }
 
 .old-new-way-section {
-    background-color: #fff;
-    padding: 40px 120px;
     display: flex;
     flex-direction: column;
-}
-
-.old-new-way-section div {
+    align-items: center;
+    padding: 60px 120px;
+    background-color: #fff;
     position: relative;
 }
 
-.old-new-way-section div:first-child {
-    border-right: 4px solid #5356ff;
-    padding-right: 15px;
-    padding-top: 30px;
-    padding-bottom: 110px;
-    width: 50%;
+.old-new-way-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+    margin-bottom: 60px;
 }
 
-.old-new-way-section div:first-child svg {
-    position: absolute;
-    right: -24px;
-    top: 55px;
+.old-new-way-content {
+    width: 50%;
+    text-align: left;
+    padding-right: 60px;
+    position: relative;
+    padding-bottom: 50px
+}
+
+.old-new-way-video {
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 5%;
+}
+
+.old-new-way-wrapper .old-new-way-video video {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .old-new-way-section-heading {
-    font-size: 40px;
+    font-size: 32px;
     font-weight: 700;
-    line-height: 64px;
-    color: #050315;
-    text-transform: capitalize;
+    color: #000;
 }
 
 .old-new-way-section-heading span {
-    color: #5356ffb2;
+    color: #5356ff;
 }
 
 .old-new-way-section-desc {
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 30px;
-    color: #050315b2;
+    font-size: 18px;
+    color: #555;
+    margin-top: 20px;
     margin-top: 60px;
 }
 
-.new-way-wrapper {
-    align-self: flex-end;
-    padding-left: 59px;
-    width: 50.23%;
-    border-left: 4px solid #5356ff;
-    margin: 0 0 0 auto;
-    padding-bottom: 40px;
-}
-
-.new-way-wrapper svg {
+/* Vertical Divider Line */
+.divider-line {
     position: absolute;
-    top: 0;
-    left: -24px;
+    left: 50%;
+    top: 5%;
+    bottom: 5%;
+    width: 4px;
+    background-color: #5356ff;
+    transform: translateX(-50%);
 }
 
-.old-way-video, .new-way-video {
-    width: 100%; /* Ensure videos take full width of their containers */
-    height: auto; /* Maintain aspect ratio */
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top: 10px;
+/* Arrow Wrapper - Centers the Arrow */
+.arrow-wrapper {
+    position: absolute;
+    left: 100%;
+    top: 20%;
+    transform: translate(-50%, -50%);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+}
+
+/* Connector Arrow */
+.connector-line {
+    width: 80px;
+    display: block;
+}
+
+@media (max-width: 1135px) {
+    .old-new-way-section {
+        flex-direction: column;
+        align-items: flex-start;
+        padding-left: 10%; /* Ensuring space from the left */
+        padding-top: 120px; /* Ensuring proper top spacing */
+        position: relative;
+    }
+
+    .old-new-way-wrapper {
+        flex-direction: column;
+        width: 100%;
+        margin-bottom: 40px;
+    }
+
+    .old-new-way-content, .old-new-way-video {
+        width: 100%;
+        padding: 0;
+    }
+
+    .old-new-way-video {
+        padding-top:50px;
+    }
+
+    /* Adjusting the Divider Line */
+    .divider-line {
+        display: block;
+        position: absolute;
+        left: 5%; /* Positioning the line on the left */
+        top: 5%;
+        bottom: 5%;
+        width: 4px;
+        background-color: #5356ff;
+        transform: translateX(0);
+    }
+
+    /* Centering the Arrow Wrapper on the Divider Line */
+    .arrow-wrapper {
+        position: absolute;
+        left: -5.5%;
+        top: 12%; /* Center it vertically */
+        transform: translate(-50%, -50%); /* Full centering */
+        width: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        content: url('./assets/Ellipse 14.svg'); /* Replacing arrow with Ellipse */
+    }
 }
 
 .benefit-section {
@@ -354,9 +424,9 @@ nav ul li a {
 
 .how-works-section {
     display: flex;
-    justify-content: space-between;
+    flex-direction:column;
     background: #ffffff05;gap: 30px;
-    padding: 79px 30px 78px 120px;
+    padding: 80px 121px;
     position: relative;
     overflow: hidden;
     gap: 30px;
@@ -384,21 +454,10 @@ nav ul li a {
     z-index: -1;
 }
 
-.how-work-left {
-    width: 40%;
-}
-
-.how-work-right{
-    flex: 1; /* Allow the video section to take up available space */
-    display: flex; /* Use flexbox for alignment */
-    justify-content: center; /* Center the video horizontally */
-    align-items: center; /* Center the video vertically */
-    margin-top:-30px;
-}
 
 .how-works-card-container {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
 }
 
@@ -407,11 +466,12 @@ nav ul li a {
     font-weight: 700;
     line-height: 48px;
     color: #000;
+    text-align: center;
     margin-bottom: 40px;
 }
 
 .how-works-card {
-    width: 75%;
+    // width: 75%;
     border: 0 solid transparent;
     border-radius: 16px;
     background: linear-gradient(90deg, #5356ff 0%, #378ce7 50%, #67c6e3 100%);
@@ -429,23 +489,21 @@ nav ul li a {
     border-radius: 14px;
     padding: 30px 16px;
     display: flex;
-    align-items: center;
+    flex-direction : column;
+    justify-content : flex-start;
     gap: 28px;
 }
 
 .how-work-card-number {
-    font-size: 24px;
+    font-size: 40px;
     font-weight: 700;
     line-height: 36px;
-    min-width: 70px;
-    min-height: 70px;
     border-radius: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #eeeeee;
-    background-color: #050315;
+    color: #3663FF;
 }
+    .how-work-heading span {
+    color: #3663FF;
+    }
 
 .how-work-card-desc {
     font-size: 20px;
@@ -454,19 +512,22 @@ nav ul li a {
     color: #000;
 }
 
-.how-work-right {
-    width: 47%;
+.how-work-right { 
+    display : flex;
+    justify-content : center;
+    align-items : center;
 }
 
 .how-works-video {
     background: linear-gradient(180deg, #67c6e3 0%, rgba(83, 86, 255, 0.7) 100%);
-    width: 100%; /* Allow the video container to scale with the parent */
+    width: 67%; /* Allow the video container to scale with the parent */
     border-radius: 16px;
+    margin-bottom: 20px;
     position: relative;
-    display: flex; /* Use flexbox to align content */
-    justify-content: center; /* Center the video horizontally */
-    align-items: center; /* Center the video vertically */
-    overflow: hidden; /* Prevent overflow */
+    display: flex; 
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
 }
 
 .how-works-video video {
@@ -568,9 +629,13 @@ nav ul li a {
     align-items: center;
     gap: 16px;
     flex-grow: 1; /* Allow this section to expand */
-    justify-content: center; /* Center content within available space */
+    justify-content: start; /* Center content within available space */
     margin-top:20px;
     margin-bottom: 40px; /* Keep the bottom margin */
+}
+
+.text-free{
+padding-top: 24px;
 }
 
 .price-card-feature {
@@ -874,6 +939,131 @@ nav ul li a {
     z-index: 1;
 }
 
+.affiliate-section {
+    position: relative; /* Ensures child elements (background images) are positioned relative to this */
+    background-color: #f3f4f6;
+    padding: 4rem 1.5rem;
+    text-align: center;
+    overflow: hidden; /* Prevents images from overflowing */
+}
+
+/* Background container */
+.affiliate-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1; /* Temporarily set to make sure it's visible */
+}
+
+/* Individual Background Images */
+.affiliate-bg-img {
+    position: absolute;
+    width: 50vw; /* Adjust to make it visible */
+    height: 100vh; /* Ensure it fills height */
+    max-width: 700px; /* Ensure it’s large enough */
+    opacity: 1; /* Set full opacity for testing */
+    z-index: 2; /* Temporarily bring it above content */
+}
+
+/* Left Background Image (Bottom Left Corner) */
+.get-start-shadow {
+    left: -20%; /* Slightly outside for a fading effect */
+    bottom: -30%;
+}
+
+/* Right Background Image (Bottom Right Corner) */
+.money-back-shadow {
+    right: -10%;
+    bottom: -20%;
+}
+
+.desktop-break {
+    display: none;
+}
+
+.affiliate-section h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #000;
+}
+
+.affiliate-section p {
+    color: #6b7280;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Flexbox for cards */
+.affiliate-cards {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+}
+
+/* Card Styling */
+.affiliate-card {
+    background-color: white;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+}
+
+.affiliate-card p {
+    margin-top: 0.5rem;
+    font-size: 1rem;
+}
+
+.affiliate-card .affiliate-card-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #5356FF;
+}
+
+/* CTA Button */
+.affiliate-signup-btn {
+    background-color: #5356FF;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    margin-top: 2rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+    border: none;
+}
+
+.affiliate-signup-btn:hover {
+    background-color: #4246e3;
+}
+
+
+@media (max-width: 1440px) {
+    .desktop-break {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .affiliate-cards {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
 .contact-us-section {
     background-color: #fff;
     padding: 46px 120px 126px 120px;
@@ -1036,71 +1226,6 @@ footer {
 }
 
 /* Media Queries  */
-
-@media (min-width: 1600px) {
-    .old-new-way-section div {
-        height: 500px; /* Adjust height for 1920px width screens */        
-    }
-
-}
-
-@media (min-width: 1920px) {
-    .old-new-way-section div {
-        height: 600px; /* Adjust height for 1920px width screens */        
-    }
-    .new-way-video {
-        margin-left:3%;
-    }
-    .old-way-video{
-        margin-right:3%;
-    }
-
-}
-
-@media (min-width: 2100px) {
-    .old-new-way-section div {
-        height: 700px; /* Adjust height for 2560px width screens */
-    }
-}
-
-@media (min-width: 2500px) {
-    .old-new-way-section div {
-        height: 800px; /* Adjust height for 2560px width screens */
-    }
-}
-
-@media (min-width: 3000px) {
-    .old-new-way-section div {
-        height: 900px; /* Adjust height for 3200px width screens */
-    }
-}
-
-@media (min-width: 3540px) {
-    .old-new-way-section div {
-        height: 1000px; /* Adjust height for 3840px width screens */
-    }
-}
-
-@media (min-width: 1135px) {
-    .old-way-video, .new-way-video {
-    position: absolute; /* Position videos outside of the section */
-    top: 50%; /* Vertically center the video relative to the section */
-    transform: translateY(-50%); /* Adjust for proper centering */
-    width: 100%; /* Adjust the video width */
-    height: auto; /* Maintain aspect ratio */
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-    margin-top:0px;
-    }
-
-    .old-way-video {
-        right: -110%; /* Place the old way video on the left side of the border */
-    }
-
-    .new-way-video {
-        left: -110%; /* Place the new way video on the right side of the border */
-    }
-}
 
 @media (max-width: 1620px) {
     nav ul {
@@ -1299,23 +1424,6 @@ footer {
     .hero {
         padding-top: 45px;
         z-index: -1;
-    }
-
-    .old-new-way-section div:first-child {
-        border-left: 4px solid #5356ff;
-        padding-left: 25px;
-        width: 100%;
-        border-right: none;
-        padding-bottom: 40px;
-    }
-
-    .old-new-way-section div:first-child svg {
-        left: -24px;
-    }
-
-    .new-way-wrapper {
-        width: 100%;
-        padding-left: 25px;
     }
 
     .benefit-heading {
@@ -1617,7 +1725,74 @@ footer {
     .footer-third-col input {
         font-size: 14px;
     }
+
+    .old-new-way-section {
+        padding-left: 10%; /* Ensuring space from the left */
+    }
 }
+
+@media (max-width: 1024px) {
+    .how-works-video {
+        width: 80%; /* Keep a reasonable size */
+        max-width: 600px; /* Prevent excessive shrinking */
+        margin: 0 auto; /* Center it */
+    }
+
+    .how-works-video video {
+        width: 100%;
+        height: auto;
+        min-height: 250px; /* Prevent it from getting too small */
+    }
+}
+
+@media (max-width: 900px) {
+    .how-works-video {
+        width: 90%; /* Allow more flexibility */
+        max-width: 550px;
+    }
+
+    .how-works-video video {
+        min-height: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .how-works-video {
+        width: 100%;
+        max-width: 500px;
+    }
+
+    .how-works-video video {
+        min-height: 200px;
+    }
+
+    .how-works-card-container {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        gap: 20px; /* Add spacing between stacked cards */
+        align-items: center; /* Center cards */
+    }
+
+    .how-works-card {
+        width: 100%; /* Make cards take full width */
+    }
+
+    .how-works-card-wrapper {
+        padding: 20px; /* Adjust padding for better readability */
+    }
+}
+
+@media (max-width: 600px) {
+    .how-works-video {
+        width: 100%;
+        max-width: 100%; /* Use full width */
+\    }
+
+    .how-works-video video {
+        min-height: 180px;
+    }
+}
+
 `;
 
 export default GlobalStyle;

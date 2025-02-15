@@ -20,6 +20,7 @@ import RefundPolicy from './components/Policies/RefundPolicy';
 import DeletionPolicy from './components/Policies/DeletionPolicy';
 import TermsOfService from './components/Policies/TermsOfService';
 import CookiesPolicy from './components/Policies/CookiesPolicy.js';
+import Affiliate from './components/Affiliate/Affiliate.js';
 import CookiesSettings from './components/CookieModal/CookiesSettings';
 import config from './config';
 
@@ -106,6 +107,7 @@ const AppContent = () => {
         <Route path="/terms-of-service" element={<TermsOfService />} />
         <Route path="/cookie-settings" element={<CookiesSettings />} />
         <Route path="/registration" element={<Registration />} />
+        <Route path="/affiliate" element={<Affiliate />} />
 
         {/* Authenticated User Layout */}
         {user ? (
@@ -114,7 +116,7 @@ const AppContent = () => {
               path="*"
               element={
                 <>
-                  <Navbar />
+                  <Navbar onLogout={handleLogout} />
                   <div className="layout">
                     <StickySide
                       setActiveAccount={setActiveAccount}

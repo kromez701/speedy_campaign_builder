@@ -9,9 +9,25 @@ import config from '../../config';
 
 const apiUrl = config.apiUrl;
 
-const Navbar = () => {
+const Navbar = ({ activeAccount, setActiveAccount, onLogout }) => {
   const navigate = useNavigate();
   const [profilePic, setProfilePic] = useState('./assets/no-profile-picture-15257.svg');
+  const [dropdownVisible, setDropdownVisible] = useState(false);
+  const [redirectToMain, setRedirectToMain] = useState(false)
+  const [adAccounts, setAdAccounts] = useState([]);
+  useEffect(() => {
+    const getAdAccounts = async () => {
+      try {
+        // Fetch all ad accounts from backend
+        const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
+        const fetchedAccounts = adAccountsResponse.data.ad_accounts;
+        setAdAccounts(fetchedAccounts);
+      } catch (error) {
+        console.error('Error fetching ad accounts', error);
+      }
+    }
+    getAdAccounts()
+  }, [])
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -32,20 +48,42 @@ const Navbar = () => {
     fetchProfile();
   }, []);
 
+  // const handleProfileClick = () => {
+  //   navigate('/profile-management');
+  // };
+
   const handleProfileClick = () => {
-    navigate('/profile-management');
+    setDropdownVisible(!dropdownVisible); // Toggle dropdown visibility
+  };
+
+  const handleOptionClick = (path) => {
+    setDropdownVisible(false); // Hide the dropdown
+    navigate(path);
   };
 
   return (
     <nav className="navbar">
       <div className="navbar-right">
-        <img src="./assets/Vector3.png" alt="Notifications" className="navbar-icon" />
+        {/* <img src="./assets/Vector3.png" alt="Notifications" className="navbar-icon" /> */}
         <img
           src={profilePic}
           alt="Profile"
           className="navbar-profile"
           onClick={handleProfileClick}
         />
+        {dropdownVisible && (
+          <div className="dropdown-menu">
+            <div className="dropdown-item1">
+              Active Ad Accounts: {adAccounts.length || 0}
+            </div>
+            <div className="dropdown-item" onClick={() => handleOptionClick('/profile-management')}>
+              Manage Subscription
+            </div>
+            <div className="dropdown-item" onClick={onLogout}>
+              Log Out
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

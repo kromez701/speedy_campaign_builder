@@ -20,6 +20,12 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   const [businessManagerId, setBusinessManagerId] = useState('');
 
   useEffect(() => {
+    if (activeAccount && activeAccount.is_bound) {
+      onClose();
+    }
+  }, [activeAccount, onClose]);  
+
+  useEffect(() => {
 
     // Dynamically set the overlay height
     const overlay = document.querySelector(`.${styles.interactionBlockingOverlay}`);
@@ -120,6 +126,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
 
             const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
             setActiveAccount(updatedAccountResponse.data);
+            onClose();
             localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
   
             setTimeout(() => {
@@ -154,9 +161,9 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
         <div className={styles.modalContainer}>
           <div className={styles.interactionBlockingOverlay}></div>
           <div ref={modalRef} className={styles.modal}>
-            <button className={styles.closeIcon} onClick={onClose}>
+            {/* <button className={styles.closeIcon} onClick={onClose}>
               &times;
-            </button>
+            </button> */}
             <div className={styles.setupForm}>
               <h3 className={styles.modalHeading}>Set Up Ad Account</h3>
               <p className={styles.modalMessage}>
