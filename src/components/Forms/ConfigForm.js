@@ -767,7 +767,7 @@ const handleAdAccountSelect = async () => {
         >
           <h3>Budget & Schedule</h3>
           <img
-            src="/assets/Vectorw.svg"
+            src="./assets/Vectorw.svg"
             alt="Toggle Section"
             className={`${styles.toggleIcon} ${
               expandedSections["budgetSchedule"] ? styles.expanded : ""
@@ -1043,7 +1043,7 @@ const handleAdAccountSelect = async () => {
         >
           <h3>Assets</h3>
           <img
-            src="/assets/Vectorw.svg"
+            src="./assets/Vectorw.svg"
             alt="Toggle Section"
             className={`${styles.toggleIcon} ${
               expandedSections["assets"] ? styles.expanded : ""
@@ -1144,7 +1144,7 @@ const handleAdAccountSelect = async () => {
   <div className={styles.sectionHeader} onClick={() => toggleSection("placements")}>
     <h3>Placements</h3>
     <img
-      src="/assets/Vectorw.svg"
+      src="./assets/Vectorw.svg"
       alt="Toggle Section"
       className={`${styles.toggleIcon} ${expandedSections["placements"] ? styles.expanded : ""}`}
     />
@@ -1788,7 +1788,7 @@ const handleAdAccountSelect = async () => {
         >
           <h3>Targeting & Delivery</h3>
           <img
-            src="/assets/Vectorw.svg"
+            src="./assets/Vectorw.svg"
             alt="Toggle Section"
             className={`${styles.toggleIcon} ${
               expandedSections["targetingDelivery"] ? styles.expanded : ""
@@ -2055,7 +2055,7 @@ const handleAdAccountSelect = async () => {
         >
           <h3>Campaign & Tracking</h3>
           <img
-            src="/assets/Vectorw.svg"
+            src="./assets/Vectorw.svg"
             alt="Toggle Section"
             className={`${styles.toggleIcon} ${
               expandedSections["campaignTracking"] ? styles.expanded : ""

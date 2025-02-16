@@ -116,7 +116,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
     <div className={styles.pricingSection}>
       <div className={styles.header}>
         <img
-          src="/assets/Vector4.png"
+          src="./assets/Vector4.png"
           alt="Go Back"
           className={styles.goBackIcon}
           onClick={() => navigate('/')}

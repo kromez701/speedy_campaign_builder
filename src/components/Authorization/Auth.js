@@ -25,7 +25,7 @@ const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => 
       className={styles['form-input']}
     />
     <img
-      src={showPassword ? "/assets/eye-off.svg" : "/assets/eye.svg"}
+      src={showPassword ? "./assets/eye-off.svg" : "./assets/eye.svg"}
       alt="Toggle Password"
       className={styles['password-toggle']}
       onClick={() => setShowPassword(!showPassword)}
@@ -53,7 +53,7 @@ const CustomGoogleLogin = ({ isLogin, onSuccess, onError, remember }) => {
 
   return (
     <button className={`${styles['social-button']} ${styles.googleLogin}`} onClick={() => login()}>
-      <img src="/assets/google-icon.png" alt="Google icon" className={styles.icon} />
+      <img src="./assets/google-icon.png" alt="Google icon" className={styles.icon} />
       {isLogin ? 'Sign in with Google' : 'Sign up with Google'}
     </button>
   );
@@ -117,7 +117,7 @@ const CustomFacebookLogin = ({ isLogin, onSuccess, onError }) => {
 
   return (
     <button className={`${styles['social-button']} ${styles.facebookLogin}`} onClick={handleFacebookLogin}>
-      <img src="/assets/facebook-icon.png" alt="Facebook icon" className={styles.icon} />
+      <img src="./assets/facebook-icon.png" alt="Facebook icon" className={styles.icon} />
       {isLogin ? 'Sign in with Facebook' : 'Sign up with Facebook'}
     </button>
   );
@@ -270,7 +270,7 @@ const Auth = ({ mode, onAuthSuccess }) => {
     <GoogleOAuthProvider clientId='362986823691-u76e3r421e7ts51cphcpcitihpu6ks51.apps.googleusercontent.com'>
       <div className={styles['page-container']}>
         <Link to="/">
-          <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
+          <img src="./assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
         </Link>
         <div className={styles.container}>
           {isEmailSent ? ( // Email verification screen

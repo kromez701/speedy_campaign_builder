@@ -205,3 +205,29 @@
         max-width: 90%;
     }
 }
+.cancelButton {
+    background-color: #ccc; /* Light gray background */
+    color: #333; /* Dark text for contrast */
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s, transform 0.2s;
+}
+
+.cancelButton:hover {
+    background-color: #bbb; /* Slightly darker on hover */
+}
+
+.cancelButton:active {
+    background-color: #aaa;
+    transform: scale(0.98); /* Slight press effect */
+}
+
+/* Aligning the Cancel and Submit buttons properly */
+.TheButtons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}

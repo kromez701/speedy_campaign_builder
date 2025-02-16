@@ -195,7 +195,7 @@ const CampaignForm = ({
     <div className={styles.formContainer}>
       <div className={styles.header}>
         <img
-          src="/assets/Vector4.png"
+          src="./assets/Vector4.png"
           alt="Go Back"
           className={styles.goBackIcon}
           onClick={onGoBack}
@@ -224,7 +224,7 @@ const CampaignForm = ({
                   `(${uploadedFiles.length} files uploaded)`}
               </h3>
               <img
-                src="/assets/Vectorw.svg"
+                src="./assets/Vectorw.svg"
                 alt="Toggle Section"
                 className={`${styles.toggleIcon} ${
                   expandedSections["creativeUploading"] ? styles.expanded : ""
@@ -238,7 +238,7 @@ const CampaignForm = ({
                   onClick={handleFileUploadClick}
                 >
                   <img
-                    src="/assets/Vector6.png"
+                    src="./assets/Vector6.png"
                     alt="Upload Icon"
                     className={styles.uploadIcon}
                   />

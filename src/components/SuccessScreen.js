@@ -11,7 +11,7 @@ const SuccessScreen = ({ onGoBack }) => {
         {/* Video element with the long filename */}
         <p>Your ad campaign has been successfully created.</p>
         <video 
-          src="/assets/WhatsApp%20Video%202024-09-09%20at%203.03.28%20PM.mp4" 
+          src="./assets/WhatsApp%20Video%202024-09-09%20at%203.03.28%20PM.mp4" 
           className={styles.successVideo} 
           autoPlay 
           loop 

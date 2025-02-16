@@ -69,7 +69,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
             if (response.data && response.data.length > 0) {
               const businessManagerIds = response.data.map(bm => bm.id);
               setBusinessManagerId(businessManagerIds);
-              console.log('Selected Business Managers:', businessManagerIds);
+              // console.log('Selected Business Managers:', businessManagerIds);
         
               // Open the popup ONLY after setting the business managers
               setShowPopup(true);
@@ -90,16 +90,18 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
     }, { scope: 'ads_management,ads_read,pages_show_list,business_management,pages_read_engagement,email,public_profile' });
   };  
 
-  const handlePopupSubmit = (adAccount, page, pixel) => {
+  const handlePopupSubmit = (adAccount, page, businessManagerId) => {
+    const pixel = " "
     setShowPopup(false);
-    verifyAndSaveAdAccount(accessToken, adAccount, page, pixel);
-  };
+    verifyAndSaveAdAccount(accessToken, adAccount, page, pixel, businessManagerId);
+};
 
-  const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
+  const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel, businessManagerId) => {
     try {
       const isAdAccountValid = await verifyField(`${apiUrl}/auth/verify_ad_account`, {
         ad_account_id: adAccount,
         access_token: accessToken,
+        business_manager_id: businessManagerId, // Use the correct BM ID
       });
   
       if (isAdAccountValid) {
@@ -117,7 +119,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
             access_token: exchangeResponse.data.long_lived_token,
             app_id: APP_ID,
             app_secret: APP_SECRET,
-            business_manager_id: businessManagerId
+            business_manager_id: businessManagerId // Ensure BM ID is saved
           };
   
           const saveResponse = await axios.post(
@@ -128,14 +130,14 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   
           if (saveResponse.status === 200) {
             toast.success('Ad account updated successfully');
-
+  
             const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
             setActiveAccount(updatedAccountResponse.data);
             onClose();
             localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
   
             setTimeout(() => {
-              window.location.reload(); // Refresh the UI with new data
+              window.location.reload();
             }, 700);
           }
         } else {
@@ -148,8 +150,8 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
       toast.error('Error verifying ad account.');
       console.error('Error verifying ad account:', error);
     }
-  };  
-
+  };
+  
   const verifyField = async (url, fieldData) => {
     try {
       const response = await axios.post(url, fieldData, { withCredentials: true });

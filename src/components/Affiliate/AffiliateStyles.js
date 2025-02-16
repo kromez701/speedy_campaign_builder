@@ -36,7 +36,7 @@ body::before {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/assets/dot.svg');
+    background-image: url('./assets/dot.svg');
     background-repeat: repeat;
     background-size: 45px 45px;
     background-position: 100px 10px;
@@ -154,7 +154,7 @@ nav ul li a {
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: url('/assets/dot.svg');
+    background-image: url('./assets/dot.svg');
     background-repeat: repeat;
     background-size: 45px 45px;
     opacity: 0.2;

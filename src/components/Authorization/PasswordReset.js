@@ -56,7 +56,7 @@ const ResetPassword = () => {
   return (
     <div className={styles['page-container']}>
         <Link to="/">
-            <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
+            <img src="./assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
         </Link>
       <div className={styles.container}>
         <h1>Reset Password</h1>
@@ -75,7 +75,7 @@ const ResetPassword = () => {
                 className={styles['form-input']}
               />
               <img
-                src={showPassword ? '/assets/eye-off.svg' : '/assets/eye.svg'}
+                src={showPassword ? './assets/eye-off.svg' : './assets/eye.svg'}
                 alt="Toggle Password"
                 className={styles['password-toggle']}
                 onClick={() => setShowPassword(!showPassword)}
@@ -90,7 +90,7 @@ const ResetPassword = () => {
                 className={styles['form-input']}
               />
               <img
-                src={showConfirmPassword ? '/assets/eye-off.svg' : '/assets/eye.svg'}
+                src={showConfirmPassword ? './assets/eye-off.svg' : './assets/eye.svg'}
                 alt="Toggle Password"
                 className={styles['password-toggle']}
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}

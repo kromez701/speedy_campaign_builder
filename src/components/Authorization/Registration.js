@@ -19,7 +19,7 @@ const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => 
       className={styles['form-input']}
     />
     <img
-      src={showPassword ? '/assets/eye-off.svg' : '/assets/eye.svg'}
+      src={showPassword ? './assets/eye-off.svg' : './assets/eye.svg'}
       alt="Toggle Password"
       className={styles['password-toggle']}
       onClick={() => setShowPassword(!showPassword)}
@@ -32,11 +32,9 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // State for password visibility
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  // State to hold user data
+  const [isEmailSent, setIsEmailSent] = useState(false); // Track success message
   const [userData, setUserData] = useState({
     username: '',
     email: '',
@@ -57,7 +55,7 @@ const Register = () => {
         const response = await axios.get(`${apiUrl}/payment/get-checkout-session?session_id=${sessionId}`);
         if (response.data && response.data.email && response.data.name) {
           setUserData({
-            username: response.data.name,  // Populate the name as username
+            username: response.data.name,
             email: response.data.email,
           });
         } else {
@@ -73,13 +71,6 @@ const Register = () => {
     fetchSessionDetails();
   }, [location, navigate]);
 
-  const initialValues = {
-    username: userData.username || '',
-    email: userData.email || '',
-    password: '',
-    confirmPassword: '',
-  };
-
   const validationSchema = Yup.object({
     username: Yup.string().required('Username is required'),
     email: Yup.string().email('Invalid email format').required('Email is required'),
@@ -90,102 +81,104 @@ const Register = () => {
   });
 
   const onSubmit = async (values) => {
-    // Ensure updatedEmail is not null or undefined by providing a fallback to original email
-    const updatedEmail = values.email ? values.email.trim() : userData.email;
-  
     const requestData = {
-      originalEmail: userData.email,  // Email from session details
-      updatedEmail: updatedEmail,     // Use form email or fallback to original email
+      originalEmail: userData.email,
+      updatedEmail: values.email ? values.email.trim() : userData.email,
       username: values.username,
       password: values.password,
     };
-  
-    console.log('Submitting request data:', requestData);
-  
+
     try {
-      const updateResponse = await axios.post(
-        `${apiUrl}/auth/update-user`,
-        requestData,
-        { withCredentials: true }
-      );
-  
+      const updateResponse = await axios.post(`${apiUrl}/auth/update-user`, requestData, { withCredentials: true });
+
       if (updateResponse.status === 200) {
-        toast.success('Profile updated successfully!');
-        window.location.href = updateResponse.data.redirect_url;
+        setIsEmailSent(true); // ✅ Hide form, show success message
+        toast.success('Email sent successfully!');
       }
     } catch (error) {
-      console.error('Error response:', error.response);
       toast.error(error.response?.data?.message || 'Failed to update profile. Please try again.');
     }
-  };  
-  
+  };
 
   return (
     <div className={styles['page-container']}>
       <Link to="/">
-        <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
+        <img src="./assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
       </Link>
       <div className={styles.container}>
-        <h1>Complete Your Registration</h1>
-        <p>Set your username and password to proceed.</p>
-        
-        <Formik
-          initialValues={{
-            username: userData.username || '',
-            email: userData.email || '',
-            password: '',
-            confirmPassword: '',
-          }}
-          validationSchema={validationSchema}
-          onSubmit={onSubmit}
-          enableReinitialize={true}
-        >
-          {({ values, setFieldValue }) => (
-            <Form className={styles['form-container']}>
+        {isEmailSent ? ( // ✅ Hide form, show success message
+          <div className={styles['success-message']}>
+            <h1>Email Sent Successfully</h1>
+            <p>An email has been sent to verify your account. Please check your inbox for further instructions. </p>
+            <div className={styles.switchLink} onClick={() => navigate('/login')}>
+              <span className={styles.linkText}>Back to Login</span>
+            </div>
+          </div>
+        ) : (
+          <>
+            <h1>Complete Your Registration</h1>
+            <p>Set your username and password to proceed.</p>
 
-              <Field
-                type="text"
-                name="username"
-                placeholder="Username"
-                className={styles['form-input']}
-                value={values.username}
-                onChange={(e) => setFieldValue('username', e.target.value)}
-              />
-              <ErrorMessage name="username" component="div" className={styles.error} />
+            <Formik
+              initialValues={{
+                username: userData.username || '',
+                email: userData.email || '',
+                password: '',
+                confirmPassword: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={onSubmit}
+              enableReinitialize={true}
+            >
+              {({ values, setFieldValue }) => (
+                <Form className={styles['form-container']}>
 
-              <Field
-                type="email"
-                name="email"
-                placeholder="Email"
-                className={styles['form-input']}
-                value={values.email} // Ensures user-entered email persists
-                onChange={(e) => setFieldValue('email', e.target.value)}
-              />
-              <ErrorMessage name="email" component="div" className={styles.error} />
+                  <Field
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    className={styles['form-input']}
+                    value={values.username}
+                    onChange={(e) => setFieldValue('username', e.target.value)}
+                  />
+                  <ErrorMessage name="username" component="div" className={styles.error} />
 
-              <PasswordField
-                name="password"
-                placeholder="Password"
-                showPassword={showPassword}
-                setShowPassword={setShowPassword}
-              />
+                  <Field
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    className={styles['form-input']}
+                    value={values.email}
+                    onChange={(e) => setFieldValue('email', e.target.value)}
+                  />
+                  <ErrorMessage name="email" component="div" className={styles.error} />
 
-              <PasswordField
-                name="confirmPassword"
-                placeholder="Confirm Password"
-                showPassword={showConfirmPassword}
-                setShowPassword={setShowConfirmPassword}
-              />
+                  <PasswordField
+                    name="password"
+                    placeholder="Password"
+                    showPassword={showPassword}
+                    setShowPassword={setShowPassword}
+                  />
 
-              <button type="submit" className={styles['option-button']}>
-                Finish
-              </button>
-            </Form>
-          )}
-        </Formik>
-        <div className={styles.switchLink} onClick={() => navigate('/login')}>
-          <span className={styles.linkText}>Back to Login</span>
-        </div>
+                  <PasswordField
+                    name="confirmPassword"
+                    placeholder="Confirm Password"
+                    showPassword={showConfirmPassword}
+                    setShowPassword={setShowConfirmPassword}
+                  />
+
+                  <button type="submit" className={styles['option-button']}>
+                    Finish
+                  </button>
+                </Form>
+              )}
+            </Formik>
+
+            <div className={styles.switchLink} onClick={() => navigate('/login')}>
+              <span className={styles.linkText}>Back to Login</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -447,7 +447,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
             >
               <div className={styles.icon}>
                 <img
-                  src="/assets/Website-Ad--Streamline-Atlas.png"
+                  src="./assets/Website-Ad--Streamline-Atlas.png"
                   alt="Website Conversions"
                 />
               </div>
@@ -467,7 +467,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
             >
               <div className={styles.icon}>
                 <img
-                  src="/assets/Device-Tablet-Search--Streamline-Tabler.png"
+                  src="./assets/Device-Tablet-Search--Streamline-Tabler.png"
                   alt="Lead Form Campaign"
                 />
               </div>
@@ -484,7 +484,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
             >
               <div className={styles.icon}>
                 <img
-                  src="/assets/Click--Streamline-Tabler.png"
+                  src="./assets/Click--Streamline-Tabler.png"
                   alt="Traffic Campaign"
                 />
               </div>
@@ -508,7 +508,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
             >
               <img
                 className={styles.buttonIcon}
-                src="/assets/Component 2.png"
+                src="./assets/Component 2.png"
                 alt="New Campaign"
               />
               New Campaign
@@ -521,7 +521,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
             >
               <img
                 className={styles.buttonIcon}
-                src="/assets/Component 2 (1).png"
+                src="./assets/Component 2 (1).png"
                 alt="Existing Campaign"
               />
               Existing Campaign
