@@ -135,7 +135,7 @@ const AppContent = () => {
                         />
                         <Route
                           path="/profile-management"
-                          element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} />}
+                          element={<ProfileManagement onLogout={handleLogout} activeAccount={activeAccount} setActiveAccount={setActiveAccount} onPlanUpgrade={handlePlanUpgrade}/>}
                         />
                         <Route path="/pricing-section" element={<PricingSection onPlanUpgrade={handlePlanUpgrade} />} />
                         <Route path="/success" element={<PaymentSuccess />} />

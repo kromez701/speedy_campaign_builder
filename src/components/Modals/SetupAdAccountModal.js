@@ -17,7 +17,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const navigate = useNavigate();
-  const [businessManagerId, setBusinessManagerId] = useState('');
+  const [businessManagerId, setBusinessManagerId] = useState([]);
 
   useEffect(() => {
     if (activeAccount && activeAccount.is_bound) {
@@ -57,33 +57,38 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
       toast.error('Facebook SDK is not loaded yet.');
       return;
     }
-
+  
     FB.login((response) => {
       if (response.authResponse) {
         const accessToken = response.authResponse.accessToken;
         setAccessToken(accessToken);
-
-        // Fetch the Business Manager ID (BM ID)
+  
+        // Fetch ALL Business Manager IDs the user selects
         FB.api('/me/businesses', 'GET', { access_token: accessToken }, (response) => {
           if (response && !response.error) {
             if (response.data && response.data.length > 0) {
-              const businessManagerId = response.data[0].id;  // Take the first BM ID
-              setBusinessManagerId(businessManagerId);
-              console.log('Business Manager ID:', businessManagerId);
+              const businessManagerIds = response.data.map(bm => bm.id);
+              setBusinessManagerId(businessManagerIds);
+              console.log('Selected Business Managers:', businessManagerIds);
+        
+              // Open the popup ONLY after setting the business managers
+              setShowPopup(true);
             } else {
               console.log('No Business Manager found');
+              toast.error('You must be associated with a Business Manager to proceed.');
             }
           } else {
-            console.error('Error fetching BM ID:', response.error);
+            console.error('Error fetching BMs:', response.error);
+            toast.error('Failed to retrieve Business Manager data.');
           }
-        });
-
-        setShowPopup(true); // Show the popup when login is successful
+        });        
+  
+        setShowPopup(true); // Open the ad account selection modal
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
     }, { scope: 'ads_management,ads_read,pages_show_list,business_management,pages_read_engagement,email,public_profile' });
-  };
+  };  
 
   const handlePopupSubmit = (adAccount, page, pixel) => {
     setShowPopup(false);
@@ -185,6 +190,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
             onClose={() => setShowPopup(false)}
             onSubmit={handlePopupSubmit}
             accessToken={accessToken}
+            businessManagerId={businessManagerId}
           />
         </div>
       )}

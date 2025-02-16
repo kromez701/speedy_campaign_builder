@@ -416,6 +416,22 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
       toast.error("Error subscribing: " + error.message);
     }
   };
+
+  const handleManageBilling = async () => {
+    try {
+      const response = await axios.post(`${apiUrl}/payment/create-billing-portal-session`, {}, { withCredentials: true });
+  
+      if (response.data.url) {
+        window.location.href = response.data.url; // Redirect to Stripe billing portal
+      }
+    } catch (error) {
+      if (error.response && error.response.data.error === 'no_subscription') {
+        toast.info('You do not have a subscription to manage.');
+      } else {
+        toast.error('Error opening billing portal. Please try again.');
+      }
+    }
+  };  
   
   const proceedWithSubscription = async (plan, adAccountToRetain) => {
     try {
@@ -562,10 +578,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
           </div>
         </div>
         <div className={`${styles.subscriptionDetails}`}>
-          <div className={`${styles.subscriptionHeader}`}>
-            <h2>Subscription Details</h2>
-            <button className={`${styles.manageBillingBtn}`}>Manage Billing Info</button>
-          </div>
+        <div className={`${styles.subscriptionHeader}`}>
+          <h2>Subscription Details</h2>
+          <button className={`${styles.manageBillingBtn}`} onClick={handleManageBilling}>
+            Manage Billing Info
+          </button>
+        </div>
           <div className={`${styles.subscriptionContent}`}>
             <div className={`${styles.detailItem}`}>
               <span>Current Plan:</span>
@@ -584,15 +602,22 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
             {/* Footer section with the Cancel Subscription Button aligned to the right */}
             <div className={styles.subscriptionFooter}>
               {isAdAccountActive ? (
-                <button className={`${styles.button} ${styles.cancelSubscriptionButton}`} onClick={handleCancelSubscription}>
-                  Cancel Subscription
-                </button>
+                cancelAtPeriodEnd ? (
+                  <button className={`${styles.button} ${styles.renewSubscriptionButton}`} onClick={handleRenewSubscription}>
+                    Renew Subscription
+                  </button>
+                ) : (
+                  <button className={`${styles.button} ${styles.cancelSubscriptionButton}`} onClick={handleCancelSubscription}>
+                    Cancel Subscription
+                  </button>
+                )
               ) : (
                 <button className={`${styles.button} ${styles.renewSubscriptionButton}`} onClick={handleRenewSubscription}>
                   Renew Subscription
                 </button>
               )}
             </div>
+
           </div>
         </div>
         <div className={`${styles.infoContainer}`}>
