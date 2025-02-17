@@ -781,11 +781,17 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
                 Receive dedicated support for ad management.
               </div>
             </div>
-            <button onClick={() => handleSubscribe('Professional')} style={{
-              backgroundColor: currentPlan === "Professional" ? "white" : "#5356FF",
-              color: currentPlan === "Professional" ? "#5356FF" : "#fff",
-              border: currentPlan === "Professional" ? "1px solid #5356FF" : "none",
-            }} className={`${styles.priceStartBtn}`}>{currentPlan === "Professional" ? "Current Plan" : currentPlan === "Enterprise" ? "Downgrade" : "Upgrade"}</button>
+            <button 
+                onClick={() => handleSubscribe('Professional')} 
+                className={`${styles.priceStartBtn} ${currentPlan === "Professional" ? styles.currentPlanBtn : ""} 
+                  ${currentPlan === "Enterprise" ? styles.downgradeBtn : ""}`}
+              >
+                {currentPlan === "Professional" 
+                  ? "Current Plan" 
+                  : currentPlan === "Enterprise" 
+                    ? "Downgrade" 
+                    : "Upgrade"}
+              </button>
           </div>
           {/* card 2 */}
           <div className={`${styles.priceCard} ${styles.popularPlan}`}>
@@ -827,11 +833,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
                 Receive dedicated support for ad management.
               </div>
             </div>
-            <button onClick={() => handleSubscribe('Enterprise')} style={{
-              backgroundColor: currentPlan === "Enterprise" ? "white" : "#5356FF",
-              color: currentPlan === "Enterprise" ? "#5356FF" : "#fff",
-              border: currentPlan === "Enterprise" ? "1px solid #5356FF" : "none",
-            }} className={`${styles.priceStartBtn}`}>{currentPlan === "Enterprise" ? "Current Plan" : "Upgrade"}</button>
+            <button 
+              onClick={() => handleSubscribe('Enterprise')} 
+              className={`${styles.priceStartBtn} ${currentPlan === "Enterprise" ? styles.currentPlanBtn : ""}`}
+            >
+              {currentPlan === "Enterprise" ? "Current Plan" : "Upgrade"}
+            </button>
           </div>
         </div>
       </div>

@@ -1031,6 +1031,8 @@ padding-top: 24px;
 
 /* CTA Button */
 .affiliate-signup-btn {
+    position: relative;
+    z-index: 10; /* Ensure it's above everything */
     background-color: #5356FF;
     color: white;
     padding: 0.75rem 1.5rem;

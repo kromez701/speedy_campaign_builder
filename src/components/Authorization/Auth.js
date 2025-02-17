@@ -391,14 +391,14 @@ const Auth = ({ mode, onAuthSuccess }) => {
                   */}
                 </div>
               )}
-              {!isForgotPassword && (
+              {/* {!isForgotPassword && (
                 <div className={styles.switchLink} onClick={() => setIsLogin(!isLogin)}>
                   {isLogin ? "Don't have an account? " : 'Already have an account? '}
                   <span className={styles.linkText}>
                     {isLogin ? 'Register' : 'Sign in'}
                   </span>
                 </div>
-              )}
+              )} */}
               {isLogin && !isForgotPassword && (
                 <div className={styles.switchLink} onClick={() => setIsForgotPassword(true)}>
                   <span className={styles.linkText}>Forgot your password?</span>

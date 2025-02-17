@@ -19,7 +19,7 @@ const PasswordField = ({ name, placeholder, showPassword, setShowPassword }) => 
       className={styles['form-input']}
     />
     <img
-      src={showPassword ? './assets/eye-off.svg' : './assets/eye.svg'}
+      src={showPassword ? '/assets/eye-off.svg' : '/assets/eye.svg'}
       alt="Toggle Password"
       className={styles['password-toggle']}
       onClick={() => setShowPassword(!showPassword)}
@@ -32,35 +32,34 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [sessionId, setSessionId] = useState(null); // ✅ Store sessionId in state
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [isEmailSent, setIsEmailSent] = useState(false); // Track success message
   const [userData, setUserData] = useState({
     username: '',
-    email: '',
+    email: '', // ✅ Ensure email is blank initially
   });
 
   useEffect(() => {
     const fetchSessionDetails = async () => {
       const queryParams = new URLSearchParams(location.search);
-      const sessionId = queryParams.get('session_id');
+      const sessionIdParam = queryParams.get('session_id');
 
-      if (!sessionId) {
+      if (!sessionIdParam) {
         toast.error('Invalid session. Please check your email.');
         navigate('/');
         return;
       }
 
+      setSessionId(sessionIdParam); // ✅ Store sessionId in state
+
       try {
-        const response = await axios.get(`${apiUrl}/payment/get-checkout-session?session_id=${sessionId}`);
-        if (response.data && response.data.email && response.data.name) {
+        const response = await axios.get(`${apiUrl}/payment/get-checkout-session?session_id=${sessionIdParam}`);
+        if (response.data && response.data.name) {
           setUserData({
             username: response.data.name,
-            email: response.data.email,
+            email: '', // ✅ Force email field to be empty
           });
-        } else {
-          toast.error('Invalid session details. Please check your email.');
-          navigate('/');
         }
       } catch (error) {
         toast.error('Failed to retrieve session details.');
@@ -81,104 +80,79 @@ const Register = () => {
   });
 
   const onSubmit = async (values) => {
-    const requestData = {
-      originalEmail: userData.email,
-      updatedEmail: values.email ? values.email.trim() : userData.email,
-      username: values.username,
-      password: values.password,
-    };
+    if (!sessionId) {
+      toast.error('Session ID is missing. Please refresh the page.');
+      return;
+    }
 
     try {
+      const requestData = {
+        originalEmail: `anon_${sessionId}@quickcampaigns.io`, 
+        updatedEmail: values.email.trim(),
+        username: values.username,
+        password: values.password,
+      };
+
       const updateResponse = await axios.post(`${apiUrl}/auth/update-user`, requestData, { withCredentials: true });
 
       if (updateResponse.status === 200) {
-        setIsEmailSent(true); // ✅ Hide form, show success message
-        toast.success('Email sent successfully!');
+        toast.success('Profile updated successfully!');
+        window.location.href = updateResponse.data.redirect_url;
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to update profile. Please try again.');
+      toast.error(error.response?.data?.error || 'Failed to update profile. Please try again.');
     }
   };
 
   return (
     <div className={styles['page-container']}>
       <Link to="/">
-        <img src="./assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
+        <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
       </Link>
       <div className={styles.container}>
-        {isEmailSent ? ( // ✅ Hide form, show success message
-          <div className={styles['success-message']}>
-            <h1>Email Sent Successfully</h1>
-            <p>An email has been sent to verify your account. Please check your inbox for further instructions. </p>
-            <div className={styles.switchLink} onClick={() => navigate('/login')}>
-              <span className={styles.linkText}>Back to Login</span>
-            </div>
-          </div>
-        ) : (
-          <>
-            <h1>Complete Your Registration</h1>
-            <p>Set your username and password to proceed.</p>
+        <h1>Complete Your Registration</h1>
+        <p>Set your username and password to proceed.</p>
 
-            <Formik
-              initialValues={{
-                username: userData.username || '',
-                email: userData.email || '',
-                password: '',
-                confirmPassword: '',
-              }}
-              validationSchema={validationSchema}
-              onSubmit={onSubmit}
-              enableReinitialize={true}
-            >
-              {({ values, setFieldValue }) => (
-                <Form className={styles['form-container']}>
+        <Formik
+          initialValues={{
+            username: userData.username || '',
+            email: '', // ✅ Email starts empty
+            password: '',
+            confirmPassword: '',
+          }}
+          validationSchema={validationSchema}
+          onSubmit={onSubmit}
+          enableReinitialize={true}
+        >
+          {({ values, setFieldValue }) => (
+            <Form className={styles['form-container']}>
+              <Field
+                type="text"
+                name="username"
+                placeholder="Username"
+                className={styles['form-input']}
+                value={values.username}
+                onChange={(e) => setFieldValue('username', e.target.value)}
+              />
+              <ErrorMessage name="username" component="div" className={styles.error} />
 
-                  <Field
-                    type="text"
-                    name="username"
-                    placeholder="Username"
-                    className={styles['form-input']}
-                    value={values.username}
-                    onChange={(e) => setFieldValue('username', e.target.value)}
-                  />
-                  <ErrorMessage name="username" component="div" className={styles.error} />
+              <Field
+                type="email"
+                name="email"
+                placeholder="Enter your email"
+                className={styles['form-input']}
+                value={values.email}
+                onChange={(e) => setFieldValue('email', e.target.value)}
+              />
+              <ErrorMessage name="email" component="div" className={styles.error} />
 
-                  <Field
-                    type="email"
-                    name="email"
-                    placeholder="Email"
-                    className={styles['form-input']}
-                    value={values.email}
-                    onChange={(e) => setFieldValue('email', e.target.value)}
-                  />
-                  <ErrorMessage name="email" component="div" className={styles.error} />
+              <PasswordField name="password" placeholder="Password" showPassword={showPassword} setShowPassword={setShowPassword} />
+              <PasswordField name="confirmPassword" placeholder="Confirm Password" showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword} />
 
-                  <PasswordField
-                    name="password"
-                    placeholder="Password"
-                    showPassword={showPassword}
-                    setShowPassword={setShowPassword}
-                  />
-
-                  <PasswordField
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    showPassword={showConfirmPassword}
-                    setShowPassword={setShowConfirmPassword}
-                  />
-
-                  <button type="submit" className={styles['option-button']}>
-                    Finish
-                  </button>
-                </Form>
-              )}
-            </Formik>
-
-            <div className={styles.switchLink} onClick={() => navigate('/login')}>
-              <span className={styles.linkText}>Back to Login</span>
-            </div>
-          </>
-        )}
+              <button type="submit" className={styles['option-button']}>Finish</button>
+            </Form>
+          )}
+        </Formik>
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../ToastifyOverrides.css';
 import config from '../../config';
+import DowngradeModal from '../DowngradeModal/DowngradeModal'; // ✅ Keeping DowngradeModal without messing up anything
 
 const apiUrl = config.apiUrl;
 const stripePublishableKey = config.stripePublishableKey;
@@ -16,6 +17,9 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   const [hasUsedFreeTrial, setHasUsedFreeTrial] = useState(false);
   const [adAccounts, setAdAccounts] = useState([]);
   const [selectedAdAccountId, setSelectedAdAccountId] = useState(null);
+  const [showDowngradeModal, setShowDowngradeModal] = useState(false);
+  const [availableAdAccounts, setAvailableAdAccounts] = useState([]);
+  const [pendingDowngradePlan, setPendingDowngradePlan] = useState("");
 
   useEffect(() => {
     const fetchSubscriptionDetails = async () => {
@@ -60,9 +64,33 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         return;
       }
 
+      // ✅ Show ad account selection modal if downgrading from Enterprise to Professional
+      if (currentPlan === 'Enterprise' && plan === 'Professional') {
+        const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
+        setAvailableAdAccounts(adAccountsResponse.data.ad_accounts);
+        setPendingDowngradePlan(plan);
+        setShowDowngradeModal(true);
+        return;
+      }
+
+      proceedWithSubscription(plan, selectedAdAccountId);
+    } catch (error) {
+      console.error('Error subscribing', error);
+      toast.error('Error subscribing: ' + error.message);
+    }
+  };
+
+  const proceedWithSubscription = async (plan, adAccountToRetain) => {
+    try {
       const response = await axios.post(
         `${apiUrl}/payment/create-checkout-session`,
-        { plan, ad_account_id: selectedAdAccountId },
+        {
+          plan,
+          ad_account_id: adAccountToRetain,
+          ...(currentPlan === 'Enterprise' && plan === 'Professional' && {
+            chosen_ad_account_id: adAccountToRetain, // ✅ Send chosen ad account for retention
+          }),
+        },
         { withCredentials: true }
       );
 
@@ -71,15 +99,12 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
         stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
         toast.success('Subscription successful! Thank you for subscribing.');
-
-        // Update the current plan dynamically
         setCurrentPlan(plan);
-
         if (onPlanUpgrade) {
           onPlanUpgrade();
         }
       } else {
-        toast.error('Failed to create checkout session');
+        toast.error('Failed to create checkout session.');
       }
     } catch (error) {
       console.error('Error subscribing', error);
@@ -146,16 +171,16 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
                 </div>
               ))}
             </div>
-            <button
-              onClick={() => handleSubscribe(plan.name)}
-              style={{
-                backgroundColor: currentPlan === plan.name ? 'white' : '#5356FF',
-                color: currentPlan === plan.name ? '#5356FF' : '#fff',
-                border: currentPlan === plan.name ? '1px solid #5356FF' : 'none',
-              }}
-              className={styles.priceStartBtn}
+            <button 
+              onClick={() => handleSubscribe(plan.name)} 
+              className={`${styles.priceStartBtn} ${currentPlan === plan.name ? styles.currentPlanBtn : ''} 
+                ${currentPlan === "Enterprise" && plan.name === "Professional" ? styles.downgradeBtn : ''}`}
             >
-              {currentPlan === plan.name ? 'Current Plan' : 'Upgrade'}
+              {currentPlan === plan.name 
+                ? "Current Plan" 
+                : currentPlan === "Enterprise" && plan.name === "Professional" 
+                  ? "Downgrade" 
+                  : "Upgrade"}
             </button>
           </div>
         ))}
@@ -163,6 +188,17 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
       <button onClick={() => navigate('/')} className={`${styles.button} ${styles.goBackButton}`}>
         Go Back
       </button>
+
+      {showDowngradeModal && (
+        <DowngradeModal
+          adAccounts={availableAdAccounts}
+          onConfirm={(selectedAccount) => {
+            setShowDowngradeModal(false);
+            proceedWithSubscription(pendingDowngradePlan, selectedAccount);
+          }}
+          onCancel={() => setShowDowngradeModal(false)}
+        />
+      )}
     </div>
   );
 };

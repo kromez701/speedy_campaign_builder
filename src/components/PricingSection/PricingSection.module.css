@@ -144,20 +144,37 @@
     max-height: 24px;
 }
 
+/* Default button */
 .priceStartBtn {
-    margin-top: auto; /* Push button to the bottom */
-    padding: 12px 24px;
-    width: 100%;
-    background-color:#5356FF;
-    color: #fff;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-    font-size: 1rem;
+  margin-top: auto; /* Push button to the bottom */
+  padding: 12px 24px;
+  width: 100%;
+  background-color: #5356FF;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+  font-size: 1rem;
+  cursor: pointer; 
+  transition: background-color 0.3s ease; /* 👈 Smooth transition effect */
 }
 
-.priceStartBtn:hover{
-    background-color:#4044C9;
+/* Current Plan Button */
+.currentPlanBtn {
+  background-color: white; /* Gray background */
+  cursor: not-allowed;
+  color: #5356FF;
+  box-shadow: none;
+  border: 1px solid #5356FF;
+}
+
+
+.priceStartBtn:hover {
+  background-color:#4044C9;
+}
+
+.currentPlanBtn:hover{
+  background-color: white;
 }
 
 .popularPlan {
@@ -245,17 +262,17 @@
     }
   }
   
-  .goBackButton {
-    background-color: #5356FF;
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    font-size: 15px;
-    cursor: pointer;
-    margin-top: 20px;
-    align-self: center; /* Center horizontally */
-    font-weight: 600px;
+.goBackButton {
+  background-color: #5356FF;
+  color: white;
+  padding: 12px 25px;
+  border: none;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 20px;
+  align-self: center; /* Center horizontally */
+  font-weight: 600px;
 }
 
 .goBackButton:hover {

@@ -472,17 +472,37 @@ padding-top: 24px;
   max-height: 24px;
 }
 
+/* Default button */
 .priceStartBtn {
-  margin-top: auto;
+  margin-top: auto; /* Push button to the bottom */
   padding: 12px 24px;
   width: 100%;
-  cursor: pointer;
-  background-color: #5356ff;
-  color: #fff;
+  background-color: #5356FF;
+  color: white;
   border-radius: 8px;
   border: none;
   outline: none;
   font-size: 1rem;
+  cursor: pointer; 
+  transition: background-color 0.3s ease; /* 👈 Smooth transition effect */
+}
+
+/* Current Plan Button */
+.currentPlanBtn {
+  background-color: white; /* Gray background */
+  cursor: not-allowed;
+  color: #5356FF;
+  box-shadow: none;
+  border: 1px solid #5356FF;
+}
+
+
+.priceStartBtn:hover {
+  background-color:#4044C9;
+}
+
+.currentPlanBtn:hover{
+  background-color: white;
 }
 
 .popularPlan {
