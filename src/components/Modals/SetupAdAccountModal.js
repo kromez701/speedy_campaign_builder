@@ -91,9 +91,13 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   };  
 
   const handlePopupSubmit = (adAccount, page, businessManagerId) => {
-    const pixel = " "
+    const pixel = " ";
+    
+    // Ensure the ad account ID is prefixed with "act_"
+    const prefixedAdAccount = adAccount.startsWith("act_") ? adAccount : `act_${adAccount}`;
+
     setShowPopup(false);
-    verifyAndSaveAdAccount(accessToken, adAccount, page, pixel, businessManagerId);
+    verifyAndSaveAdAccount(accessToken, prefixedAdAccount, page, pixel, businessManagerId);
 };
 
   const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel, businessManagerId) => {

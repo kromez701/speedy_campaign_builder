@@ -32,12 +32,13 @@ const Register = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [sessionId, setSessionId] = useState(null); // ✅ Store sessionId in state
+  const [sessionId, setSessionId] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isEmailSent, setIsEmailSent] = useState(false);
   const [userData, setUserData] = useState({
     username: '',
-    email: '', // ✅ Ensure email is blank initially
+    email: '',
   });
 
   useEffect(() => {
@@ -51,14 +52,14 @@ const Register = () => {
         return;
       }
 
-      setSessionId(sessionIdParam); // ✅ Store sessionId in state
+      setSessionId(sessionIdParam);
 
       try {
         const response = await axios.get(`${apiUrl}/payment/get-checkout-session?session_id=${sessionIdParam}`);
         if (response.data && response.data.name) {
           setUserData({
             username: response.data.name,
-            email: '', // ✅ Force email field to be empty
+            email: '',
           });
         }
       } catch (error) {
@@ -87,7 +88,7 @@ const Register = () => {
 
     try {
       const requestData = {
-        originalEmail: `anon_${sessionId}@quickcampaigns.io`, 
+        originalEmail: `anon_${sessionId}@quickcampaigns.io`,
         updatedEmail: values.email.trim(),
         username: values.username,
         password: values.password,
@@ -96,8 +97,8 @@ const Register = () => {
       const updateResponse = await axios.post(`${apiUrl}/auth/update-user`, requestData, { withCredentials: true });
 
       if (updateResponse.status === 200) {
-        toast.success('Profile updated successfully!');
-        window.location.href = updateResponse.data.redirect_url;
+        setIsEmailSent(true); // ✅ Switch to "Email Sent" state
+        toast.success('Profile updated successfully! Please check your email for verification.');
       }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Failed to update profile. Please try again.');
@@ -110,49 +111,67 @@ const Register = () => {
         <img src="/assets/logo-header.png" alt="Logo" className={styles['logo-header']} />
       </Link>
       <div className={styles.container}>
-        <h1>Complete Your Registration</h1>
-        <p>Set your username and password to proceed.</p>
+        {isEmailSent ? ( // ✅ Email verification screen
+          <>
+            <h1>Email Sent</h1>
+            <p>An email has been sent to verify your account. Please check your inbox and click the verification link. Once verified, you can log in.</p>
+            <span
+              className={styles.linkText}
+              onClick={() => {
+                setIsEmailSent(false);
+                navigate('/login');
+              }}
+            >
+              Back to Login
+            </span>
+          </>
+        ) : ( // ✅ Show form if email is not sent yet
+          <>
+            <h1>Complete Your Registration</h1>
+            <p>Set your username and password to proceed.</p>
 
-        <Formik
-          initialValues={{
-            username: userData.username || '',
-            email: '', // ✅ Email starts empty
-            password: '',
-            confirmPassword: '',
-          }}
-          validationSchema={validationSchema}
-          onSubmit={onSubmit}
-          enableReinitialize={true}
-        >
-          {({ values, setFieldValue }) => (
-            <Form className={styles['form-container']}>
-              <Field
-                type="text"
-                name="username"
-                placeholder="Username"
-                className={styles['form-input']}
-                value={values.username}
-                onChange={(e) => setFieldValue('username', e.target.value)}
-              />
-              <ErrorMessage name="username" component="div" className={styles.error} />
+            <Formik
+              initialValues={{
+                username: userData.username || '',
+                email: '',
+                password: '',
+                confirmPassword: '',
+              }}
+              validationSchema={validationSchema}
+              onSubmit={onSubmit}
+              enableReinitialize={true}
+            >
+              {({ values, setFieldValue }) => (
+                <Form className={styles['form-container']}>
+                  <Field
+                    type="text"
+                    name="username"
+                    placeholder="Username"
+                    className={styles['form-input']}
+                    value={values.username}
+                    onChange={(e) => setFieldValue('username', e.target.value)}
+                  />
+                  <ErrorMessage name="username" component="div" className={styles.error} />
 
-              <Field
-                type="email"
-                name="email"
-                placeholder="Enter your email"
-                className={styles['form-input']}
-                value={values.email}
-                onChange={(e) => setFieldValue('email', e.target.value)}
-              />
-              <ErrorMessage name="email" component="div" className={styles.error} />
+                  <Field
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    className={styles['form-input']}
+                    value={values.email}
+                    onChange={(e) => setFieldValue('email', e.target.value)}
+                  />
+                  <ErrorMessage name="email" component="div" className={styles.error} />
 
-              <PasswordField name="password" placeholder="Password" showPassword={showPassword} setShowPassword={setShowPassword} />
-              <PasswordField name="confirmPassword" placeholder="Confirm Password" showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword} />
+                  <PasswordField name="password" placeholder="Password" showPassword={showPassword} setShowPassword={setShowPassword} />
+                  <PasswordField name="confirmPassword" placeholder="Confirm Password" showPassword={showConfirmPassword} setShowPassword={setShowConfirmPassword} />
 
-              <button type="submit" className={styles['option-button']}>Finish</button>
-            </Form>
-          )}
-        </Formik>
+                  <button type="submit" className={styles['option-button']}>Finish</button>
+                </Form>
+              )}
+            </Formik>
+          </>
+        )}
       </div>
     </div>
   );
