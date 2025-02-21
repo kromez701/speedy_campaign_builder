@@ -17,13 +17,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [accessToken, setAccessToken] = useState('');
   const navigate = useNavigate();
-  const [businessManagerId, setBusinessManagerId] = useState([]);
-
-  useEffect(() => {
-    if (activeAccount && activeAccount.is_bound) {
-      onClose();
-    }
-  }, [activeAccount, onClose]);  
+  const [businessManagerId, setBusinessManagerId] = useState('');
 
   useEffect(() => {
 
@@ -57,55 +51,44 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
       toast.error('Facebook SDK is not loaded yet.');
       return;
     }
-  
+
     FB.login((response) => {
       if (response.authResponse) {
         const accessToken = response.authResponse.accessToken;
         setAccessToken(accessToken);
-  
-        // Fetch ALL Business Manager IDs the user selects
+
+        // Fetch the Business Manager ID (BM ID)
         FB.api('/me/businesses', 'GET', { access_token: accessToken }, (response) => {
           if (response && !response.error) {
             if (response.data && response.data.length > 0) {
-              const businessManagerIds = response.data.map(bm => bm.id);
-              setBusinessManagerId(businessManagerIds);
-              // console.log('Selected Business Managers:', businessManagerIds);
-        
-              // Open the popup ONLY after setting the business managers
-              setShowPopup(true);
+              const businessManagerId = response.data[0].id;  // Take the first BM ID
+              setBusinessManagerId(businessManagerId);
+              console.log('Business Manager ID:', businessManagerId);
             } else {
               console.log('No Business Manager found');
-              toast.error('You must be associated with a Business Manager to proceed.');
             }
           } else {
-            console.error('Error fetching BMs:', response.error);
-            toast.error('Failed to retrieve Business Manager data.');
+            console.error('Error fetching BM ID:', response.error);
           }
-        });        
-  
-        setShowPopup(true); // Open the ad account selection modal
+        });
+
+        setShowPopup(true); // Show the popup when login is successful
       } else {
         toast.error('Facebook login failed or was cancelled.');
       }
     }, { scope: 'ads_management,ads_read,pages_show_list,business_management,pages_read_engagement,email,public_profile' });
-  };  
+  };
 
-  const handlePopupSubmit = (adAccount, page, businessManagerId) => {
-    const pixel = " ";
-    
-    // Ensure the ad account ID is prefixed with "act_"
-    const prefixedAdAccount = adAccount.startsWith("act_") ? adAccount : `act_${adAccount}`;
-
+  const handlePopupSubmit = (adAccount, page, pixel) => {
     setShowPopup(false);
-    verifyAndSaveAdAccount(accessToken, prefixedAdAccount, page, pixel, businessManagerId);
-};
+    verifyAndSaveAdAccount(accessToken, adAccount, page, pixel);
+  };
 
-  const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel, businessManagerId) => {
+  const verifyAndSaveAdAccount = async (accessToken, adAccount, page, pixel) => {
     try {
       const isAdAccountValid = await verifyField(`${apiUrl}/auth/verify_ad_account`, {
         ad_account_id: adAccount,
         access_token: accessToken,
-        business_manager_id: businessManagerId, // Use the correct BM ID
       });
   
       if (isAdAccountValid) {
@@ -123,7 +106,7 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
             access_token: exchangeResponse.data.long_lived_token,
             app_id: APP_ID,
             app_secret: APP_SECRET,
-            business_manager_id: businessManagerId // Ensure BM ID is saved
+            business_manager_id: businessManagerId
           };
   
           const saveResponse = await axios.post(
@@ -134,14 +117,14 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
   
           if (saveResponse.status === 200) {
             toast.success('Ad account updated successfully');
-  
+
             const updatedAccountResponse = await axios.get(`${apiUrl}/auth/ad_account/${activeAccount.id}`, { withCredentials: true });
             setActiveAccount(updatedAccountResponse.data);
             onClose();
             localStorage.setItem('activeAccount', JSON.stringify(updatedAccountResponse.data));
   
             setTimeout(() => {
-              window.location.reload();
+              window.location.reload(); // Refresh the UI with new data
             }, 700);
           }
         } else {
@@ -154,8 +137,8 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
       toast.error('Error verifying ad account.');
       console.error('Error verifying ad account:', error);
     }
-  };
-  
+  };  
+
   const verifyField = async (url, fieldData) => {
     try {
       const response = await axios.post(url, fieldData, { withCredentials: true });
@@ -172,9 +155,6 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
         <div className={styles.modalContainer}>
           <div className={styles.interactionBlockingOverlay}></div>
           <div ref={modalRef} className={styles.modal}>
-            {/* <button className={styles.closeIcon} onClick={onClose}>
-              &times;
-            </button> */}
             <div className={styles.setupForm}>
               <h3 className={styles.modalHeading}>Set Up Ad Account</h3>
               <p className={styles.modalMessage}>
@@ -196,7 +176,6 @@ const SetupAdAccountModal = ({ onClose, activeAccount, setActiveAccount }) => {
             onClose={() => setShowPopup(false)}
             onSubmit={handlePopupSubmit}
             accessToken={accessToken}
-            businessManagerId={businessManagerId}
           />
         </div>
       )}

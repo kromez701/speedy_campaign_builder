@@ -189,6 +189,7 @@ const ConfigForm = ({
   const [pages, setPages] = useState([]);
   const [pixels, setPixels] = useState([]);
   const [instagramAccounts, setInstagramAccounts] = useState([]);
+  const [selectedPage, setSelectedPage] = useState("");
 
   const fetchPages = async () => {
     try {
@@ -202,55 +203,57 @@ const ConfigForm = ({
     }
   };
 
-  const fetchInstagramAccountsForBM = async (businessManagerId, userAccessToken) => {
+  const fetchInstagramAccountForPage = async (pageId) => {
+    if (!pageId) return;
+
     try {
-      const response = await fetch(
-        `https://graph.facebook.com/v15.0/${businessManagerId}/owned_instagram_accounts?fields=username,id&access_token=${userAccessToken}`
-      );
-      const data = await response.json();
-      
-      // If the API returns data with Instagram accounts
-      if (data && data.data) {
-        const instagramAccounts = data.data.map(account => ({
-          label: account.username,  // Use the username as the label
-          value: account.id,        // Store the account ID as the value
-        }));
-        return instagramAccounts;
-      } else {
-        console.log("No Instagram accounts found.");
-        return [];
-      }
+        // Fetch the Page Access Token first
+        const pageResponse = await fetch(
+            `https://graph.facebook.com/v18.0/me/accounts?fields=id,name,access_token&access_token=${activeAccount.access_token}`
+        );
+        const pageData = await pageResponse.json();
+        const selectedPage = pageData.data.find(page => page.id === pageId);
+
+        if (!selectedPage) {
+            console.error("Page not found or missing permissions.");
+            setInstagramAccounts([{ label: "Page not found", value: "" }]);
+            return;
+        }
+
+        const pageAccessToken = selectedPage.access_token;
+
+        // Fetch Instagram account using Page Access Token
+        const response = await fetch(
+            `https://graph.facebook.com/v18.0/${pageId}?fields=instagram_accounts{id,username}&access_token=${pageAccessToken}`
+        );
+        const data = await response.json();
+
+        if (data.instagram_accounts && Array.isArray(data.instagram_accounts.data) && data.instagram_accounts.data.length > 0) {
+            const instagramAccount = data.instagram_accounts.data[0]; // Extract first account
+            setInstagramAccounts([{ 
+                label: instagramAccount.username, 
+                value: instagramAccount.id 
+            }]);
+        } else {
+            setInstagramAccounts([{ label: "No Instagram Account Linked", value: "" }]);
+        }
     } catch (error) {
-      console.error("Error fetching Instagram accounts:", error);
-      return [];
+        console.error("Error fetching Instagram account:", error);
+        setInstagramAccounts([{ label: "Error fetching data", value: "" }]);
     }
-  };  
-  
-  // Function to fetch Instagram accounts based on the ad account's BM
-const handleAdAccountSelect = async () => {
-  const businessManagerId = activeAccount.business_manager_id; // Use BM ID from activeAccount
-
-  if (!businessManagerId) {
-    console.error("Business Manager ID not found.");
-    return;
-  }
-
-  // Fetch Instagram accounts for the existing BM ID
-  const instagramAccounts = await fetchInstagramAccountsForBM(businessManagerId, activeAccount.access_token);
-
-  // Now set the Instagram accounts in the dropdown, correctly displaying the username
-  setInstagramAccounts(instagramAccounts.map(account => ({
-    label: account.label, // Use the username as the label
-    value: account.value, // Use the account ID as the value
-  })));
 };
+  
+const handlePageChange = async (selectedPageId) => {
+  setSelectedPage(selectedPageId);
+  setConfig(prevConfig => ({
+      ...prevConfig,
+      facebook_page_id: selectedPageId,
+      instagram_account: "", // Reset Instagram selection
+  }));
 
-
-  useEffect(() => {
-    if (activeAccount && activeAccount.is_bound) {
-      handleAdAccountSelect(); // Use the existing BM ID from activeAccount
-    }
-  }, [activeAccount]);
+  // Fetch Instagram Account for the selected page
+  await fetchInstagramAccountForPage(selectedPageId);
+};
 
   const handleInstagramAccountChange = (selectedAccountId) => {
     setConfig((prevConfig) => ({
@@ -1092,47 +1095,49 @@ const handleAdAccountSelect = async () => {
             </div>
 
 
+            {/* Facebook Page Dropdown */}
             <div className={styles.column}>
-              <label htmlFor="facebook_page_id" className={styles.labelText}>
-                Facebook Page:
-              </label>
-              <select
-                id="facebook_page_id"
-                name="facebook_page_id"
-                value={config.facebook_page_id}
-                onChange={handleChange}
-                className={styles.selectField}
-                required
-              >
-                <option value="">Select Facebook Page</option>
-                {pages.map((page) => (
-                  <option key={page.id} value={page.id}>
-                    {page.name || page.id}
-                  </option>
-                ))}
-              </select>
+                <label htmlFor="facebook_page_id" className={styles.labelText}>
+                    Facebook Page:
+                </label>
+                <select
+                    id="facebook_page_id"
+                    name="facebook_page_id"
+                    value={selectedPage}
+                    onChange={(e) => handlePageChange(e.target.value)}
+                    className={styles.selectField}
+                    required
+                >
+                    <option value="">Select Facebook Page</option>
+                    {pages.map((page) => (
+                        <option key={page.id} value={page.id}>
+                            {page.name || page.id}
+                        </option>
+                    ))}
+                </select>
             </div>
 
-            <div className={styles.column}>
-  <label htmlFor="instagram_account" className={styles.labelText}>
-    Instagram Account:
-  </label>
-  <select
-    id="instagram_account"
-    name="instagram_account"
-    value={config.instagram_account || ""}  // Set the value correctly
-    onChange={(e) => handleInstagramAccountChange(e.target.value)} // Pass the selected account id
-    className={styles.selectField}
-  >
-    <option value="">Select Instagram Account</option>
-    {instagramAccounts.map((account) => (
-      <option key={account.value} value={account.value}>
-        {account.label} {/* Display the username */}
-      </option>
-    ))}
-  </select>
-</div>
-
+          {/* Instagram Account Dropdown */}
+          <div className={styles.column}>
+              <label htmlFor="instagram_account" className={styles.labelText}>
+                  Instagram Account:
+              </label>
+              <select
+                  id="instagram_account"
+                  name="instagram_account"
+                  value={config.instagram_account || ""}
+                  onChange={(e) => handleInstagramAccountChange(e.target.value)}
+                  className={styles.selectField}
+                  disabled={!selectedPage} // Disable dropdown if no page is selected
+              >
+                  <option value="">Select Instagram Account</option>
+                  {instagramAccounts.map((account) => (
+                      <option key={account.value} value={account.value}>
+                          {account.label}
+                      </option>
+                  ))}
+              </select>
+          </div>
 
           </div>
         )}

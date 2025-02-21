@@ -125,13 +125,10 @@ const Landing = () => {
             lightning-fast campaign creation with our groundbreaking software.
           </p>
           <div className="hero-video">
-            {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg> */}
             <video
               src="./assets/video1.mp4"
               playsInline
+              poster="./assets/poster2.jpg"
               controls
             ></video>
           </div>
@@ -265,14 +262,11 @@ const Landing = () => {
           <p className="how-work-heading">How <span>QuickCampaigns</span> Works</p>
           <div className="how-work-right">
             <div className="how-works-video">
-              {/* <svg width="112" height="112" viewBox="0 0 112 112" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M55.9999 102.667C81.7732 102.667 102.667 81.7733 102.667 56C102.667 30.2267 81.7732 9.33331 55.9999 9.33331C30.2266 9.33331 9.33325 30.2267 9.33325 56C9.33325 81.7733 30.2266 102.667 55.9999 102.667Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M46.6666 37.3333L74.6666 56L46.6666 74.6667V37.3333Z" stroke="#EEEEEE" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg> */}
               <video
                 src="./assets/video4.mp4"
                 playsInline
                 controls
+                poster="./assets/poster1.jpg"
               ></video>
             </div>
           </div>

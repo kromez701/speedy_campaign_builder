@@ -116,7 +116,7 @@ const AppContent = () => {
               path="*"
               element={
                 <>
-                  <Navbar onLogout={handleLogout} />
+                  <Navbar onLogout={handleLogout} refreshTrigger={refreshTrigger} />
                   <div className="layout">
                     <StickySide
                       setActiveAccount={setActiveAccount}

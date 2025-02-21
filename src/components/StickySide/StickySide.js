@@ -13,6 +13,7 @@ const stripePublishableKey = config.stripePublishableKey;
 const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const [adAccounts, setAdAccounts] = useState([]);
   const [adAccountDetails, setAdAccountDetails] = useState({});
+  const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
   const [userSubscriptionPlan, setUserSubscriptionPlan] = useState('');
   const [isDropdownVisible, setDropdownVisible] = useState(true);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
@@ -46,7 +47,34 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
         const fetchedAccounts = adAccountsResponse.data.ad_accounts;
         setAdAccounts(fetchedAccounts);
-  
+
+        setActiveAdAccountsCount(0); // ✅ Reset count before updating
+
+  const countActiveAccounts = async () => {
+    let activeCount = 0;
+
+    await Promise.all(
+      fetchedAccounts.map(async (account) => {
+        try {
+          const subResponse = await axios.get(
+            `${apiUrl}/payment/subscription-status/${account.id}`, 
+            { withCredentials: true }
+          );
+          if (subResponse.data.is_active_manual) {
+            activeCount++;
+          }
+        } catch (error) {
+          console.error(`Error fetching subscription for account ${account.id}:`, error);
+        }
+      })
+    );
+
+    setActiveAdAccountsCount(activeCount); // ✅ Now correctly updates count
+  };
+
+  // Call the function
+  countActiveAccounts();
+    
         // Get saved ad account and count from local storage
         const savedAccount = localStorage.getItem('activeAccount');
         const savedAccountParsed = savedAccount ? JSON.parse(savedAccount) : null;
@@ -86,6 +114,7 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   useEffect(() => {
     if (activeAccount) {
       // Save the active account to localStorage whenever it changes
+      console.log(activeAccount)
       localStorage.setItem('activeAccount', JSON.stringify(activeAccount));
     }
   }, [activeAccount]);
@@ -96,11 +125,20 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
     }
   }, [activeAccount]);
 
+  useEffect(() => {
+    if (activeAccount?.id) {
+      fetchAdAccountDetails(activeAccount.id);
+    }
+  }, [activeAccount]);  
+
   const handleAccountClick = (index) => {
     const selectedAccount = adAccounts[index];
     setActiveAccount(selectedAccount);
     fetchAdAccountDetails(selectedAccount.id);
     localStorage.setItem('activeAccount', JSON.stringify(selectedAccount));
+    if (location.pathname === "/pricing-section") {
+      navigate("/");
+    }
   };
 
   const handleDropdownToggle = () => {
@@ -231,9 +269,9 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         <div>
           <button className={styles.upgradeButton} onClick={handleUpgradeClick}>Upgrade Plan</button>
           <div className={styles.footer}>
-            {adAccounts.length === 1 
-              ? `1 Ad account on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`
-              : `${adAccounts.length} Ad accounts on ${userSubscriptionPlan.toLowerCase() === 'no active plan' ? userSubscriptionPlan.toLowerCase() : `${userSubscriptionPlan.toLowerCase()} plan`}`}
+            {userSubscriptionPlan.toLowerCase() === "professional"
+              ? `${activeAdAccountsCount > 0 ? "1" : "0"} Ad account on ${userSubscriptionPlan.toLowerCase()} plan`
+              : `${activeAdAccountsCount} Ad accounts on ${userSubscriptionPlan.toLowerCase()} plan`}
           </div>
         </div>
       </div>

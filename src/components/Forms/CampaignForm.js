@@ -207,7 +207,14 @@ const CampaignForm = ({
       </p>
 
       <div className={styles.tutorialVideo}>
-        <p>Tutorial video here</p>
+        <video
+          src="./assets/video4.mp4"
+          playsInline
+          controls
+          poster="./assets/poster1.jpg"
+        >
+          Your browser does not support the video tag.
+        </video>
       </div>
 
       <form id={formId} onSubmit={handleSubmit} encType="multipart/form-data">

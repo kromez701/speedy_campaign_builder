@@ -197,19 +197,12 @@ nav ul li a {
     margin-bottom: 40px;
 }
 
-.hero-video svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none; /* Ensure the SVG does not interfere with video interaction */
-}
-
 .hero-video video {
     width: 100%; /* Make the video fit the container's width */
     height: auto; /* Ensure the height adjusts dynamically */
     border-radius: 16px 16px 16px 16px; /* Match container's rounded corners */
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
+    z-index: 2;
 }
 
 .old-new-way-section {
@@ -426,7 +419,7 @@ nav ul li a {
     display: flex;
     flex-direction:column;
     background: #ffffff05;gap: 30px;
-    padding: 80px 121px;
+    padding: 80px 120px;
     position: relative;
     overflow: hidden;
     gap: 30px;
@@ -522,7 +515,7 @@ nav ul li a {
     background: linear-gradient(180deg, #67c6e3 0%, rgba(83, 86, 255, 0.7) 100%);
     width: 67%; /* Allow the video container to scale with the parent */
     border-radius: 16px;
-    margin-bottom: 20px;
+    margin-bottom: 5%;
     position: relative;
     display: flex; 
     justify-content: center;
@@ -535,14 +528,8 @@ nav ul li a {
     height: auto; /* Maintain aspect ratio */
     border-radius: 16px; /* Match the container's rounded corners */
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow */
-}
-
-.how-works-video svg {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none; /* Ensure the SVG does not interfere with video interaction */
+    z-index: 2;
+    opacity: 1;
 }
 
 .pricing-section {
@@ -659,14 +646,16 @@ padding-top: 24px;
 
 .price-start-btn {
     margin-top: auto; /* Push button to the bottom */
-    padding: 12px 24px;
-    width: 100%;
+    width: 80%;
     background-color: #5356ff;
     color: #fff;
     border-radius: 8px;
+    font-size: 1rem;
+    margin-top: 2rem;
     border: none;
     outline: none;
-    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    margin: 0 auto;
 }
 
 .popular-plan {
@@ -1037,8 +1026,7 @@ padding-top: 24px;
     color: white;
     padding: 0.75rem 1.5rem;
     border-radius: 8px;
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-size: 1rem;
     margin-top: 2rem;
     display: inline-flex;
     align-items: center;
@@ -1436,23 +1424,8 @@ footer {
         width: calc(50.7% - 20px);
     }
 
-    .how-works-section {
-        flex-direction: column;
-        padding-bottom: 0;
-    }
-
-    .how-work-left,
     .how-work-right {
-        width: 100%;
-    }
-
-    .how-work-right {
-        margin-top: 40px;
-        height: 385px;
-    }
-
-    .how-works-video {
-        border-radius: 16px 16px 0 0;
+        margin-top: -2%;
     }
 
     .price-card-container {
@@ -1565,6 +1538,14 @@ footer {
         line-height: 34px;
     }
 
+    .affiliate-section h2 {
+        font-size: 1.3rem;
+    }
+
+    .desktop-break {
+        display: none;
+    }
+
     .old-new-way-section,
     .benefit-section,
     .how-works-section,
@@ -1588,18 +1569,15 @@ footer {
         width: 100%;
     }
 
-    .how-works-section {
-        padding-top: 24px;
-    }
-
     .how-works-card-wrapper {
         gap: 16px;
         padding: 6px;
     }
 
     .how-work-card-number {
-        width: 68px;
-        height: 68px;
+        font-size: 30px;
+        width: 28px;
+        height: 28px;
     }
 
     .how-work-card-desc {
@@ -1738,6 +1716,7 @@ footer {
         width: 80%; /* Keep a reasonable size */
         max-width: 600px; /* Prevent excessive shrinking */
         margin: 0 auto; /* Center it */
+        margin-bottom: 8%
     }
 
     .how-works-video video {
@@ -1793,6 +1772,15 @@ footer {
     .how-works-video video {
         min-height: 180px;
     }
+}
+nav {
+    z-index: 1000; /* Reduce from an excessively high value if needed */
+}
+.nav-menu-btn-container {
+    z-index: 999; /* Ensure it's below the navbar but still functional */
+}
+.hero {
+    z-index: 1; /* Ensure hero section is above other content */
 }
 
 `;

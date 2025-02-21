@@ -57,7 +57,7 @@
 }
 
 /* Tutorial Video Styling */
-.tutorialVideo {
+/* .tutorialVideo {
   width: 80%;
   height: 250px;
   background-color: #e0e0e0;
@@ -70,7 +70,7 @@
   color: #050315B2;
   margin-top: 40px;
   margin-bottom: 40px;
-}
+} */
 
 .formSectionsContainer {
   border: 1px solid #ccc; 
@@ -261,4 +261,26 @@
     min-width: 550px;
   }
   
+}
+
+/* Tutorial Video Container */
+.tutorialVideo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px auto;
+  overflow: hidden;
+  border-radius: 10px; /* Smooth rounded corners */
+  width: auto; /* Shrink to fit */
+  max-width: 100%; /* Prevents stretching beyond available space */
+}
+
+/* Video Styling */
+.tutorialVideo video {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 100%;
+  display: block; /* Removes any extra spacing */
+  border-radius: 10px;
 }

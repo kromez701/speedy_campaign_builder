@@ -28,6 +28,8 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
   const [subscriptionEndDate, setSubscriptionEndDate] = useState('-- -- --');
   const [isActive, setIsActive] = useState(false);
   const [isAdAccountActive, setIsAdAccountActive] = useState(false);
+  const [isActiveManual, setIsActiveManual] = useState(false);
+  const [nextBillingDate, setNextBillingDate] = useState('-- -- --');
   const [runningPlan, setRunningPlan] = useState('No active plan');
   const [showPopup, setShowPopup] = useState(false);  // State to control the visibility of the popup
   const [accessToken, setAccessToken] = useState('');  // State to store the access token from Facebook login
@@ -90,11 +92,13 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
         );
   
         if (response.status === 200) {
-          const { plan, start_date, end_date, is_active } = response.data;
+          const { plan, start_date, end_date, is_active, is_active_manual, next_billing_date } = response.data;
           setRunningPlan(plan);
           setSubscriptionStartDate(start_date);
           setSubscriptionEndDate(end_date);
           setIsAdAccountActive(is_active);
+          setIsActiveManual(is_active_manual);
+          setNextBillingDate(is_active_manual ? next_billing_date : "-- -- --");
         }
   
         const cancelStatusResponse = await axios.get(
@@ -302,14 +306,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
 
   const handleCancelSubscription = async () => {
     try {
+      // Fetch active ad account count (but no specific condition on count)
       const response = await axios.get(`${apiUrl}/payment/active-ad-accounts`, { withCredentials: true });
       const activeAdAccountsCount = response.data.count;
   
-      const confirmCancel = window.confirm(
-        runningPlan === 'Enterprise' && isActive && activeAdAccountsCount > 1 && activeAdAccountsCount < 3
-          ? `There are only 2 active ad accounts with running plans. Canceling the subscription for this account will cancel all subscriptions. Are you sure you want to proceed?`
-          : `Are you sure you want to cancel the subscription for this ad account?`
-      );
+      // General confirmation message
+      const confirmCancel = window.confirm(`Are you sure you want to cancel the subscription for this ad account?`);
   
       if (confirmCancel) {
         const cancelResponse = await axios.post(
@@ -449,12 +451,16 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
   
       if (response.data.sessionId) {
         const stripe = window.Stripe(stripePublishableKey);
-        stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+        await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
         toast.success("Subscription successful! Thank you for subscribing.");
         setCurrentPlan(plan);
         if (onPlanUpgrade) {
           onPlanUpgrade();
+        }
+  
+        if (response.data.redirect_to_main) {
+          navigate("/");
         }
       } else {
         toast.error("Failed to create checkout session.");
@@ -509,7 +515,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
             <div className={`${styles.formSection}`}>
 
               {/* Profile Picture Upload Section */}
-              <div className={styles.profilePicSection}>
+              {/* <div className={styles.profilePicSection}>
                 <div className={styles.profilePicWrapper}>
                   {profilePic ? (
                     <img src={profilePic} alt="Profile" className={styles.profilePic} />
@@ -533,7 +539,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
                   <p className={styles.uploadText}><img src='./assets/upload.png' alt="Uplaod" /> Upload Image</p>
                   <p className={styles.fileHint}>JPG, PNG, or GIF, Max 2MB</p>
                 </div>
-              </div>
+              </div> */}
 
               {/* Full Name Input */}
               <label htmlFor="fullName" className={styles.label}>
@@ -584,20 +590,27 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
             Manage Billing Info
           </button>
         </div>
-          <div className={`${styles.subscriptionContent}`}>
-            <div className={`${styles.detailItem}`}>
-              <span>Current Plan:</span>
-              <span className={`${styles.tag} ${styles.professional}`}>{currentPlan}</span>
-            </div>
-            <div className={`${styles.detailItem}`}>
-              <span>Subscription Status:</span>
-              <span className={`${styles.tag} ${styles.active}`} style={{
-                backgroundColor: isAdAccountActive ? "#b8f7c0" : "#dc3545",
-                color: isAdAccountActive ? "black" : "white",
-              }}>
-                {isAdAccountActive ? "Active" : "Inactive"}
-              </span>
-            </div>
+
+        <div className={`${styles.subscriptionContent}`}>
+          <div className={`${styles.detailItem}`}>
+            <span>Current Plan:</span>
+            <span className={`${styles.tag} ${styles.professional}`}>{currentPlan}</span>
+          </div>
+
+          <div className={styles.detailItem}>
+            <span>Subscription Status:</span>
+            <span className={`${styles.tag} ${isActiveManual ? styles.active : styles.inactive}`}>
+              {isActiveManual ? 'Active' : 'Inactive'}
+            </span>
+          </div>
+
+          {/* ✅ Move "Next Billing Date" out of the "Subscription Status" div */}
+          <div className={styles.detailItem}>
+            <span>Next Billing Date:</span>
+            <span className={styles.tag}>{nextBillingDate}</span>
+          </div>
+        </div>
+        
 
             {/* Footer section with the Cancel Subscription Button aligned to the right */}
             <div className={styles.subscriptionFooter}>
@@ -733,7 +746,6 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
             <p><strong>Status:</strong> Inactive</p>
           )}
         </div >*/}
-      </div>
 
       <div id="pricing-section" className={`${styles.pricingSection}`}>
         <p className={`${styles.priceHeading}`}>
@@ -797,7 +809,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
           <div className={`${styles.priceCard} ${styles.popularPlan}`}>
             <div class={`${styles.priceCardDescriptionContainer}`}>
               <p className={`${styles.priceCardPrice}`}>$99.5/month</p>
-              <p className={`${styles.priceCardAccounts} ${styles.enterprise_title}`}> For up to 2 Ad Accounts, with pricing per account.</p>
+              <p className={`${styles.priceCardAccounts} ${styles.enterprise_title}`}>For 2 or more ad accounts, with pricing per account.</p>
               <p className={`${styles.priceCardPlan}`}>Enterprise plan</p>
               <p className={`${styles.priceCardPlanDesc}`}>
                 Ideal for Agencies and Businesses

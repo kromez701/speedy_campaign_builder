@@ -18,15 +18,36 @@ const DowngradeModal = ({ onCancel, onConfirm }) => {
         const response = await axios.get(`${apiUrl}/auth/ad_accounts`, {
           withCredentials: true,
         });
+
         const fetchedAccounts = response.data.ad_accounts;
 
-        if (fetchedAccounts.length > 0) {
-          setAdAccounts(fetchedAccounts);
-          setSelectedAdAccount(fetchedAccounts[0].id); // Default to first account
-        } else {
+        if (fetchedAccounts.length === 0) {
           toast.error("No ad accounts available.");
+          setIsLoading(false);
+          return;
         }
 
+        // Fetch details for each account
+        const accountDetailsPromises = fetchedAccounts.map(async (account, index) => {
+          try {
+            const detailsResponse = await axios.get(
+              `${apiUrl}/auth/ad_account/${account.id}`, 
+              { withCredentials: true }
+            );
+            return {
+              id: account.id,
+              name: detailsResponse.data.name || `Ad Account ${index + 1}` // Ensure we get the correct name
+            };
+          } catch (error) {
+            console.error(`Error fetching details for account ${account.id}:`, error);
+            return { id: account.id, name: `Ad Account ${index + 1}` }; // Fallback name
+          }
+        });
+
+        const detailedAccounts = await Promise.all(accountDetailsPromises);
+
+        setAdAccounts(detailedAccounts);
+        setSelectedAdAccount(detailedAccounts[0].id); // Default to the first account
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching ad accounts:", error);
@@ -62,7 +83,7 @@ const DowngradeModal = ({ onCancel, onConfirm }) => {
           >
             {adAccounts.map((account, index) => (
               <option key={account.id} value={account.id}>
-                {`Ad Account ${index + 1}`}
+                {`${index + 1} - ${account.name}`} {/* Correctly formatted */}
               </option>
             ))}
           </select>

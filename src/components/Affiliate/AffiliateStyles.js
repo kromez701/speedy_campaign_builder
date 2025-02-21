@@ -1043,7 +1043,17 @@ footer {
         font-size: 14px;
     }
 }
+
+
+.hero {
+    background: rgba(0, 255, 0, 0.3);  /* Semi-transparent green */
+}
+.hero-video {
+    background: rgba(0, 0, 255, 0.3);  /* Semi-transparent blue */
+}
+
 `;
 
 export default GlobalStyle;
+
 

@@ -54,9 +54,14 @@ const Main = ({ activeAccount, setActiveAccount }) => {
     const fetchSubscriptionData = async () => {
       try {
         // Fetch user subscription status
-        const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
+        const userPlanResponse = await axios.get(`${apiUrl}/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
         setIsActiveSubscription(userPlanResponse.data.is_active);
-        setUserPlan(userPlanResponse.data.plan);
+
+        const usersPlanResponse = await axios.get(
+          `${apiUrl}/payment/user-subscription-status`, 
+          { withCredentials: true }
+        );
+        setUserPlan(usersPlanResponse.data.plan);
   
         // Fetch active ad accounts count
         const adAccountsResponse = await axios.get(`${apiUrl}/payment/active-ad-accounts`, { withCredentials: true });
@@ -291,7 +296,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
     };
   }, [taskId]);
 
-  const handleShowForm = (formId) => {
+  const handleShowForm = async (formId) => {
 
     if (!isActiveSubscription) {
       toast.info("Please choose a subscription plan for the selected ad account before creating an ad.");
@@ -307,6 +312,23 @@ const Main = ({ activeAccount, setActiveAccount }) => {
       toast.warning("Please connect an ad account to create campaigns.");
       return; // Prevent navigation if the ad account is not bound
     }
+
+    try {
+      if (userPlan === "Free Trial") {
+        const response = await axios.post(`${apiUrl}/payment/has-used-free-trial`, {
+          ad_account_id: activeAccount.ad_account_id
+        }, { withCredentials: true });
+
+        if (response.data.has_used_free_trial) {
+          toast.warning("This ad account has already used a free trial. Please choose a subscription plan!");
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking free trial usage:", error);
+      toast.error("Could not verify free trial usage.");
+      return;
+    }    
 
     if (campaignType === "existing" && formId === "next" && !selectedCampaign) {
       toast.warning("Please select an existing campaign before proceeding.");

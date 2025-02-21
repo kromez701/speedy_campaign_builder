@@ -96,12 +96,15 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
 
       if (response.data.sessionId) {
         const stripe = window.Stripe(stripePublishableKey);
-        stripe.redirectToCheckout({ sessionId: response.data.sessionId });
+        await stripe.redirectToCheckout({ sessionId: response.data.sessionId });
       } else if (response.data.message) {
         toast.success('Subscription successful! Thank you for subscribing.');
         setCurrentPlan(plan);
         if (onPlanUpgrade) {
           onPlanUpgrade();
+        }
+        if (response.data.redirect_to_main) {
+          navigate('/');
         }
       } else {
         toast.error('Failed to create checkout session.');
