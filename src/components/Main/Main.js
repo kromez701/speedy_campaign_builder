@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import io from "socket.io-client";
 import CampaignForm from "../Forms/CampaignForm";
 import ConfigForm from "../Forms/ConfigForm";
@@ -44,6 +44,23 @@ const Main = ({ activeAccount, setActiveAccount }) => {
   const [userPlan, setUserPlan] = useState('');
   const [activeAdAccountsCount, setActiveAdAccountsCount] = useState(0);
 
+  // Store all AbortControllers
+  const abortControllersRef = useRef(new Set());
+
+  // Function to create and track a new AbortController
+  const getAbortController = () => {
+    const controller = new AbortController();
+    abortControllersRef.current.add(controller);
+    return controller;
+  };
+
+  // Cleanup function to cancel all ongoing requests on unmount
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach(controller => controller.abort());
+      abortControllersRef.current.clear();
+    };
+  }, []);
 
   // Check if activeAccount is bound
   useEffect(() => {
@@ -52,28 +69,37 @@ const Main = ({ activeAccount, setActiveAccount }) => {
 
   useEffect(() => {
     const fetchSubscriptionData = async () => {
+      const controller = getAbortController();
       try {
-        // Fetch user subscription status
-        const userPlanResponse = await axios.get(`${apiUrl}/payment/subscription-status/${activeAccount.id}`, { withCredentials: true });
+        const userPlanResponse = await axios.get(`${apiUrl}/payment/subscription-status/${activeAccount.id}`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         setIsActiveSubscription(userPlanResponse.data.is_active);
 
-        const usersPlanResponse = await axios.get(
-          `${apiUrl}/payment/user-subscription-status`, 
-          { withCredentials: true }
-        );
+        const usersPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         setUserPlan(usersPlanResponse.data.plan);
-  
-        // Fetch active ad accounts count
-        const adAccountsResponse = await axios.get(`${apiUrl}/payment/active-ad-accounts`, { withCredentials: true });
+
+        const adAccountsResponse = await axios.get(`${apiUrl}/payment/active-ad-accounts`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         setActiveAdAccountsCount(adAccountsResponse.data.count);
       } catch (error) {
-        console.error("Error fetching subscription data:", error);
-        toast.error("Error fetching subscription details.");
+        if (!axios.isCancel(error)) {
+          console.error("Error fetching subscription data:", error);
+          toast.error("Error fetching subscription details.");
+        }
+      } finally {
+        abortControllersRef.current.delete(controller);
       }
     };
-  
+
     fetchSubscriptionData();
-  }, [activeAccount]);  // Re-run when `activeAccount` changes
+  }, [activeAccount]);
   
 
   // Reset the form when activeAccount changes

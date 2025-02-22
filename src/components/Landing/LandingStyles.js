@@ -1783,6 +1783,12 @@ nav {
     z-index: 1; /* Ensure hero section is above other content */
 }
 
+
+.price-card-price {
+    font-size: 2rem;
+  }
+
+
 /* Medium Screens (Tablets) */
 @media (max-width: 1024px) {
   .price-heading {
@@ -1800,7 +1806,7 @@ nav {
   .price-card-accounts,
   .price-card-plan,
   .price-card-plan-desc {
-    font-size: 0.9rem;
+    font-size: 1.rem;
   }
 }
 

@@ -1,6 +1,6 @@
 /* global FB */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -43,21 +43,45 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
   const [pendingDowngradePlan, setPendingDowngradePlan] = useState("");
   const [cancelAtPeriodEnd, setCancelAtPeriodEnd] = useState(false);
 
+  const abortControllersRef = useRef(new Set());
+
+  // Function to create and track a new AbortController
+  const getAbortController = () => {
+    const controller = new AbortController();
+    abortControllersRef.current.add(controller);
+    return controller;
+  };
+
+  // Cleanup function to cancel all ongoing requests on unmount
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach(controller => controller.abort());
+      abortControllersRef.current.clear();
+    };
+  }, []);
   
 
   useEffect(() => {
     const fetchProfile = async () => {
+      const controller = getAbortController();
       try {
-        const response = await axios.get(`${apiUrl}/auth/profile`, { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/auth/profile`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         if (response.status === 200) {
           const { username, email, profile_picture } = response.data.user;
           setFullName(username);
           setEmail(email);
-          setProfilePic(profile_picture ? profile_picture : null);
+          setProfilePic(profile_picture || null);
         }
       } catch (error) {
-        toast.error('Error fetching profile');
-        console.error('Error fetching profile', error);
+        if (!axios.isCancel(error)) {
+          toast.error('Error fetching profile');
+          console.error('Error fetching profile', error);
+        }
+      } finally {
+        abortControllersRef.current.delete(controller);
       }
     };
     fetchProfile();
@@ -65,8 +89,12 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
 
   useEffect(() => {
     const fetchUserSubscriptionStatus = async () => {
+      const controller = getAbortController();
       try {
-        const response = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/payment/user-subscription-status`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         if (response.status === 200) {
           const { plan, start_date, end_date, is_active } = response.data;
           setSubscriptionPlan(plan);
@@ -75,11 +103,14 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
           setIsActive(is_active);
         }
       } catch (error) {
-        toast.error('Error fetching user subscription status');
-        console.error('Error fetching user subscription status', error);
+        if (!axios.isCancel(error)) {
+          toast.error('Error fetching user subscription status');
+          console.error('Error fetching user subscription status', error);
+        }
+      } finally {
+        abortControllersRef.current.delete(controller);
       }
     };
-
     fetchUserSubscriptionStatus();
   }, []);
 

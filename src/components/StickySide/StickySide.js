@@ -109,11 +109,18 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
 
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
+      const controller = getAbortController();
       try {
-        const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
+        const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         setUserSubscriptionPlan(userPlanResponse.data.plan);
 
-        const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
+        const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, {
+          withCredentials: true,
+          signal: controller.signal,
+        });
         const fetchedAccounts = adAccountsResponse.data.ad_accounts;
         setAdAccounts(fetchedAccounts);
 
@@ -126,29 +133,35 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
               try {
                 const subResponse = await axios.get(
                   `${apiUrl}/payment/subscription-status/${account.id}`, 
-                  { withCredentials: true }
+                  { withCredentials: true, signal: controller.signal }
                 );
                 if (subResponse.data.is_active_manual) {
                   activeCount++;
                 }
               } catch (error) {
-                console.error(`Error fetching subscription for account ${account.id}:`, error);
+                if (!axios.isCancel(error)) {
+                  console.error(`Error fetching subscription for account ${account.id}:`, error);
+                }
               }
             })
           );
           setActiveAdAccountsCount(activeCount);
         };
 
-        countActiveAccounts();
+        await countActiveAccounts();
 
         // Fetch active ad account from backend
         fetchActiveAdAccount();
 
         setIsLoading(false);
       } catch (error) {
-        setError(error);
-        setIsLoading(false);
-        toast.error('Error fetching ad accounts or user plan');
+        if (!axios.isCancel(error)) {
+          setError(error);
+          setIsLoading(false);
+          toast.error('Error fetching ad accounts or user plan');
+        }
+      } finally {
+        abortControllersRef.current.delete(controller);
       }
     };
 
@@ -187,8 +200,12 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   };
 
   const handleAddAdAccountClick = async () => {
+    const controller = getAbortController();
     try {
-      const response = await axios.post(`${apiUrl}/payment/add_ad_account`, {}, { withCredentials: true });
+      const response = await axios.post(`${apiUrl}/payment/add_ad_account`, {}, {
+        withCredentials: true,
+        signal: controller.signal,
+      });
       if (response.status === 200) {
         const sessionId = response.data.sessionId;
         if (sessionId) {
@@ -199,8 +216,12 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         }
       }
     } catch (error) {
-      toast.error('Error adding ad account');
-      console.error('Error adding ad account', error);
+      if (!axios.isCancel(error)) {
+        toast.error('Error adding ad account');
+        console.error('Error adding ad account', error);
+      }
+    } finally {
+      abortControllersRef.current.delete(controller);
     }
   };
 
