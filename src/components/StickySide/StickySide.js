@@ -23,83 +23,127 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
   const activeAccountRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
+  const abortControllersRef = useRef(new Set());
 
+  // Function to create and track a new AbortController
+  const getAbortController = () => {
+    const controller = new AbortController();
+    abortControllersRef.current.add(controller);
+    return controller;
+  };
 
+  // Cleanup function to cancel all ongoing requests
+  useEffect(() => {
+    return () => {
+      abortControllersRef.current.forEach(controller => controller.abort());
+      abortControllersRef.current.clear();
+    };
+  }, []);
+
+  // Scroll to the active account when it changes
+  useEffect(() => {
+    if (activeAccountRef.current) {
+      activeAccountRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  }, [activeAccount]); // Runs every time the activeAccount updates
+
+  // Fetch ad account details
   const fetchAdAccountDetails = async (id) => {
+    const controller = getAbortController();
     try {
-      const response = await axios.get(`${apiUrl}/auth/ad_account/${id}`, { withCredentials: true });
-      const accountDetails = response.data;
-      setAdAccountDetails(accountDetails);
+      const response = await axios.get(`${apiUrl}/auth/ad_account/${id}`, {
+        withCredentials: true,
+        signal: controller.signal,
+      });
+      setAdAccountDetails(response.data);
     } catch (error) {
-      toast.error('Error fetching ad account details');
-      console.error('Error fetching ad account details', error);
+      if (!axios.isCancel(error)) {
+        toast.error('Error fetching ad account details');
+        console.error('Error fetching ad account details', error);
+      }
+    } finally {
+      abortControllersRef.current.delete(controller);
+    }
+  };
+
+  // Fetch active ad account from backend
+  const fetchActiveAdAccount = async () => {
+    const controller = getAbortController();
+    try {
+      const response = await axios.get(`${apiUrl}/auth/get_active_ad_account`, {
+        withCredentials: true,
+        signal: controller.signal,
+      });
+      if (response.data) {
+        setActiveAccount(response.data);
+        fetchAdAccountDetails(response.data.id);
+      }
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error('Error fetching active ad account', error);
+      }
+    } finally {
+      abortControllersRef.current.delete(controller);
+    }
+  };
+
+  // Set active ad account in backend
+  const updateActiveAdAccount = async (selectedAccount) => {
+    const controller = getAbortController();
+    try {
+      await axios.post(`${apiUrl}/auth/set_active_ad_account`, selectedAccount, {
+        withCredentials: true,
+        signal: controller.signal,
+      });
+      setActiveAccount(selectedAccount);
+      fetchAdAccountDetails(selectedAccount.id);
+    } catch (error) {
+      if (!axios.isCancel(error)) {
+        console.error('Error setting active ad account', error);
+        toast.error('Failed to update active ad account');
+      }
+    } finally {
+      abortControllersRef.current.delete(controller);
     }
   };
 
   useEffect(() => {
     const fetchAdAccountsAndPlan = async () => {
       try {
-        // Fetch the user subscription plan
         const userPlanResponse = await axios.get(`${apiUrl}/payment/user-subscription-status`, { withCredentials: true });
         setUserSubscriptionPlan(userPlanResponse.data.plan);
-  
-        // Fetch all ad accounts from backend
+
         const adAccountsResponse = await axios.get(`${apiUrl}/auth/ad_accounts`, { withCredentials: true });
         const fetchedAccounts = adAccountsResponse.data.ad_accounts;
         setAdAccounts(fetchedAccounts);
 
-        setActiveAdAccountsCount(0); // ✅ Reset count before updating
+        setActiveAdAccountsCount(0);
 
-  const countActiveAccounts = async () => {
-    let activeCount = 0;
-
-    await Promise.all(
-      fetchedAccounts.map(async (account) => {
-        try {
-          const subResponse = await axios.get(
-            `${apiUrl}/payment/subscription-status/${account.id}`, 
-            { withCredentials: true }
+        const countActiveAccounts = async () => {
+          let activeCount = 0;
+          await Promise.all(
+            fetchedAccounts.map(async (account) => {
+              try {
+                const subResponse = await axios.get(
+                  `${apiUrl}/payment/subscription-status/${account.id}`, 
+                  { withCredentials: true }
+                );
+                if (subResponse.data.is_active_manual) {
+                  activeCount++;
+                }
+              } catch (error) {
+                console.error(`Error fetching subscription for account ${account.id}:`, error);
+              }
+            })
           );
-          if (subResponse.data.is_active_manual) {
-            activeCount++;
-          }
-        } catch (error) {
-          console.error(`Error fetching subscription for account ${account.id}:`, error);
-        }
-      })
-    );
+          setActiveAdAccountsCount(activeCount);
+        };
 
-    setActiveAdAccountsCount(activeCount); // ✅ Now correctly updates count
-  };
+        countActiveAccounts();
 
-  // Call the function
-  countActiveAccounts();
-    
-        // Get saved ad account and count from local storage
-        const savedAccount = localStorage.getItem('activeAccount');
-        const savedAccountParsed = savedAccount ? JSON.parse(savedAccount) : null;
-  
-        const storedAccountCount = localStorage.getItem('adAccountCount');
-        const currentAccountCount = fetchedAccounts.length;
-  
-        if (storedAccountCount && parseInt(storedAccountCount) < currentAccountCount) {
-          // If new ad account was added, set the last account as active
-          const newActiveAccount = fetchedAccounts[fetchedAccounts.length - 1];
-          setActiveAccount(newActiveAccount);
-          fetchAdAccountDetails(newActiveAccount.id);
-        } else if (savedAccountParsed && fetchedAccounts.some(acc => acc.id === savedAccountParsed.id)) {
-          // Use the saved account if it exists in the list of accounts
-          setActiveAccount(savedAccountParsed);
-          fetchAdAccountDetails(savedAccountParsed.id);
-        } else if (fetchedAccounts.length > 0) {
-          // Fallback to the first account if the saved one isn't found
-          const activeAccount = fetchedAccounts[0];
-          setActiveAccount(activeAccount);
-          fetchAdAccountDetails(activeAccount.id);
-        }
-  
-        // Update local storage with the new count of ad accounts
-        localStorage.setItem('adAccountCount', fetchedAccounts.length.toString());
+        // Fetch active ad account from backend
+        fetchActiveAdAccount();
+
         setIsLoading(false);
       } catch (error) {
         setError(error);
@@ -107,35 +151,20 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
         toast.error('Error fetching ad accounts or user plan');
       }
     };
-  
-    fetchAdAccountsAndPlan();
-  }, [setActiveAccount, refreshTrigger, location.pathname]); // <- Added location.pathname dependency  
-  
-  useEffect(() => {
-    if (activeAccount) {
-      // Save the active account to localStorage whenever it changes
-      console.log(activeAccount)
-      localStorage.setItem('activeAccount', JSON.stringify(activeAccount));
-    }
-  }, [activeAccount]);
 
-  useEffect(() => {
-    if (activeAccountRef.current) {
-      activeAccountRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  }, [activeAccount]);
+    fetchAdAccountsAndPlan();
+  }, [setActiveAccount, refreshTrigger, location.pathname]);
 
   useEffect(() => {
     if (activeAccount?.id) {
       fetchAdAccountDetails(activeAccount.id);
     }
-  }, [activeAccount]);  
+  }, [activeAccount]);
 
   const handleAccountClick = (index) => {
     const selectedAccount = adAccounts[index];
-    setActiveAccount(selectedAccount);
-    fetchAdAccountDetails(selectedAccount.id);
-    localStorage.setItem('activeAccount', JSON.stringify(selectedAccount));
+    updateActiveAdAccount(selectedAccount);
+
     if (location.pathname === "/pricing-section") {
       navigate("/");
     }
@@ -202,8 +231,8 @@ const StickySide = ({ setActiveAccount, activeAccount, refreshTrigger }) => {
               adAccounts.map((account, index) => (
                 <button
                   key={index}
-                  ref={activeAccount?.id === account.id ? activeAccountRef : null} // Compare IDs
-                  className={`${styles.accountButton} ${activeAccount?.id === account.id ? styles.active : ''}`} // Compare IDs
+                  ref={activeAccount?.id === account.id ? activeAccountRef : null}
+                  className={`${styles.accountButton} ${activeAccount?.id === account.id ? styles.active : ''}`}
                   onClick={() => handleAccountClick(index)}
                   aria-label={`Switch to Ad Account ${index + 1}`}
                 >

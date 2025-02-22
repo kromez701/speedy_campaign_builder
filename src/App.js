@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import Landing from './components/Landing/Landing';
 import Auth from './components/Authorization/Auth';
@@ -34,17 +34,21 @@ const AppContent = () => {
   const [activeAccount, setActiveAccount] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(false);
   const navigate = useNavigate();
+  const abortControllersRef = useRef(new Set());
 
   useEffect(() => {
     const checkCurrentUser = async () => {
+      const controller = new AbortController();
+      abortControllersRef.current.add(controller);
       try {
-        const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true });
+        const response = await axios.get(`${apiUrl}/auth/current_user`, { withCredentials: true, signal: controller.signal, });
         if (response.status === 200) {
           setUser(response.data.user);
         }
       } catch (error) {
         console.error('Error checking current user', error);
       } finally {
+        abortControllersRef.current.delete(controller);
         setLoading(false);
       }
     };
@@ -66,6 +70,9 @@ const AppContent = () => {
 
   const handleLogout = async () => {
     try {
+      abortControllersRef.current.forEach((controller) => controller.abort()); // Cancel all ongoing requests
+      abortControllersRef.current.clear(); // Clear the set
+  
       const response = await axios.post(`${apiUrl}/auth/logout`, {}, { withCredentials: true });
       if (response.status === 200) {
         setUser(null);
@@ -77,7 +84,7 @@ const AppContent = () => {
     } catch (error) {
       console.error('Error logging out:', error);
     }
-  };
+  };  
 
   const handlePlanUpgrade = () => {
     setRefreshTrigger((prev) => !prev);

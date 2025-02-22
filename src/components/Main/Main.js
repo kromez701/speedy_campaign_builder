@@ -297,44 +297,43 @@ const Main = ({ activeAccount, setActiveAccount }) => {
   }, [taskId]);
 
   const handleShowForm = async (formId) => {
-
     if (!isActiveSubscription) {
       toast.info("Please choose a subscription plan for the selected ad account before creating an ad.");
       return;
     }
-    
+  
     if (userPlan === "Enterprise" && activeAdAccountsCount < 2) {
       toast.info("Please purchase a second ad account to activate and enjoy the Enterprise plan.");
       return;
-    }    
-    
+    }
+  
     if (!activeAccount || !activeAccount.is_bound) {
       toast.warning("Please connect an ad account to create campaigns.");
-      return; // Prevent navigation if the ad account is not bound
+      return;
     }
-
-    try {
-      if (userPlan === "Free Trial") {
+  
+    if (userPlan === "Free Trial") {
+      try {
         const response = await axios.post(`${apiUrl}/payment/has-used-free-trial`, {
           ad_account_id: activeAccount.ad_account_id
         }, { withCredentials: true });
-
+  
         if (response.data.has_used_free_trial) {
           toast.warning("This ad account has already used a free trial. Please choose a subscription plan!");
           return;
         }
+      } catch (error) {
+        console.error("Error checking free trial usage:", error);
+        toast.error("Could not verify free trial usage.");
+        return;
       }
-    } catch (error) {
-      console.error("Error checking free trial usage:", error);
-      toast.error("Could not verify free trial usage.");
-      return;
-    }    
-
+    }
+  
     if (campaignType === "existing" && formId === "next" && !selectedCampaign) {
       toast.warning("Please select an existing campaign before proceeding.");
       return;
     }
-
+  
     if (formId === "configForm") {
       setPreviousForm(formId);
     } else {
@@ -348,7 +347,7 @@ const Main = ({ activeAccount, setActiveAccount }) => {
       );
     }
     setShowHeader(formId === "mainForm");
-  };
+  };  
 
   const handleEditConfig = () => {
     setPreviousForm(formId);

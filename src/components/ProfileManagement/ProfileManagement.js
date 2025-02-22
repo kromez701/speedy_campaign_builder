@@ -756,7 +756,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
           <div className={`${styles.priceCard} ${styles.popularPlan}`}>
 
             <div class={`${styles.priceCardDescriptionContainer}`}>
-              <p className={`${styles.priceCardPrice}`}>$129.5/month</p>
+              <p className={`${styles.priceCardPrice}`}>$129.5/Month</p>
               <p className={`${styles.priceCardAccounts}`}>1 Ad Account</p>
               <p className={`${styles.priceCardPlan}`}>Professional Plan</p>
               <p className={`${styles.priceCardPlanDesc}`}>
@@ -808,7 +808,7 @@ const ProfileManagement = ({ onLogout, activeAccount, setActiveAccount, onPlanUp
           {/* card 2 */}
           <div className={`${styles.priceCard} ${styles.popularPlan}`}>
             <div class={`${styles.priceCardDescriptionContainer}`}>
-              <p className={`${styles.priceCardPrice}`}>$99.5/month</p>
+              <p className={`${styles.priceCardPrice}`}>$99.5/Month</p>
               <p className={`${styles.priceCardAccounts} ${styles.enterprise_title}`}>For 2 or more ad accounts, with pricing per account.</p>
               <p className={`${styles.priceCardPlan}`}>Enterprise plan</p>
               <p className={`${styles.priceCardPlanDesc}`}>

@@ -1783,6 +1783,56 @@ nav {
     z-index: 1; /* Ensure hero section is above other content */
 }
 
+/* Medium Screens (Tablets) */
+@media (max-width: 1024px) {
+  .price-heading {
+    font-size: 2rem;
+  }
+
+  .price-desc {
+    font-size: 1.1rem;
+  }
+
+  .price-card-price {
+    font-size: 1.8rem;
+  }
+
+  .price-card-accounts,
+  .price-card-plan,
+  .price-card-plan-desc {
+    font-size: 0.9rem;
+  }
+}
+
+/* Small Screens (Mobile Phones) */
+@media (max-width: 768px) {
+
+  .price-card-price {
+    font-size: 1.8rem;  /* Reduce font size for better mobile display */
+  }
+
+  .price-card-accounts,
+  .price-card-plan,
+  .price-card-plan-desc {
+    font-size: 1rem;
+  }
+}
+
+/* Extra Small Screens (Phones < 480px) */
+@media (max-width: 480px) {
+
+  .price-card-price {
+    font-size: 1.5rem; /* Reduce even further for compact view */
+  }
+
+  .price-card-accounts,
+  .price-card-plan,
+  .price-card-plan-desc {
+    font-size: 1rem;
+  }
+}
+
+
 `;
 
 export default GlobalStyle;

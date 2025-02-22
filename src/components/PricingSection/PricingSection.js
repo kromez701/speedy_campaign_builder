@@ -118,7 +118,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
   const plans = [
     {
       name: "Professional",
-      price: "$129.95/month",
+      price: "$129.95/Month",
       description: "Perfect for Individual Advertisers and Small Teams",
       features: [
         "Upload unlimited ads to 1 ad account.",
@@ -129,7 +129,7 @@ const SubscriptionPlan = ({ onPlanUpgrade }) => {
     },
     {
       name: "Enterprise",
-      price: "$99.95/month",
+      price: "$99.95/Month",
       description: "Ideal for Agencies and Businesses",
       features: [
         "Upload unlimited ads to multiple ad accounts.",
